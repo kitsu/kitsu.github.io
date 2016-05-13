@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="Hugo 0.15" />
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    
+    <link href="/index.xml" rel="alternate" type="application/rss+xml" title="Superfluous Comments" />
+    <link href="/index.xml" rel="feed" type="application/rss+xml" title="Superfluous Comments" />
+    
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+    
+    <script src="https://apis.google.com/js/platform.js" async defer>{lang: 'ja'}</script>
+    
+    <link rel="stylesheet" href="https://yandex.st/highlightjs/8.0/styles/default.min.css">
+    <script src="https://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <title>Setting Everything Up | Superfluous Comments</title>
+  </head>
+  <body>
+    <div id="wrap">
+      
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-77704589-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+      <header class="site-header">
+        <div class="site-header-left">
+          <a class="site-header-title" href="http://kitsu.github.io/">Superfluous Comments</a>
+        </div>
+      </header>
+      <div class="container">
+        <div id="main">
+
+<div class="article">
+  <header>
+    <div class="article-header">
+      <h1>Setting Everything Up</h1>
+      <div class="article-meta">
+        <span class="posttime">2016/05/13</span>
+        
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/meta"><span></span>meta</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      </div>
+    </div>
+  </header>
+  <div class="content">
+    <p>In which I setup Github hosting, Disqus Comments, Google Analytics and AdSense.</p>
+
+<hr/>
+
+<p>After spending some time yesterday customizing the
+<a href="http://themes.gohugo.io/polymer/">Polymer</a> theme I changed my mind and switched
+to a theme called <a href="http://themes.gohugo.io/hugo-theme-geppaku/">Geppaku</a>.
+Both the style and the structure of Geppaku are simpler, which makes it easier
+to understand and change. I darkened the colors a little, and added some
+accents, but the Geppaku code is mostly unchanged.</p>
+
+<p><strong>First cool thing:</strong> Geppaku uses something called
+<a href="http://fontawesome.io/">Font Awesome</a> for its icons. I had to customize the
+images that came with Polymer, but with FA I had everything I needed.</p>
+
+<p>With the visual styling basically setup I had to turn to the technical -
+actually getting this thing online. I&rsquo;m still not that confident in how to setup
+the Git and Github parts though, so instead I played around with some
+extras. Hugo claims to support easy integration with Google Analytics and Discus
+Comments, and the Geppaku theme comes with Google AdSense integration (sorry).</p>
+
+<p><strong>Second cool thing:</strong> Signing up for
+<a href="https://www.google.com/analytics/">Google Analytics</a> and
+<a href="https://publishers.disqus.com/engage">Disqus Comments</a> were both easy.
+With that account info I just added a couple strings to my Hugo config and
+everything worked. <a href="https://www.google.com/adsense/">AdSense</a> on the other
+hand seems to have some (lengthy) approval process, so I slapped some dummy
+templates in until I get the AdSense code.</p>
+
+<p>With nothing else left to futz with I had to decide how to push to Github. By
+now I&rsquo;ve read all the Hugo Github tutorials at least a couple of times. Most of
+the material is on creating <em>project pages</em> which use a specially named branch
+for content. I&rsquo;m going with a normal <em>personal page</em> though, which just serves
+from the root of the main branch. I would prefer to keep the whole thing in one
+repo, but any way I come up with just seems awkward. Instead I&rsquo;m setting
+up one <a href="https://github.com/kitsu/blog">repo</a> of the source code, and a
+<a href="https://github.com/kitsu/kitsu.github.io">sub-repo</a> for the content.</p>
+
+<p>I might still try to automate building/pushing the site, but at this point I&rsquo;ve
+spent far too long getting this working.</p>
+
+  </div>
+  <footer>
+    <div class="article-footer">
+      
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/meta"><span></span>meta</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      
+      <div class="adsense">
+        <span class="sponsor-label">Sponsored link</span>
+        <div></div>
+      </div>
+      
+      
+<div id="share-buttons">
+  <ul>
+    
+    
+    
+    
+    <li>
+      <div class="g-plusone" data-size="medium"></div>
+    </li>
+    
+    
+  </ul>
+</div>
+
+
+      <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'SuperfComs';
+    var disqus_identifier = 'http:\/\/kitsu.github.io\/2016\/05\/13\/setting-up\/';
+    var disqus_title = 'Setting Everything Up';
+    var disqus_url = 'http:\/\/kitsu.github.io\/2016\/05\/13\/setting-up\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+      
+      <div id="pagenavigation-next-prev">
+        
+        <div id="pagenavigation-next">
+          <span class="pagenav-label">Previous</span>
+          <a href="http://kitsu.github.io/2016/05/12/hello-hugo/">Hello Hugo</a>
+        </div>
+        
+        
+      </div>
+      
+    </div>
+  </footer>
+</div>
+        </div>
+        <div class="sidebar">
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Author</span>
+    </div>
+    <div id="author">
+      <span>Ed Blake</span>
+      <div>
+        
+        
+        <a href="https://plus.google.com/118323029386640613972"><i class="fa fa-google-plus-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://github.com/kitsu"><i class="fa fa-github-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        
+        <a href="https://stackoverflow.com/users/770443"><i class="fa fa-stack-overflow fa-2x" aria-hidden="true"></i></a>
+        
+      </div>
+    </div>
+  </div>
+  
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Categories</span>
+    </div>
+    <div class="categories">
+      <ul>
+        
+        <li>
+          <a href="/categories/blog"><span></span>blog (2)</a>
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>RSS</span>
+    </div>
+    <div id="rss">
+      <a href="/index.xml" type="application/rss+xml" target="_blank">
+        <i class="fa fa-rss-square fa-2x" aria-hidden="true"></i>
+      </a>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Sponsored link</span>
+    </div>
+    <div class="adsense">
+      <div></div>
+    </div>
+  </div>
+  
+</div>
+
+      </div>
+      <footer>
+        <div id="site-footer-wrap">
+          <div id="site-footer">
+            <span>Powered by <a href="https://gohugo.io/">Hugo</a>.</span>
+            <span>
+              
+              © 2015 Ed Blake
+              
+           </span>
+           <span id="copyleft">
+              <a rel="license"
+                 href="http://creativecommons.org/licenses/by-sa/4.0/">
+                <img alt="Creative Commons License" style="border-width:0"
+                     src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" />
+              </a>
+            </span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
+
