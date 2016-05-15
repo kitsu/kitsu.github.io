@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Code on Superfluous Comments</title>
+    <link>http://kitsu.github.io/tags/code/</link>
+    <description>Recent content in Code on Superfluous Comments</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>© 2015 Ed Blake</copyright>
+    <lastBuildDate>Sat, 14 May 2016 15:00:55 -0700</lastBuildDate>
+    <atom:link href="http://kitsu.github.io/tags/code/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Testing and Thinking About Testing</title>
+      <link>http://kitsu.github.io/2016/05/14/unit-testing-01/</link>
+      <pubDate>Sat, 14 May 2016 15:00:55 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/05/14/unit-testing-01/</guid>
+      <description>&lt;p&gt;Writing bad code differently?!&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

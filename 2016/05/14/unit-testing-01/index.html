@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="Hugo 0.15" />
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    
+    <link href="/index.xml" rel="alternate" type="application/rss+xml" title="Superfluous Comments" />
+    <link href="/index.xml" rel="feed" type="application/rss+xml" title="Superfluous Comments" />
+    
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+    
+    <script src="https://apis.google.com/js/platform.js" async defer>{lang: 'ja'}</script>
+    
+    <link rel="stylesheet" href="https://yandex.st/highlightjs/8.0/styles/default.min.css">
+    <script src="https://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <title>Testing and Thinking About Testing | Superfluous Comments</title>
+  </head>
+  <body>
+    <div id="wrap">
+      
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-77704589-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+      <header class="site-header">
+        <div class="site-header-left">
+          <a class="site-header-title" href="http://kitsu.github.io/">Superfluous Comments</a>
+        </div>
+      </header>
+      <div class="container">
+        <div id="main">
+
+<div class="article">
+  <header>
+    <div class="article-header">
+      <h1>Testing and Thinking About Testing</h1>
+      <div class="article-meta">
+        <span class="posttime">2016/05/14</span>
+        
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/code"><span></span>Code</a>
+    </li>
+    
+    <li>
+      <a href="/tags/testing"><span></span>Testing</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      </div>
+    </div>
+  </header>
+  <div class="content">
+    <p>Writing bad code differently?!</p>
+
+<p><hr/><br/>
+As part of my goal of changing my job title to <em>Developer</em> I've been on a
+whirlwind tour of enterprise tools and practices. I am currently working through
+the C# version of 'Uncle' Bob Martin's
+<a href="https://www.amazon.com/dp/B0051TM4GI">Agile Principles, Patterns, and Practices</a>.
+I just got through the bit where Bob does Test Driven Development (TDD) pair
+programming with Bob Koss on a bowling score keeping application. It really
+is a pretty picture of TDD - It was test first, and the design was shaped and
+simplified by how the tests were framed.</p>
+
+<p>I've never really done TDD, though it sounds like the idea. When I think about
+testing a new project unit testing is what comes to mind. I learned unit testing
+using Python and it's unittest module. At the time code coverage was also all
+the rage. In Python everything is effectively public, and so you can easily
+write tests even against code meant to be private. So when I think of tests I
+think of deep thorough coverage, even into internals, which is hardly practical
+when you don't have any code!</p>
+
+<p>In the last few years I've watched a number of conference talks railing against
+test-first, or encouraging people to write tests differently. The thing I've
+been drawn to, and that I saw in Uncle Bob's example, was that you should &quot;Write
+tests against the interface rather than against the implementation&quot;.</p>
+
+<p>I just happen to be making a major revision to a some code that had no tests,
+so before I touched the code I worked on some tests. I resisted the urge
+to start testing things in file order, and instead thought about what the
+module's interface was. Since only a single function was ever used outside the
+module I started with that.</p>
+
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #66d9ef">class</span> <span style="color: #a6e22e">Test_Filter</span><span style="color: #f8f8f2">(unittest</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">TestCase):</span>
+    <span style="color: #e6db74">&quot;&quot;&quot;Test filter functions.&quot;&quot;&quot;</span>
+
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">test_filter_rows</span><span style="color: #f8f8f2">(self):</span>
+        <span style="color: #e6db74">&quot;&quot;&quot;Testing table filtering.&quot;&quot;&quot;</span>
+        <span style="color: #75715e"># Setup</span>
+        <span style="color: #f8f8f2">config</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">{</span><span style="color: #e6db74">&#39;default_filter_field&#39;</span><span style="color: #f8f8f2">:</span><span style="color: #e6db74">&#39;num&#39;</span><span style="color: #f8f8f2">}</span>
+        <span style="color: #f8f8f2">table</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">{</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">{</span><span style="color: #e6db74">&#39;num&#39;</span><span style="color: #f8f8f2">:</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;name&#39;</span><span style="color: #f8f8f2">:</span> <span style="color: #e6db74">&#39;foo&#39;</span><span style="color: #f8f8f2">,},</span>
+                 <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">{</span><span style="color: #e6db74">&#39;num&#39;</span><span style="color: #f8f8f2">:</span> <span style="color: #ae81ff">2</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;name&#39;</span><span style="color: #f8f8f2">:</span> <span style="color: #e6db74">&#39;bar&#39;</span><span style="color: #f8f8f2">,},</span>
+                 <span style="color: #ae81ff">2</span><span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">{</span><span style="color: #e6db74">&#39;num&#39;</span><span style="color: #f8f8f2">:</span> <span style="color: #ae81ff">3</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;name&#39;</span><span style="color: #f8f8f2">:</span> <span style="color: #e6db74">&#39;baz&#39;</span><span style="color: #f8f8f2">,},</span>
+                 <span style="color: #ae81ff">3</span><span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">{</span><span style="color: #e6db74">&#39;num&#39;</span><span style="color: #f8f8f2">:</span> <span style="color: #ae81ff">4</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;name&#39;</span><span style="color: #f8f8f2">:</span> <span style="color: #e6db74">&#39;spam&#39;</span><span style="color: #f8f8f2">,},</span>
+        <span style="color: #f8f8f2">}</span>
+        <span style="color: #75715e"># Test simple single filter</span>
+        <span style="color: #f8f8f2">fltr</span> <span style="color: #f92672">=</span> <span style="color: #e6db74">&#39;3&#39;</span>
+        <span style="color: #f8f8f2">res</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">filter_rows(fltr,</span> <span style="color: #f8f8f2">config,</span> <span style="color: #f8f8f2">table)</span>
+        <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">assertEqual(res,</span> <span style="color: #f8f8f2">[</span><span style="color: #ae81ff">2</span><span style="color: #f8f8f2">],</span>
+                         <span style="color: #f8f8f2">msg</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;Expected row indices [2], got {}&quot;</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">format(res))</span>
+        <span style="color: #75715e"># Test simple filter on missing value</span>
+        <span style="color: #f8f8f2">fltr</span> <span style="color: #f92672">=</span> <span style="color: #e6db74">&#39;9&#39;</span>
+        <span style="color: #f8f8f2">res</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">filter_rows(fltr,</span> <span style="color: #f8f8f2">config,</span> <span style="color: #f8f8f2">table)</span>
+        <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">assertEqual(res,</span> <span style="color: #f8f8f2">[],</span>
+                         <span style="color: #f8f8f2">msg</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;Expected empty result, got {}&quot;</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">format(res))</span>
+        <span style="color: #75715e"># Test multiple simple filters (order and whitespace invariant)</span>
+        <span style="color: #f8f8f2">err</span> <span style="color: #f92672">=</span> <span style="color: #e6db74">&quot;Filter &#39;{}&#39;, expected [0, 2], got {}&quot;</span>
+        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">fltr</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">(</span><span style="color: #e6db74">&#39;3 1&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;3   1&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;1 3&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;1  3&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;1 3  1&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;3 1 3&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;1 1 3&#39;</span><span style="color: #f8f8f2">):</span>
+            <span style="color: #f8f8f2">res</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">filter_rows(fltr,</span> <span style="color: #f8f8f2">config,</span> <span style="color: #f8f8f2">table)</span>
+            <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">assertEqual(res,</span> <span style="color: #f8f8f2">[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">,</span> <span style="color: #ae81ff">2</span><span style="color: #f8f8f2">],</span>
+                             <span style="color: #f8f8f2">msg</span><span style="color: #f92672">=</span><span style="color: #f8f8f2">err</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">format(fltr,</span> <span style="color: #f8f8f2">res))</span>
+        <span style="color: #75715e"># Test Special filters...</span>
+</pre></div>
+
+
+<p>As I got ready to write the next set of tests though I was thinking about a talk
+I watched the other day <a href="https://www.youtube.com/watch?v=f9eu4mMOtN4">Unselfish Testing by Jay Fields</a>
+where he made some good points about test naming and organization. He recommends
+grouping tests into self contained methods which are actually named for what
+they are testing. I was at an obvious conceptual break, so I refactored a little:</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #75715e"># Details elided...</span>
+<span style="color: #66d9ef">class</span> <span style="color: #a6e22e">Test_Filter</span><span style="color: #f8f8f2">(unittest</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">TestCase):</span>
+    <span style="color: #e6db74">&quot;&quot;&quot;Test filter functions.&quot;&quot;&quot;</span>
+
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">test_simple_filters</span><span style="color: #f8f8f2">(self):</span>
+        <span style="color: #75715e"># Setup</span>
+        <span style="color: #f8f8f2">config</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">{</span><span style="color: #e6db74">&#39;default_filter_field&#39;</span><span style="color: #f8f8f2">:</span><span style="color: #e6db74">&#39;num&#39;</span><span style="color: #f8f8f2">}</span>
+        <span style="color: #f8f8f2">table</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">{</span><span style="color: #f92672">...</span><span style="color: #f8f8f2">}</span>
+        <span style="color: #75715e"># Test single filter</span>
+        <span style="color: #f8f8f2">fltr</span> <span style="color: #f92672">=</span> <span style="color: #e6db74">&#39;3&#39;</span>
+        <span style="color: #f8f8f2">res</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">filter_rows(fltr,</span> <span style="color: #f8f8f2">config,</span> <span style="color: #f8f8f2">table)</span>
+        <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">assertEqual(res,</span> <span style="color: #f8f8f2">[</span><span style="color: #ae81ff">2</span><span style="color: #f8f8f2">],</span>
+                         <span style="color: #f8f8f2">msg</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;Expected row indices [2], got {}&quot;</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">format(res))</span>
+        <span style="color: #75715e"># Test searching to missing value</span>
+        <span style="color: #f92672">...</span>
+        <span style="color: #75715e"># Test multiple filters (order and whitespace invariant)</span>
+        <span style="color: #f92672">...</span>
+
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">test_special_filters</span><span style="color: #f8f8f2">(self):</span>
+        <span style="color: #75715e"># Setup (duplicated from above)</span>
+        <span style="color: #75715e"># Test special filter</span>
+        <span style="color: #f92672">...</span>
+
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">test_mixed_filters</span><span style="color: #f8f8f2">(self):</span>
+        <span style="color: #75715e"># Setup (duplicated from above)</span>
+        <span style="color: #75715e"># Test combinations of simple &amp; special filters</span>
+        <span style="color: #f92672">...</span>
+</pre></div>
+</p>
+
+<p>All three tests exercise the same <code>filter_rows</code> function, but are using
+different features (which use different helper functions/classes in the
+module). Now I can change my implementation without changing my tests, and when
+things fail I have more information about what exactly is broken. What I don't
+have is verification of my backing logic.</p>
+
+<p>I guess I'm okay with that. I can test my code in the repl somewhat like in
+Clojure, or make disposable tests just for development. If I keep everything
+pure and immutable there shouldn't be any weird interactions. Besides I don't
+know what an error looks like that can't be expressed through the public
+interface?</p>
+
+<p><strong>Bonus cool:</strong> Hugo's Markdown renderer is called <em>BlackFriday</em>, and hugo exposes
+  <a href="https://gohugo.io/overview/configuration#configure-blackfriday-rendering">some settings</a>
+  under a section of the same name. In particular Markdown by default replaces
+  normal quotes with <em>smart</em> quotes, which cause problems and weren't rendering
+  correctly for me. Here is the code to disable them:</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #75715e"># In config.toml</span>
+<span style="color: #66d9ef">[blackfriday]</span>
+    <span style="color: #a6e22e">smartypants</span> <span style="color: #f92672">=</span> <span style="color: #e6db74">false</span>
+</pre></div>
+</p>
+
+  </div>
+  <footer>
+    <div class="article-footer">
+      
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/code"><span></span>Code</a>
+    </li>
+    
+    <li>
+      <a href="/tags/testing"><span></span>Testing</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      
+      <div class="adsense">
+        <span class="sponsor-label">Sponsored link</span>
+        <div></div>
+      </div>
+      
+      
+<div id="share-buttons">
+  <ul>
+    
+    
+    
+    
+    <li>
+      <div class="g-plusone" data-size="medium"></div>
+    </li>
+    
+    
+  </ul>
+</div>
+
+
+      <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'SuperfComs';
+    var disqus_identifier = 'http:\/\/kitsu.github.io\/2016\/05\/14\/unit-testing-01\/';
+    var disqus_title = 'Testing and Thinking About Testing';
+    var disqus_url = 'http:\/\/kitsu.github.io\/2016\/05\/14\/unit-testing-01\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+      
+      <div id="pagenavigation-next-prev">
+        
+        <div id="pagenavigation-next">
+          <span class="pagenav-label">Previous</span>
+          <a href="http://kitsu.github.io/2016/05/13/setting-up/">Setting Everything Up</a>
+        </div>
+        
+        
+      </div>
+      
+    </div>
+  </footer>
+</div>
+        </div>
+        <div class="sidebar">
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Author</span>
+    </div>
+    <div id="author">
+      <span>Ed Blake</span>
+      <div>
+        
+        
+        <a href="https://plus.google.com/118323029386640613972"><i class="fa fa-google-plus-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://github.com/kitsu"><i class="fa fa-github-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        
+        <a href="https://stackoverflow.com/users/770443"><i class="fa fa-stack-overflow fa-2x" aria-hidden="true"></i></a>
+        
+      </div>
+    </div>
+  </div>
+  
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Categories</span>
+    </div>
+    <div class="categories">
+      <ul>
+        
+        <li>
+          <a href="/categories/blog"><span></span>blog (2)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/development"><span></span>development (1)</a>
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>RSS</span>
+    </div>
+    <div id="rss">
+      <a href="/index.xml" type="application/rss+xml" target="_blank">
+        <i class="fa fa-rss-square fa-2x" aria-hidden="true"></i>
+      </a>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Sponsored link</span>
+    </div>
+    <div class="adsense">
+      <div></div>
+    </div>
+  </div>
+  
+</div>
+
+      </div>
+      <footer>
+        <div id="site-footer-wrap">
+          <div id="site-footer">
+            <span>Powered by <a href="https://gohugo.io/">Hugo</a>.</span>
+            <span>
+              
+              © 2015 Ed Blake
+              
+           </span>
+           <span id="copyleft">
+              <a rel="license"
+                 href="http://creativecommons.org/licenses/by-sa/4.0/">
+                <img alt="Creative Commons License" style="border-width:0"
+                     src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" />
+              </a>
+            </span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
+

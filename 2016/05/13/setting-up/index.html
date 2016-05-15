@@ -67,9 +67,8 @@ ga('send', 'pageview');
 
 <p>In which I setup Github hosting, Disqus Comments, Google Analytics and AdSense.</p>
 
-<hr/>
-
-<p>After spending some time yesterday customizing the
+<p><hr/><br/>
+After spending some time yesterday customizing the
 <a href="http://themes.gohugo.io/polymer/">Polymer</a> theme I changed my mind and switched
 to a theme called <a href="http://themes.gohugo.io/hugo-theme-geppaku/">Geppaku</a>.
 Both the style and the structure of Geppaku are simpler, which makes it easier
@@ -81,7 +80,7 @@ accents, but the Geppaku code is mostly unchanged.</p>
 images that came with Polymer, but with FA I had everything I needed.</p>
 
 <p>With the visual styling basically setup I had to turn to the technical -
-actually getting this thing online. I&rsquo;m still not that confident in how to setup
+actually getting this thing online. I'm still not that confident in how to setup
 the Git and Github parts though, so instead I played around with some
 extras. Hugo claims to support easy integration with Google Analytics and Discus
 Comments, and the Geppaku theme comes with Google AdSense integration (sorry).</p>
@@ -95,20 +94,20 @@ hand seems to have some (lengthy) approval process, so I slapped some dummy
 templates in until I get the AdSense code.</p>
 
 <p>With nothing else left to futz with I had to decide how to push to Github. By
-now I&rsquo;ve read all the Hugo Github tutorials at least a couple of times. Most of
+now I've read all the Hugo Github tutorials at least a couple of times. Most of
 the material is on creating <em>project pages</em> which use a specially named branch
-for content. I&rsquo;m going with a normal <em>personal page</em> though, which just serves
+for content. I'm going with a normal <em>personal page</em> though, which just serves
 from the root of the main branch. I would prefer to keep the whole thing in one
-repo, but any way I come up with just seems awkward. Instead I&rsquo;m setting
+repo, but any way I come up with just seems awkward. Instead I'm setting
 up one <a href="https://github.com/kitsu/blog">repo</a> of the source code, and a
 <a href="https://github.com/kitsu/kitsu.github.io">sub-repo</a> for the content.</p>
 
-<p>I might still try to automate building/pushing the site, but at this point I&rsquo;ve
+<p>I might still try to automate building/pushing the site, but at this point I've
 spent far too long getting this working.</p>
 
 <h3 id="edit:9cc19b767474709e57f2eb1461398238">Edit</h3>
 
-<p>Well, the deploy didn&rsquo;t go as smooth as it could have. It seems I was using a
+<p>Well, the deploy didn't go as smooth as it could have. It seems I was using a
 really old version of Git (MSYS Git 1.7.1), and something had broken since the last time I pushed
 to Github. Every time I tried to push I got <code>fatal: authentication failed</code> or
 worse. The solution was to install the latest
@@ -120,7 +119,7 @@ my vimrc, I then broke Vundle when doing <code>:BundleUpgrade</code>. It was a c
 everything is working now.</p>
 
 <p>On the AdSense front - They did in fact get to my application same day. They
-promptly rejected it because the site wasn&rsquo;t up yet. Which works out really well
+promptly rejected it because the site wasn't up yet. Which works out really well
 if you were waiting to setup AdSense before going live<span>..</span>.</p>
 
 <p>I did test the site on a few computers, my Note III, and an old Samsung
@@ -188,6 +187,11 @@ on narrow screens.</p>
         </div>
         
         
+        <div id="pagenavigation-prev">
+          <span class="pagenav-label">Next</span>
+          <a href="http://kitsu.github.io/2016/05/14/unit-testing-01/">Testing and Thinking About Testing</a>
+        </div>
+        
       </div>
       
     </div>
@@ -228,6 +232,10 @@ on narrow screens.</p>
         
         <li>
           <a href="/categories/blog"><span></span>blog (2)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/development"><span></span>development (1)</a>
         </li>
         
       </ul>
