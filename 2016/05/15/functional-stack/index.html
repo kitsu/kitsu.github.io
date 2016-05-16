@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="Hugo 0.15" />
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    
+    <link href="/index.xml" rel="alternate" type="application/rss+xml" title="Superfluous Comments" />
+    <link href="/index.xml" rel="feed" type="application/rss+xml" title="Superfluous Comments" />
+    
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+    
+    <script src="https://apis.google.com/js/platform.js" async defer>{lang: 'ja'}</script>
+    
+    <link rel="stylesheet" href="https://yandex.st/highlightjs/8.0/styles/default.min.css">
+    <script src="https://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <title>Composing Function Compositions | Superfluous Comments</title>
+  </head>
+  <body>
+    <div id="wrap">
+      
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-77704589-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+      <header class="site-header">
+        <div class="site-header-left">
+          <a class="site-header-title" href="http://kitsu.github.io/">Superfluous Comments</a>
+        </div>
+      </header>
+      <div class="container">
+        <div id="main">
+
+<div class="article">
+  <header>
+    <div class="article-header">
+      <h1>Composing Function Compositions</h1>
+      <div class="article-meta">
+        <span class="posttime">2016/05/15</span>
+        
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/code"><span></span>code</a>
+    </li>
+    
+    <li>
+      <a href="/tags/functional"><span></span>functional</a>
+    </li>
+    
+    <li>
+      <a href="/tags/python"><span></span>python</a>
+    </li>
+    
+    <li>
+      <a href="/tags/lister"><span></span>lister</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      </div>
+    </div>
+  </header>
+  <div class="content">
+    <p>Using a push down automata and functional programming IRL.</p>
+
+<p><hr/><br/>
+I'm still working on the same project as
+<a href="/2016/05/14/unit-testing-01/">last time</a>, but today I implemented the
+<em>special filters</em> mentioned in the tests. The application lets users filter a
+collection of data rows by typing into an input field. Normally users just type
+space-separated bits of text that are permissively matched against a default
+column. As an advanced feature though I wanted to let users make queries against
+any column using regular expressions. My first attempt worked fine, but in
+testing on a real world data set it became immediately apparent that a
+single independent queries were not enough.</p>
+
+<p>The original special syntax was <code>(column:pattern)</code>, and parsing was a simple as
+grabbing patterns containing parens and a colon, strip parens, split on colon,
+and compile the pattern as a regex. I actually performed the entire match+split
+using a regex too. Matching was done by, given a row, checking if the column
+existed, and if so returning whether the pattern found a match.</p>
+
+<p>For the new syntax I wanted the user to be able to specify arbitrary
+<em>combinations</em> of column:pattern pairs. With the old syntax the user was
+basically defining sets, and so by adding boolean operators the user could define
+unions, intersections, differences, etc. of those sets. After some thought I
+decided the new syntax would be <code>(NOT &lt;col:pat&gt; AND &lt;col:pat&gt; OR &lt;col:pat&gt;)</code>
+where any pair may be NOT'ed and every pair must be connected by AND/OR.</p>
+
+<p>To accomplish this I had to build several parts. First I had to adjust the
+parser to collect terms inside parens. As soon as I find a matching paren I
+create a <code>Special</code> object that tries to build a matcher for the collected expression
+and sets a flag on itself if successful. If not successful the parts are treated
+as normal patterns (that happen to have a paren in them). The Special object is
+replacing a namedtuple, and is effectively a typed data container.</p>
+
+<p>Okay, on to the interesting part. I know that a pushdown automata is an easy way
+to process arithmetic expressions. You just use a stack and based on the type of
+each new input and the item on top of the stack you perform some action. My
+actual code is a little messy (and gives away the next part of the story) so
+here is a straight forward calculator example:</p>
+
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #e6db74">&quot;&quot;&quot;PushDown Automata based arithmetic calculator.&quot;&quot;&quot;</span>
+<span style="color: #f92672">from</span> <span style="color: #f8f8f2">operator</span> <span style="color: #f92672">import</span> <span style="color: #f8f8f2">add,</span> <span style="color: #f8f8f2">sub,</span> <span style="color: #f8f8f2">mul,</span> <span style="color: #f8f8f2">div</span>
+<span style="color: #f92672">from</span> <span style="color: #f8f8f2">functools</span> <span style="color: #f92672">import</span> <span style="color: #f8f8f2">partial</span>
+
+<span style="color: #75715e"># Mapping of operator tokens to operator functions</span>
+<span style="color: #f8f8f2">ops</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">{</span><span style="color: #e6db74">&#39;+&#39;</span><span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">add,</span> <span style="color: #e6db74">&#39;-&#39;</span><span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">sub,</span> <span style="color: #e6db74">&#39;*&#39;</span><span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">mul,</span> <span style="color: #e6db74">&#39;/&#39;</span><span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">div}</span>
+
+<span style="color: #75715e"># Executable error message templates</span>
+<span style="color: #f8f8f2">tail</span> <span style="color: #f92672">=</span> <span style="color: #e6db74">&#39; in &quot;{}&quot;&#39;</span>
+<span style="color: #f8f8f2">adj_ops_error</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">partial((</span><span style="color: #e6db74">&quot;Error: adjacent ops &#39;{}&#39; &amp; &#39;{}&#39;&quot;</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">tail)</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">format)</span>
+<span style="color: #f8f8f2">no_left_error</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">partial((</span><span style="color: #e6db74">&quot;Error: no left operand for &#39;{}&#39;&quot;</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">tail)</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">format)</span>
+<span style="color: #f8f8f2">no_op_error</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">partial((</span><span style="color: #e6db74">&quot;Error: no operator between {} and {}&quot;</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">tail)</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">format)</span>
+<span style="color: #f8f8f2">number_error</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">partial((</span><span style="color: #e6db74">&quot;Error: cannot convert {} to int&quot;</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">tail)</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">format)</span>
+
+<span style="color: #66d9ef">def</span> <span style="color: #a6e22e">eval</span><span style="color: #f8f8f2">(expr):</span>
+    <span style="color: #e6db74">&quot;&quot;&quot;Attempt to left-fold expression.&quot;&quot;&quot;</span>
+    <span style="color: #f8f8f2">tokens</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">expr</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">strip()</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">split()</span>
+    <span style="color: #66d9ef">if</span> <span style="color: #f92672">not</span> <span style="color: #f8f8f2">tokens:</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">None</span>
+    <span style="color: #f8f8f2">stack</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">list()</span>
+    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">token</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">tokens:</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">token</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">ops:</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #f92672">not</span> <span style="color: #f8f8f2">stack:</span>
+                <span style="color: #66d9ef">print</span> <span style="color: #f8f8f2">no_left_error(token,</span> <span style="color: #f8f8f2">expr)</span>
+                <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">None</span>
+            <span style="color: #66d9ef">elif</span> <span style="color: #f8f8f2">stack[</span><span style="color: #f92672">-</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">ops:</span>
+                <span style="color: #66d9ef">print</span> <span style="color: #f8f8f2">adj_ops_error(stack[</span><span style="color: #f92672">-</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">],</span> <span style="color: #f8f8f2">token,</span> <span style="color: #f8f8f2">expr)</span>
+                <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">None</span>
+            <span style="color: #75715e"># Push op onto stack</span>
+            <span style="color: #f8f8f2">stack</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">append(token)</span>
+        <span style="color: #66d9ef">else</span><span style="color: #f8f8f2">:</span>
+            <span style="color: #66d9ef">try</span><span style="color: #f8f8f2">:</span>
+                <span style="color: #f8f8f2">token</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">int(token)</span>
+            <span style="color: #66d9ef">except</span> <span style="color: #a6e22e">ValueError</span><span style="color: #f8f8f2">:</span>
+                <span style="color: #66d9ef">print</span> <span style="color: #f8f8f2">number_error(token,</span> <span style="color: #f8f8f2">expr)</span>
+                <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">None</span>
+            <span style="color: #75715e"># Branch based on top of stack</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">stack:</span>
+                <span style="color: #f8f8f2">top</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">stack</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">pop()</span>
+                <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">top</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">ops:</span>
+                    <span style="color: #75715e"># Try to get a left operand to go with top op</span>
+                    <span style="color: #66d9ef">if</span> <span style="color: #f92672">not</span> <span style="color: #f8f8f2">stack:</span>
+                        <span style="color: #66d9ef">print</span> <span style="color: #f8f8f2">no_left_error(top,</span> <span style="color: #f8f8f2">expr)</span>
+                        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">None</span>
+                    <span style="color: #f8f8f2">left</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">stack</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">pop()</span>
+                    <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">left</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">ops:</span>
+                        <span style="color: #66d9ef">print</span> <span style="color: #f8f8f2">adj_ops_error(left,</span> <span style="color: #f8f8f2">token,</span> <span style="color: #f8f8f2">expr)</span>
+                        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">None</span>
+                    <span style="color: #75715e"># Apply operator and push result onto stack</span>
+                    <span style="color: #f8f8f2">stack</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">append(ops[top](left,</span> <span style="color: #f8f8f2">token))</span>
+                <span style="color: #66d9ef">else</span><span style="color: #f8f8f2">:</span>
+                    <span style="color: #66d9ef">print</span> <span style="color: #f8f8f2">no_op_error(top,</span> <span style="color: #f8f8f2">token,</span> <span style="color: #f8f8f2">expr)</span>
+                    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">None</span>
+            <span style="color: #66d9ef">else</span><span style="color: #f8f8f2">:</span>
+                <span style="color: #75715e"># If stack is empty push operand (seed operand)</span>
+                <span style="color: #f8f8f2">stack</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">append(token)</span>
+    <span style="color: #66d9ef">assert</span> <span style="color: #f8f8f2">len(stack)</span> <span style="color: #f92672">==</span> <span style="color: #ae81ff">1</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">stack</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">pop()</span>
+
+<span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">__name__</span> <span style="color: #f92672">==</span> <span style="color: #e6db74">&#39;__main__&#39;</span><span style="color: #f8f8f2">:</span>
+    <span style="color: #66d9ef">assert</span> <span style="color: #f8f8f2">eval(</span><span style="color: #e6db74">&quot;1 + 1&quot;</span><span style="color: #f8f8f2">)</span> <span style="color: #f92672">==</span> <span style="color: #ae81ff">2</span>
+    <span style="color: #66d9ef">assert</span> <span style="color: #f8f8f2">eval(</span><span style="color: #e6db74">&quot;2 * 4&quot;</span><span style="color: #f8f8f2">)</span> <span style="color: #f92672">==</span> <span style="color: #ae81ff">8</span>
+    <span style="color: #66d9ef">assert</span> <span style="color: #f8f8f2">eval(</span><span style="color: #e6db74">&quot;10 / 2&quot;</span><span style="color: #f8f8f2">)</span> <span style="color: #f92672">==</span> <span style="color: #ae81ff">5</span>
+    <span style="color: #66d9ef">assert</span> <span style="color: #f8f8f2">eval(</span><span style="color: #e6db74">&quot;2 * 10 + 2 / 2&quot;</span><span style="color: #f8f8f2">)</span> <span style="color: #f92672">==</span> <span style="color: #ae81ff">11</span>
+    <span style="color: #66d9ef">assert</span> <span style="color: #f8f8f2">eval(</span><span style="color: #e6db74">&quot;-2 * 2 * 4&quot;</span><span style="color: #f8f8f2">)</span> <span style="color: #f92672">==</span> <span style="color: #f92672">-</span><span style="color: #ae81ff">16</span>
+    <span style="color: #75715e"># Calculator REPL</span>
+    <span style="color: #f8f8f2">res</span> <span style="color: #f92672">=</span> <span style="color: #e6db74">&quot;Type a space-separated expression&quot;</span>
+    <span style="color: #66d9ef">while</span> <span style="color: #f8f8f2">res:</span>
+        <span style="color: #66d9ef">print</span> <span style="color: #f8f8f2">res</span>
+        <span style="color: #f8f8f2">res</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">eval(raw_input())</span>
+</pre></div>
+
+
+<p>Adding sub-expression grouping isn't hard, parsing just gets trickier and you
+need recursion or a helper function. A bigger problem with this example is that
+everything is eagerly evaluated. Remember I am building a filter predicate that
+is tested against rows of a table, so I don't know the values of my operands
+until I have a row in hand. Instead of calculating a value what I really want is
+the resulting expression tree. To accomplish that I used function composition
+and Python's <code>functools.partial</code>. Here are my operators and base operand:</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #75715e"># Operators</span>
+<span style="color: #66d9ef">def</span> <span style="color: #a6e22e">NOT</span><span style="color: #f8f8f2">(matcher,</span> <span style="color: #f8f8f2">row):</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #f92672">not</span> <span style="color: #f8f8f2">matcher(row)</span>
+
+<span style="color: #66d9ef">def</span> <span style="color: #a6e22e">AND</span><span style="color: #f8f8f2">(match1,</span> <span style="color: #f8f8f2">match2,</span> <span style="color: #f8f8f2">row):</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">match1(row)</span> <span style="color: #f92672">and</span> <span style="color: #f8f8f2">match2(row)</span>
+
+<span style="color: #66d9ef">def</span> <span style="color: #a6e22e">OR</span><span style="color: #f8f8f2">(match1,</span> <span style="color: #f8f8f2">match2,</span> <span style="color: #f8f8f2">row):</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">match1(row)</span> <span style="color: #f92672">or</span> <span style="color: #f8f8f2">match2(row)</span>
+
+<span style="color: #75715e"># Operand (leaf)</span>
+<span style="color: #66d9ef">def</span> <span style="color: #a6e22e">matcher</span><span style="color: #f8f8f2">(column,</span> <span style="color: #f8f8f2">pattern,</span> <span style="color: #f8f8f2">row):</span>
+    <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">column</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">row:</span>
+        <span style="color: #f8f8f2">col</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">row[column]</span>
+        <span style="color: #f8f8f2">match</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">pattern</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">match(col)</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">match:</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">True</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">False</span>
+</pre></div>
+</p>
+
+<p>Each operator accepts the current row as an argument, which is propagated down
+to the bottom level of matchers. Now every item on the stack is either one of
+<code>(NOT, AND, OR)</code> or a partial function waiting for a row. Here is how the
+matchers and OP expressions are built:</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #75715e"># Matcher leaf node</span>
+<span style="color: #f8f8f2">column,</span> <span style="color: #f8f8f2">pat</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">part</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">strip(</span><span style="color: #e6db74">&#39;&lt;&gt;&#39;</span><span style="color: #f8f8f2">)</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">split(</span><span style="color: #e6db74">&#39;:&#39;</span><span style="color: #f8f8f2">)[:</span><span style="color: #ae81ff">2</span><span style="color: #f8f8f2">]</span>
+<span style="color: #f8f8f2">pattern</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">re</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">compile(pat,</span> <span style="color: #f8f8f2">re</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">IGNORECASE)</span>
+<span style="color: #f8f8f2">match</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">partial(matcher,</span> <span style="color: #f8f8f2">column,</span> <span style="color: #f8f8f2">pattern)</span>
+<span style="color: #f8f8f2">stack</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">append(match)</span>
+
+<span style="color: #75715e"># OPs become operands</span>
+<span style="color: #f92672">...</span>
+<span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">top</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">NOT:</span>
+    <span style="color: #75715e"># Replace operand with not&#39;ed operand</span>
+    <span style="color: #f8f8f2">operand</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">partial(NOT,</span> <span style="color: #f8f8f2">operand)</span>
+<span style="color: #66d9ef">elif</span> <span style="color: #f8f8f2">top</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">(AND,</span> <span style="color: #f8f8f2">OR)</span> <span style="color: #f92672">and</span> <span style="color: #f8f8f2">stack:</span>
+    <span style="color: #f8f8f2">left</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">stack</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">pop()</span>
+    <span style="color: #75715e"># Replace operand with op on left and operand</span>
+    <span style="color: #f8f8f2">operand</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">partial(top,</span> <span style="color: #f8f8f2">left,</span> <span style="color: #f8f8f2">operand)</span>
+<span style="color: #f92672">...</span>
+</pre></div>
+</p>
+
+<p>Once all tokens have been consumed (and the stack squished) without error the
+result is a function taking a row dict and returning match/nomatch.
+It works too, all tests pass, and exercising it in the UI behaves as expected.</p>
+
+  </div>
+  <footer>
+    <div class="article-footer">
+      
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/code"><span></span>code</a>
+    </li>
+    
+    <li>
+      <a href="/tags/functional"><span></span>functional</a>
+    </li>
+    
+    <li>
+      <a href="/tags/python"><span></span>python</a>
+    </li>
+    
+    <li>
+      <a href="/tags/lister"><span></span>lister</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      
+      <div class="adsense">
+        <span class="sponsor-label">Sponsored link</span>
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="2442045076"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+      </div>
+      
+      
+<div id="share-buttons">
+  <ul>
+    
+    
+    
+    
+    <li>
+      <div class="g-plusone" data-size="medium"></div>
+    </li>
+    
+    
+  </ul>
+</div>
+
+
+      <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'SuperfComs';
+    var disqus_identifier = 'http:\/\/kitsu.github.io\/2016\/05\/15\/functional-stack\/';
+    var disqus_title = 'Composing Function Compositions';
+    var disqus_url = 'http:\/\/kitsu.github.io\/2016\/05\/15\/functional-stack\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+      
+      <div id="pagenavigation-next-prev">
+        
+        <div id="pagenavigation-next">
+          <span class="pagenav-label">Previous</span>
+          <a href="http://kitsu.github.io/2016/05/14/unit-testing-01/">Testing and Thinking About Testing</a>
+        </div>
+        
+        
+      </div>
+      
+    </div>
+  </footer>
+</div>
+        </div>
+        <div class="sidebar">
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Author</span>
+    </div>
+    <div id="author">
+      <span>Ed Blake</span>
+      <div>
+        
+        
+        <a href="https://plus.google.com/118323029386640613972"><i class="fa fa-google-plus-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://github.com/kitsu"><i class="fa fa-github-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        
+        <a href="https://stackoverflow.com/users/770443"><i class="fa fa-stack-overflow fa-2x" aria-hidden="true"></i></a>
+        
+      </div>
+    </div>
+  </div>
+  
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Categories</span>
+    </div>
+    <div class="categories">
+      <ul>
+        
+        <li>
+          <a href="/categories/blog"><span></span>blog (2)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/development"><span></span>development (2)</a>
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>RSS</span>
+    </div>
+    <div id="rss">
+      <a href="/index.xml" type="application/rss+xml" target="_blank">
+        <i class="fa fa-rss-square fa-2x" aria-hidden="true"></i>
+      </a>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Sponsored link</span>
+    </div>
+    <div class="adsense">
+      <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:inline-block;width:300px;height:600px"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="9965311870"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+    </div>
+  </div>
+  
+</div>
+
+      </div>
+      <footer>
+        <div id="site-footer-wrap">
+          <div id="site-footer">
+            <span>Powered by <a href="https://gohugo.io/">Hugo</a>.</span>
+            <span>
+              
+              © 2015 Ed Blake
+              
+           </span>
+           <span id="copyleft">
+              <a rel="license"
+                 href="http://creativecommons.org/licenses/by-sa/4.0/">
+                <img alt="Creative Commons License" style="border-width:0"
+                     src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" />
+              </a>
+            </span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
+

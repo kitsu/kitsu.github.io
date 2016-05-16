@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Superfluous Comments</title>
-    <link>http://kitsu.github.io/</link>
-    <description>Recent content on Superfluous Comments</description>
+    <title>Python on Superfluous Comments</title>
+    <link>http://kitsu.github.io/tags/python/</link>
+    <description>Recent content in Python on Superfluous Comments</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© 2015 Ed Blake</copyright>
     <lastBuildDate>Sun, 15 May 2016 18:47:44 -0700</lastBuildDate>
-    <atom:link href="http://kitsu.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://kitsu.github.io/tags/python/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>Composing Function Compositions</title>
@@ -27,26 +27,6 @@
       
       <guid>http://kitsu.github.io/2016/05/14/unit-testing-01/</guid>
       <description>&lt;p&gt;Writing bad code differently?!&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Setting Everything Up</title>
-      <link>http://kitsu.github.io/2016/05/13/setting-up/</link>
-      <pubDate>Fri, 13 May 2016 11:20:23 -0700</pubDate>
-      
-      <guid>http://kitsu.github.io/2016/05/13/setting-up/</guid>
-      <description>&lt;p&gt;In which I setup Github hosting, Disqus Comments, Google Analytics and AdSense.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Hello Hugo</title>
-      <link>http://kitsu.github.io/2016/05/12/hello-hugo/</link>
-      <pubDate>Thu, 12 May 2016 15:42:30 -0700</pubDate>
-      
-      <guid>http://kitsu.github.io/2016/05/12/hello-hugo/</guid>
-      <description>&lt;p&gt;Starting a blog, using Hugo, hosted on Github, for reasons.&lt;/p&gt;
 </description>
     </item>
     
