@@ -75,7 +75,9 @@ ga('send', 'pageview');
     </div>
   </header>
   <div class="content">
-    <p>Using a push down automata and functional programming IRL.</p>
+    
+
+<p>Using a push down automata and functional programming IRL.</p>
 
 <p><hr/><br/>
 I'm still working on the same project as
@@ -243,6 +245,24 @@ matchers and OP expressions are built:</p>
 <p>Once all tokens have been consumed (and the stack squished) without error the
 result is a function taking a row dict and returning match/nomatch.
 It works too, all tests pass, and exercising it in the UI behaves as expected.</p>
+
+<h3 id="edit:4bc8dbac1fc9f7b0eab3697217e0101a">Edit</h3>
+
+<p>While I'm thinking about it I wanted to mention the prettiest <em>explicit</em>
+Finit-Automata I've ever seen in Python. It was in an answer to a
+<a href="https://leetcode.com/problems/valid-number/">LeetCode question</a> involving
+parsing a string and determining if it was a valid number. The problem is
+trickier than it sounds, but so is
+<a href="https://leetcode.com/discuss/70510/a-simple-solution-in-python-based-on-dfa">this answer</a>.
+The author builds a state transition table as a list of dicts, where the state
+is an index in the list, and transitions are determined by lookups in the
+current state's map. I made a more verbose version while trying to understand
+it, which is posted further down the thread. So terse, and such a simple looking
+solution to a complex problem.</p>
+
+<p>Additionally,
+<a href="https://www.youtube.com/watch?v=GglfimrfYn4">Here is a talk at this year's Clojure West</a>
+covering another interesting class of Automata and some applications.</p>
 
   </div>
   <footer>
