@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="Hugo 0.15" />
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    
+    <link href="/index.xml" rel="alternate" type="application/rss+xml" title="Superfluous Comments" />
+    <link href="/index.xml" rel="feed" type="application/rss+xml" title="Superfluous Comments" />
+    
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+    
+    <script src="https://apis.google.com/js/platform.js" async defer>{lang: 'ja'}</script>
+    
+    <link rel="stylesheet" href="https://yandex.st/highlightjs/8.0/styles/default.min.css">
+    <script src="https://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <title>Generating HTML on the fly in Python | Superfluous Comments</title>
+    <meta name="Description" content="More like &quot;data as code&quot; than &quot;code as data&quot;.
+">
+  </head>
+  <body>
+    <div id="wrap">
+      
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-77704589-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+      <header class="site-header">
+        <div class="site-header-left">
+          <a class="site-header-title" href="http://kitsu.github.io/">Superfluous Comments</a>
+        </div>
+      </header>
+      <div class="container">
+        <div id="main">
+
+<div class="article">
+  <header>
+    <div class="article-header">
+      <h1>Generating HTML on the fly in Python</h1>
+      <div class="article-meta">
+        <span class="posttime">2016/05/18</span>
+        
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/code"><span></span>code</a>
+    </li>
+    
+    <li>
+      <a href="/tags/functional"><span></span>functional</a>
+    </li>
+    
+    <li>
+      <a href="/tags/python"><span></span>python</a>
+    </li>
+    
+    <li>
+      <a href="/tags/lister"><span></span>lister</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      </div>
+    </div>
+  </header>
+  <div class="content">
+    <p>More like &quot;data as code&quot; than &quot;code as data&quot;.</p>
+
+<p><hr/><br/>
+Due to questionable advice from a random online article last night I decided to
+sign up for LinkedIn. As can be expected I've accomplished very little of use
+since then. As painful as it is, cranking through all the work experience and
+self promotion stuff, it is also pretty cool to play celebrity chaser and follow
+people like <a href="https://www.linkedin.com/in/richhickey">Rich Hickey</a>
+or <a href="https://www.linkedin.com/in/erik-demaine-88aab35">Erik Demaine</a>.</p>
+
+<p>Anyway, the plan today was to implement a click &amp; drag selection mode in the
+document list of my application <em>Lister</em>. I did find some
+<a href="https://jsfiddle.net/kitsu_eb/agsb0h86/">awkward JQuery</a> code on
+<a href="http://stackoverflow.com/questions/22550424">StackOverflow</a> that I could fix
+enough to be usable, but I've been thinking about moving my JS code (all 200
+lines) over to ClojureScript. Then I could use core.async to sanely manage the
+app state across events. I could also clean up a lot of the ugliness I've let
+live just because its Javascript. I'm not sure it will be worth it to add
+another (big!) dependency and additional build steps though. I'll probably try a
+smaller experiment first and see how it goes.</p>
+
+<p>As a supplement for today though I'll show off this little module I wrote
+to do HTML generation. The main widget in Lister is a QTabWidget containing
+one <a href="http://doc.qt.io/qt-4.8/qwebview.html">QWebView</a> widget per tab. Since I
+didn't want to include an extra library to populate those web views I rolled my
+own super simple generator instead. It is inspired by libraries
+like <a href="https://github.com/weavejester/hiccup">Hiccup</a>
+and <a href="https://github.com/hoplon/hoplon">Hoplon</a>,
+and takes advantage of the Python syntax to do most of the heavy lifting.</p>
+
+<p>The key function is <code>tag</code>, which produces an arbitrary tag containing its args
+as its innerHTML and kwargs as attributes:</p>
+
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f92672">from</span> <span style="color: #f8f8f2">functools</span> <span style="color: #f92672">import</span> <span style="color: #f8f8f2">partial</span>
+
+<span style="color: #f8f8f2">self_closing</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">[</span><span style="color: #e6db74">&quot;area&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;base&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;br&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;col&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;command&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;embed&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;hr&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;img&quot;</span><span style="color: #f8f8f2">,</span>
+                <span style="color: #e6db74">&quot;input&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;keygen&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;link&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;meta&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;param&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;source&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;track&quot;</span><span style="color: #f8f8f2">,</span>
+                <span style="color: #e6db74">&quot;wbr&quot;</span><span style="color: #f8f8f2">]</span>
+
+<span style="color: #66d9ef">def</span> <span style="color: #a6e22e">tag</span><span style="color: #f8f8f2">(kind,</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">args,</span> <span style="color: #f92672">**</span><span style="color: #f8f8f2">kwargs):</span>
+    <span style="color: #e6db74">&quot;&quot;&quot;Generic tag-producing function.&quot;&quot;&quot;</span>
+    <span style="color: #f8f8f2">kind</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">kind</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">lower()</span>
+    <span style="color: #f8f8f2">result</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">list()</span>
+    <span style="color: #f8f8f2">result</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">append(</span><span style="color: #e6db74">&quot;&lt;{}&quot;</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">format(kind))</span>
+    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">key,</span> <span style="color: #f8f8f2">val</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">kwargs</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">items():</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">key</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">(</span><span style="color: #e6db74">&#39;kind&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;_type&#39;</span><span style="color: #f8f8f2">):</span>
+            <span style="color: #f8f8f2">key</span> <span style="color: #f92672">=</span> <span style="color: #e6db74">&#39;type&#39;</span>
+        <span style="color: #66d9ef">elif</span> <span style="color: #f8f8f2">key</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">(</span><span style="color: #e6db74">&#39;klass&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;cls&#39;</span><span style="color: #f8f8f2">):</span>
+            <span style="color: #f8f8f2">key</span> <span style="color: #f92672">=</span> <span style="color: #e6db74">&#39;class&#39;</span>
+        <span style="color: #f8f8f2">result</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">append(</span><span style="color: #e6db74">&quot; {}=</span><span style="color: #ae81ff">\&quot;</span><span style="color: #e6db74">{}</span><span style="color: #ae81ff">\&quot;</span><span style="color: #e6db74">&quot;</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">format(key,</span> <span style="color: #f8f8f2">val))</span>
+    <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">kind</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">self_closing:</span>
+        <span style="color: #f8f8f2">result</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">append(</span><span style="color: #e6db74">&quot; /&gt;&quot;</span><span style="color: #f8f8f2">)</span>
+    <span style="color: #66d9ef">else</span><span style="color: #f8f8f2">:</span>
+        <span style="color: #f8f8f2">result</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">append(</span><span style="color: #e6db74">&quot;&gt;{}&lt;/{}&gt;</span><span style="color: #ae81ff">\n</span><span style="color: #e6db74">&quot;</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">format(</span><span style="color: #e6db74">&quot;&quot;</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">join(args),</span> <span style="color: #f8f8f2">kind))</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #e6db74">&quot;&quot;</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">join(result)</span>
+</pre></div>
+
+
+<p>(Note that no attempt is made to sanitize or encode anything)</p>
+
+<p>I then use that to build some basic tags as partial functions, and some
+specific convenience functions:</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #75715e"># Misc simple tags</span>
+<span style="color: #f8f8f2">style</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">partial(tag,</span> <span style="color: #e6db74">&#39;style&#39;</span><span style="color: #f8f8f2">)</span>
+<span style="color: #f8f8f2">div</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">partial(tag,</span> <span style="color: #e6db74">&#39;div&#39;</span><span style="color: #f8f8f2">)</span>
+<span style="color: #f8f8f2">span</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">partial(tag,</span> <span style="color: #e6db74">&#39;span&#39;</span><span style="color: #f8f8f2">)</span>
+
+<span style="color: #75715e"># Form related tags</span>
+<span style="color: #f8f8f2">label</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">partial(tag,</span> <span style="color: #e6db74">&#39;label&#39;</span><span style="color: #f8f8f2">)</span>
+<span style="color: #f8f8f2">textbox</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">partial(tag,</span> <span style="color: #e6db74">&#39;input&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">_type</span><span style="color: #f92672">=</span><span style="color: #e6db74">&#39;text&#39;</span><span style="color: #f8f8f2">)</span>
+<span style="color: #f8f8f2">button</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">partial(tag,</span> <span style="color: #e6db74">&#39;button&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">_type</span><span style="color: #f92672">=</span><span style="color: #e6db74">&#39;button&#39;</span><span style="color: #f8f8f2">)</span>
+
+<span style="color: #75715e"># Helper functions</span>
+<span style="color: #66d9ef">def</span> <span style="color: #a6e22e">html</span><span style="color: #f8f8f2">(head</span><span style="color: #f92672">=</span><span style="color: #e6db74">&#39;&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">body</span><span style="color: #f92672">=</span><span style="color: #e6db74">&#39;&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #f92672">**</span><span style="color: #f8f8f2">body_attrs):</span>
+    <span style="color: #e6db74">&quot;&quot;&quot;Root document element.&quot;&quot;&quot;</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">tag(</span><span style="color: #e6db74">&#39;html&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">tag(</span><span style="color: #e6db74">&#39;head&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">head),</span> <span style="color: #f8f8f2">tag(</span><span style="color: #e6db74">&#39;body&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">body,</span> <span style="color: #f92672">**</span><span style="color: #f8f8f2">body_attrs))</span>
+
+<span style="color: #66d9ef">def</span> <span style="color: #a6e22e">css</span><span style="color: #f8f8f2">(url):</span>
+    <span style="color: #e6db74">&quot;&quot;&quot;A css link tag.&quot;&quot;&quot;</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">tag(</span><span style="color: #e6db74">&#39;link&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">href</span><span style="color: #f92672">=</span><span style="color: #f8f8f2">url,</span> <span style="color: #f8f8f2">rel</span><span style="color: #f92672">=</span><span style="color: #e6db74">&#39;stylesheet&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">_type</span><span style="color: #f92672">=</span><span style="color: #e6db74">&#39;text/css&#39;</span><span style="color: #f8f8f2">)</span>
+
+<span style="color: #f8f8f2">js</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">partial(tag,</span> <span style="color: #e6db74">&#39;script&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">_type</span><span style="color: #f92672">=</span><span style="color: #e6db74">&#39;text/javascript&#39;</span><span style="color: #f8f8f2">)</span>
+<span style="color: #66d9ef">def</span> <span style="color: #a6e22e">script</span><span style="color: #f8f8f2">(url</span><span style="color: #f92672">=</span><span style="color: #f8f8f2">None,</span> <span style="color: #f8f8f2">script</span><span style="color: #f92672">=</span><span style="color: #f8f8f2">None):</span>
+    <span style="color: #e6db74">&quot;&quot;&quot;A script tag.&quot;&quot;&quot;</span>
+    <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">url:</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">js(src</span><span style="color: #f92672">=</span><span style="color: #f8f8f2">url)</span>
+    <span style="color: #66d9ef">elif</span> <span style="color: #f8f8f2">script:</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">js(script)</span>
+</pre></div>
+</p>
+
+<p>From there I build some application specific template functions:</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #75715e"># Doclist filter input controls</span>
+<span style="color: #f8f8f2">docfilter</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">div(</span><span style="color: #e6db74">&quot; &quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">label(</span><span style="color: #e6db74">&#39;Filter:&#39;</span><span style="color: #f8f8f2">),</span> <span style="color: #e6db74">&quot; &quot;</span><span style="color: #f8f8f2">,</span>
+                <span style="color: #f8f8f2">textbox(id</span><span style="color: #f92672">=</span><span style="color: #e6db74">&#39;filter_input&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">autofocus</span><span style="color: #f92672">=</span><span style="color: #e6db74">&#39;autofocus&#39;</span><span style="color: #f8f8f2">),</span>
+                <span style="color: #f8f8f2">button(</span><span style="color: #e6db74">&quot;Clear&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">id</span><span style="color: #f92672">=</span><span style="color: #e6db74">&#39;filter_clear&#39;</span><span style="color: #f8f8f2">),</span>
+                <span style="color: #f8f8f2">id</span><span style="color: #f92672">=</span><span style="color: #e6db74">&#39;docfilter&#39;</span><span style="color: #f8f8f2">)</span>
+
+<span style="color: #f8f8f2">bar</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">span(</span><span style="color: #e6db74">&#39;|&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">cls</span><span style="color: #f92672">=</span><span style="color: #e6db74">&#39;bar noselect&#39;</span><span style="color: #f8f8f2">)</span>
+
+<span style="color: #66d9ef">def</span> <span style="color: #a6e22e">cell</span><span style="color: #f8f8f2">(idx,</span> <span style="color: #f8f8f2">contents):</span>
+    <span style="color: #e6db74">&quot;&quot;&quot;Create html representing a cell in a row.&quot;&quot;&quot;</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">span(</span><span style="color: #e6db74">&quot; {}&quot;</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">format(contents),</span>
+                <span style="color: #f8f8f2">cls</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;col{} noselect&quot;</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">format(idx))</span>
+
+<span style="color: #66d9ef">def</span> <span style="color: #a6e22e">add_bars</span><span style="color: #f8f8f2">(data):</span>
+    <span style="color: #e6db74">&quot;&quot;&quot;Transform column data into cell tags, and add separating bars.&quot;&quot;&quot;</span>
+    <span style="color: #f8f8f2">cells</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">[(cell(i,</span> <span style="color: #f8f8f2">c),</span> <span style="color: #f8f8f2">bar)</span> <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">i,</span> <span style="color: #f8f8f2">c</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">enumerate(data)]</span>
+    <span style="color: #f8f8f2">cells</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">list(chain(</span><span style="color: #f92672">*</span><span style="color: #f8f8f2">cells))</span>
+    <span style="color: #f8f8f2">cells</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">pop()</span> <span style="color: #75715e"># Remove last vertical bar</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">cells</span>
+
+<span style="color: #66d9ef">def</span> <span style="color: #a6e22e">row</span><span style="color: #f8f8f2">(idx,</span> <span style="color: #f8f8f2">data):</span>
+    <span style="color: #e6db74">&quot;&quot;&quot;Create html representing a row of cells.&quot;&quot;&quot;</span>
+    <span style="color: #f8f8f2">cells</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">add_bars(data)</span>
+    <span style="color: #75715e"># Setup row classes</span>
+    <span style="color: #f8f8f2">classes</span> <span style="color: #f92672">=</span> <span style="color: #e6db74">&quot;row noselect&quot;</span>
+    <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">idx</span><span style="color: #f92672">%</span><span style="color: #ae81ff">2</span> <span style="color: #f92672">==</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">:</span>
+        <span style="color: #f8f8f2">classes</span> <span style="color: #f92672">+=</span> <span style="color: #e6db74">&quot; zebra&quot;</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">div(</span><span style="color: #f92672">*</span><span style="color: #f8f8f2">cells,</span> <span style="color: #f8f8f2">id</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;row{}&quot;</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">format(idx),</span> <span style="color: #f8f8f2">cls</span><span style="color: #f92672">=</span><span style="color: #f8f8f2">classes)</span>
+
+<span style="color: #66d9ef">def</span> <span style="color: #a6e22e">header</span><span style="color: #f8f8f2">(columns):</span>
+    <span style="color: #e6db74">&quot;&quot;&quot;Create html for column headers.&quot;&quot;&quot;</span>
+    <span style="color: #f8f8f2">cells</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">add_bars(columns)</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">div(docfilter,</span> <span style="color: #f8f8f2">div(</span><span style="color: #f92672">*</span><span style="color: #f8f8f2">cells,</span> <span style="color: #f8f8f2">cls</span><span style="color: #f92672">=</span><span style="color: #e6db74">&#39;noselect&#39;</span><span style="color: #f8f8f2">),</span> <span style="color: #f8f8f2">id</span><span style="color: #f92672">=</span><span style="color: #e6db74">&#39;header&#39;</span><span style="color: #f8f8f2">)</span>
+
+<span style="color: #66d9ef">def</span> <span style="color: #a6e22e">doclist</span><span style="color: #f8f8f2">(headers,</span> <span style="color: #f8f8f2">data):</span>
+    <span style="color: #e6db74">&quot;&quot;&quot;Create a complete doclist from headers and 2d data.&quot;&quot;&quot;</span>
+    <span style="color: #f8f8f2">rows</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">[header(headers)]</span>
+    <span style="color: #f8f8f2">rows</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">extend([row(i,</span> <span style="color: #f8f8f2">r)</span> <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">i,</span> <span style="color: #f8f8f2">r</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">enumerate(data)])</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">div(</span><span style="color: #f92672">*</span><span style="color: #f8f8f2">rows,</span> <span style="color: #f8f8f2">id</span><span style="color: #f92672">=</span><span style="color: #e6db74">&#39;doclist&#39;</span><span style="color: #f8f8f2">)</span>
+</pre></div>
+</p>
+
+<p>A lot of this is messy, and not necessarily how I would do this in a web page,
+but since it is hidden inside a desktop application I did what was expedient.</p>
+
+<p>You can see the full code
+<a href="https://gist.github.com/kitsu/7e25aee3ee95e904af6e406e56827642">as a Gist here</a>.</p>
+
+  </div>
+  <footer>
+    <div class="article-footer">
+      
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/code"><span></span>code</a>
+    </li>
+    
+    <li>
+      <a href="/tags/functional"><span></span>functional</a>
+    </li>
+    
+    <li>
+      <a href="/tags/python"><span></span>python</a>
+    </li>
+    
+    <li>
+      <a href="/tags/lister"><span></span>lister</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      
+      <div class="adsense">
+        <span class="sponsor-label">Sponsored link</span>
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="2442045076"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+      </div>
+      
+      
+<div id="share-buttons">
+  <ul>
+    
+    
+    
+    
+    <li>
+      <div class="g-plusone" data-size="medium"></div>
+    </li>
+    
+    
+  </ul>
+</div>
+
+
+      <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'SuperfComs';
+    var disqus_identifier = 'http:\/\/kitsu.github.io\/2016\/05\/18\/functional-html\/';
+    var disqus_title = 'Generating HTML on the fly in Python';
+    var disqus_url = 'http:\/\/kitsu.github.io\/2016\/05\/18\/functional-html\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+      
+      <div id="pagenavigation-next-prev">
+        
+        <div id="pagenavigation-next">
+          <span class="pagenav-label">Previous</span>
+          <a href="http://kitsu.github.io/2016/05/17/autolisp-hackery/">AutoLisp and AutoCAD® Command Script Hackery</a>
+        </div>
+        
+        
+      </div>
+      
+    </div>
+  </footer>
+</div>
+        </div>
+        <div class="sidebar">
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Author</span>
+    </div>
+    <div id="author">
+      <span>Ed Blake</span>
+      <div>
+        
+        
+        <a href="https://plus.google.com/118323029386640613972"><i class="fa fa-google-plus-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://github.com/kitsu"><i class="fa fa-github-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://www.linkedin.com/in/edward-blake-b3601411b"><i class="fa fa-linkedin-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://stackoverflow.com/users/770443"><i class="fa fa-stack-overflow fa-2x" aria-hidden="true"></i></a>
+        
+      </div>
+    </div>
+  </div>
+  
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Categories</span>
+    </div>
+    <div class="categories">
+      <ul>
+        
+        <li>
+          <a href="/categories/blog"><span></span>blog (3)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/development"><span></span>development (3)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/hacks"><span></span>hacks (1)</a>
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>RSS</span>
+    </div>
+    <div id="rss">
+      <a href="/index.xml" type="application/rss+xml" target="_blank">
+        <i class="fa fa-rss-square fa-2x" aria-hidden="true"></i>
+      </a>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Sponsored link</span>
+    </div>
+    <div class="adsense">
+      <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:inline-block;width:300px;height:600px"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="9965311870"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+    </div>
+  </div>
+  
+</div>
+
+      </div>
+      <footer>
+        <div id="site-footer-wrap">
+          <div id="site-footer">
+            <span>Powered by <a href="https://gohugo.io/">Hugo</a>.</span>
+            <span>
+              
+              © 2015 Ed Blake
+              
+           </span>
+           <span id="copyleft">
+              <a rel="license"
+                 href="http://creativecommons.org/licenses/by-sa/4.0/">
+                <img alt="Creative Commons License" style="border-width:0"
+                     src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" />
+              </a>
+            </span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
+
