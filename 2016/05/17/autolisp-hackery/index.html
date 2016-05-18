@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="Hugo 0.15" />
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    
+    <link href="/index.xml" rel="alternate" type="application/rss+xml" title="Superfluous Comments" />
+    <link href="/index.xml" rel="feed" type="application/rss+xml" title="Superfluous Comments" />
+    
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+    
+    <script src="https://apis.google.com/js/platform.js" async defer>{lang: 'ja'}</script>
+    
+    <link rel="stylesheet" href="https://yandex.st/highlightjs/8.0/styles/default.min.css">
+    <script src="https://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <title>AutoLisp and AutoCAD® Command Script Hackery | Superfluous Comments</title>
+    <meta name="Description" content="Working around AutoCAD quirks using AutoCAD quirks.
+">
+  </head>
+  <body>
+    <div id="wrap">
+      
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-77704589-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+      <header class="site-header">
+        <div class="site-header-left">
+          <a class="site-header-title" href="http://kitsu.github.io/">Superfluous Comments</a>
+        </div>
+      </header>
+      <div class="container">
+        <div id="main">
+
+<div class="article">
+  <header>
+    <div class="article-header">
+      <h1>AutoLisp and AutoCAD® Command Script Hackery</h1>
+      <div class="article-meta">
+        <span class="posttime">2016/05/17</span>
+        
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/cad"><span></span>cad</a>
+    </li>
+    
+    <li>
+      <a href="/tags/autolisp"><span></span>autolisp</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      </div>
+    </div>
+  </header>
+  <div class="content">
+    <p>Working around AutoCAD quirks using AutoCAD quirks.</p>
+
+<p><hr/><br/>
+I got pulled away from the project I was working on today to try and automate
+around a CAD content problem. At work we have three simultaneous projects with
+the same client. They, because of their internal politics, are doing all the
+civil survey work in-house. They do try, and they are willing to work with us
+when their product is unsatisfactory, but we've gotten a lot of odd and broken
+data from them.</p>
+
+<p>In this particular case we received a file containing additional right-of-way and
+property ownership information. Since the surveyors prepared the file with only
+their own drawings in mind (as they usually do) all the text and line-work were
+tweaked and manually overridden. In particular the property tags and owner
+information were placed at a size and orientation that fit the survey plans, but
+not ours.</p>
+
+<p>After getting go ahead to fix the issue my boss came and asked if I could help
+out. His plan was to somehow adjust the text and then make it <em>annotative</em>,
+which just means it can be sized/oriented differently in different views.
+We talked about it and played around with some solutions and decided on fixing
+and decorating the text and then turning everything into an <em>annotative block</em>.
+Annotative blocks allow arbitrary collections of geometry to be automatically
+sized and rotated.</p>
+
+<p>I only had an hour to bang something together, and although I ran into some
+problems, I ended up with something that worked and was even relatively nice to
+use. Since it is short here is all the code, I'll break down some of the what
+and why next:</p>
+
+<p><code>File saved at &quot;d:\pown_wrap.scr&quot;</code>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #75715e">;; Preamble</span>
+<span style="color: #f8f8f2">(</span><span style="color: #a6e22e">defun</span> <span style="color: #f8f8f2">c:pown_block</span> <span style="color: #f8f8f2">(</span> <span style="color: #f8f8f2">/</span> <span style="color: #f8f8f2">dummy)</span>
+   <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">setq</span> <span style="color: #f8f8f2">title</span> <span style="color: #f8f8f2">(car (</span><span style="color: #a6e22e">entsel</span>  <span style="color: #e6db74">&quot;Select title text&quot;</span><span style="color: #f8f8f2">))</span>
+         <span style="color: #f8f8f2">name</span> <span style="color: #f8f8f2">(cdr (assoc </span><span style="color: #ae81ff">1</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">entget</span> <span style="color: #f8f8f2">title)))</span>
+         <span style="color: #f8f8f2">dummy</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">princ</span> <span style="color: #e6db74">&quot;\n&quot;</span><span style="color: #f8f8f2">)</span>
+         <span style="color: #f8f8f2">note</span> <span style="color: #f8f8f2">(car (</span><span style="color: #a6e22e">entsel</span>  <span style="color: #e6db74">&quot;Select note text&quot;</span><span style="color: #f8f8f2">)))</span>
+   <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">command</span> <span style="color: #e6db74">&quot;script&quot;</span> <span style="color: #e6db74">&quot;d:\\pown_wrap.scr&quot;</span><span style="color: #f8f8f2">)</span>
+   <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">princ</span><span style="color: #f8f8f2">))</span>
+<span style="color: #75715e">;; Conditional break</span>
+<span style="color: #f8f8f2">(</span><span style="color: #66d9ef">if </span><span style="color: #f8f8f2">(not title)</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">command</span> <span style="color: #e6db74">&quot;invalid&quot;</span><span style="color: #f8f8f2">))</span>
+<span style="color: #75715e">;; Modifications (note: bg is a custom lisp command)</span>
+<span style="color: #f8f8f2">select</span> <span style="color: #f8f8f2">!note</span> <span style="color: #75715e">;</span>
+<span style="color: #f8f8f2">justifytext</span> <span style="color: #f8f8f2">p</span> <span style="color: #75715e">;</span>
+<span style="color: #f8f8f2">tc</span><span style="color: #75715e">;</span>
+<span style="color: #f8f8f2">bg</span>  <span style="color: #f8f8f2">p</span> <span style="color: #75715e">;</span>
+<span style="color: #f8f8f2">select</span> <span style="color: #f8f8f2">!title</span> <span style="color: #75715e">;</span>
+<span style="color: #f8f8f2">justifytext</span> <span style="color: #f8f8f2">p</span> <span style="color: #75715e">;</span>
+<span style="color: #f8f8f2">mc</span><span style="color: #75715e">;</span>
+<span style="color: #f8f8f2">bg</span>  <span style="color: #f8f8f2">p</span> <span style="color: #75715e">;</span>
+<span style="color: #f8f8f2">(</span><span style="color: #a6e22e">setq</span> <span style="color: #f8f8f2">insert</span> <span style="color: #f8f8f2">(cdr (assoc </span><span style="color: #ae81ff">10</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">entget</span> <span style="color: #f8f8f2">title))))</span>
+<span style="color: #75715e">;; Express tools Lisp command</span>
+<span style="color: #f8f8f2">select</span> <span style="color: #f8f8f2">!title</span> <span style="color: #75715e">;</span>
+<span style="color: #f8f8f2">tcircle</span> <span style="color: #f8f8f2">p</span> <span style="color: #75715e">;</span>
+
+<span style="color: #f8f8f2">slots</span>
+
+
+
+<span style="color: #75715e">;; Block creation and re-insertion</span>
+<span style="color: #f8f8f2">-block</span> <span style="color: #f8f8f2">!name</span> <span style="color: #f8f8f2">annotative</span> <span style="color: #f8f8f2">yes</span> <span style="color: #f8f8f2">yes</span> <span style="color: #f8f8f2">!insert</span> <span style="color: #f8f8f2">l</span> <span style="color: #f8f8f2">!title</span> <span style="color: #f8f8f2">!note</span> <span style="color: #75715e">;</span>
+<span style="color: #75715e">;; The insert command tried to interpret `!name` as a file path...</span>
+<span style="color: #f8f8f2">(</span><span style="color: #a6e22e">command</span> <span style="color: #e6db74">&quot;-insert&quot;</span> <span style="color: #f8f8f2">name</span> <span style="color: #f8f8f2">insert</span> <span style="color: #e6db74">&quot;1&quot;</span> <span style="color: #e6db74">&quot;&quot;</span> <span style="color: #e6db74">&quot;0&quot;</span><span style="color: #f8f8f2">)</span>
+<span style="color: #75715e">;; Clean up</span>
+<span style="color: #f8f8f2">(</span><span style="color: #a6e22e">setq</span> <span style="color: #f8f8f2">title</span> <span style="color: #f8f8f2">nil</span> <span style="color: #f8f8f2">note</span> <span style="color: #f8f8f2">nil</span> <span style="color: #f8f8f2">name</span> <span style="color: #f8f8f2">nil</span> <span style="color: #f8f8f2">insert</span> <span style="color: #f8f8f2">nil)</span>
+</pre></div>
+</p>
+
+<p>Above is an AutoCAD script file. All the white-space is significant, especially
+at the end of lines. I went with a script instead of just writing the whole
+thing in lisp because AutoCAD's lisp interpreter has an odd restriction: it is
+prevented from executing any command that requires use of the interpreter. This
+means AutoLisp cannot automate a command that is written in AutoLisp.</p>
+
+<p>In this case I want to use my own <code>bg</code> command (which turns on text masking),
+and a built-in command <code>tcircle</code> which wraps text in decorative shapes. The only
+way I can run those commands without user mediation is in a script, but scripts
+must be a file on disk, <em>and</em> they don't allow any user interaction. So I still
+need the user to run a lisp command so I can gather their input to use in the
+script...</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #75715e">;; Preamble</span>
+<span style="color: #f8f8f2">(</span><span style="color: #a6e22e">defun</span> <span style="color: #f8f8f2">c:pown_block</span> <span style="color: #f8f8f2">(</span> <span style="color: #f8f8f2">/</span> <span style="color: #f8f8f2">dummy)</span>
+   <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">setq</span> <span style="color: #f8f8f2">title</span> <span style="color: #f8f8f2">(car (</span><span style="color: #a6e22e">entsel</span>  <span style="color: #e6db74">&quot;Select title text&quot;</span><span style="color: #f8f8f2">))</span>
+         <span style="color: #f8f8f2">name</span> <span style="color: #f8f8f2">(cdr (assoc </span><span style="color: #ae81ff">1</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">entget</span> <span style="color: #f8f8f2">title)))</span>
+         <span style="color: #f8f8f2">dummy</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">princ</span> <span style="color: #e6db74">&quot;\n&quot;</span><span style="color: #f8f8f2">)</span>
+         <span style="color: #f8f8f2">note</span> <span style="color: #f8f8f2">(car (</span><span style="color: #a6e22e">entsel</span>  <span style="color: #e6db74">&quot;Select note text&quot;</span><span style="color: #f8f8f2">)))</span>
+   <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">command</span> <span style="color: #e6db74">&quot;script&quot;</span> <span style="color: #e6db74">&quot;d:\\pown_wrap.scr&quot;</span><span style="color: #f8f8f2">)</span>
+   <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">princ</span><span style="color: #f8f8f2">))</span>
+</pre></div>
+</p>
+
+<p>The preamble actually defines the lisp command used to collect property titles
+and ownership notes. In AutoLisp a function prepended by <code>c:</code> becomes an AutoCAD
+command. Since no AutoCAD command starts with <code>pow</code> those three letters
+auto-complete to this command. After collecting the DB entities the command then
+runs the same script file it is defined in...</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #75715e">;; Conditional break</span>
+<span style="color: #f8f8f2">(</span><span style="color: #66d9ef">if </span><span style="color: #f8f8f2">(not title)</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">command</span> <span style="color: #e6db74">&quot;invalid&quot;</span><span style="color: #f8f8f2">))</span>
+</pre></div>
+</p>
+
+<p>The <code>conditional break</code> line is a neat hack. There is no way to conditionally
+terminate script execution in AutoCAD, but it does terminate automatically when
+an invalid command is executed, which &quot;invalid&quot; is.</p>
+
+<p>So when the user drags the script into the application window the <code>pown_block</code>
+command is defined, and if the lisp var <code>title</code> is not defined then execution
+stops. The user then runs the <code>pow</code> command which initializes <code>title</code> and
+executes the same script, which is now able to reach the &quot;Modifications&quot; section.</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #75715e">;; Modifications (note: bg is a custom lisp command)</span>
+<span style="color: #f8f8f2">select</span> <span style="color: #f8f8f2">!note</span> <span style="color: #75715e">;</span>
+<span style="color: #f8f8f2">justifytext</span> <span style="color: #f8f8f2">p</span> <span style="color: #75715e">;</span>
+<span style="color: #f8f8f2">tc</span><span style="color: #75715e">;</span>
+<span style="color: #f8f8f2">bg</span>  <span style="color: #f8f8f2">p</span> <span style="color: #75715e">;</span>
+<span style="color: #f8f8f2">select</span> <span style="color: #f8f8f2">!title</span> <span style="color: #75715e">;</span>
+<span style="color: #f8f8f2">justifytext</span> <span style="color: #f8f8f2">p</span> <span style="color: #75715e">;</span>
+<span style="color: #f8f8f2">mc</span><span style="color: #75715e">;</span>
+<span style="color: #f8f8f2">bg</span>  <span style="color: #f8f8f2">p</span> <span style="color: #75715e">;</span>
+<span style="color: #f8f8f2">(</span><span style="color: #a6e22e">setq</span> <span style="color: #f8f8f2">insert</span> <span style="color: #f8f8f2">(cdr (assoc </span><span style="color: #ae81ff">10</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">entget</span> <span style="color: #f8f8f2">title))))</span>
+<span style="color: #75715e">;; Express tools Lisp command</span>
+<span style="color: #f8f8f2">select</span> <span style="color: #f8f8f2">!title</span> <span style="color: #75715e">;</span>
+<span style="color: #f8f8f2">tcircle</span> <span style="color: #f8f8f2">p</span> <span style="color: #75715e">;</span>
+
+<span style="color: #f8f8f2">slots</span>
+
+
+
+<span style="color: #75715e">;; Block creation and re-insertion</span>
+<span style="color: #f8f8f2">-block</span> <span style="color: #f8f8f2">!name</span> <span style="color: #f8f8f2">annotative</span> <span style="color: #f8f8f2">yes</span> <span style="color: #f8f8f2">yes</span> <span style="color: #f8f8f2">!insert</span> <span style="color: #f8f8f2">l</span> <span style="color: #f8f8f2">!title</span> <span style="color: #f8f8f2">!note</span> <span style="color: #75715e">;</span>
+<span style="color: #75715e">;; The insert command tried to interpret `!name` as a file path...</span>
+<span style="color: #f8f8f2">(</span><span style="color: #a6e22e">command</span> <span style="color: #e6db74">&quot;-insert&quot;</span> <span style="color: #f8f8f2">name</span> <span style="color: #f8f8f2">insert</span> <span style="color: #e6db74">&quot;1&quot;</span> <span style="color: #e6db74">&quot;&quot;</span> <span style="color: #e6db74">&quot;0&quot;</span><span style="color: #f8f8f2">)</span>
+</pre></div>
+</p>
+
+<p>From there everything is pretty standard. Note that I cannot use the <code>!var</code>
+syntax to access lisp variables, again because of the re-entrance restriction.
+Fortunately Autodesk fixed a bug in earlier versions of the select command so
+it can now make selections! All the trailing <code>p</code>s are shorthand for previous
+selection (since those commands clear the active selection for some reason).</p>
+
+<p>I actually wait to grab the title's coordinate until after changing the
+justification to middle center, so the block insertion point is nicely
+centered. Once the block is made I clear all the vars in case the lisp has to
+be manually redefined.</p>
+
+<p>Now instead of a 20+ steps to convert each set of annotation you can just type
+<code>pow</code> and pick a couple of pieces of text!</p>
+
+<pre><code class="language-html">Autodesk, and AutoCAD are registered trademarks or trademarks of Autodesk,
+Inc., and/or its subsidiaries and/or affiliates in the USA and/or other
+countries.
+
+I have no affiliation with them except the use of their products.
+</code></pre>
+
+  </div>
+  <footer>
+    <div class="article-footer">
+      
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/cad"><span></span>cad</a>
+    </li>
+    
+    <li>
+      <a href="/tags/autolisp"><span></span>autolisp</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      
+      <div class="adsense">
+        <span class="sponsor-label">Sponsored link</span>
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="2442045076"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+      </div>
+      
+      
+<div id="share-buttons">
+  <ul>
+    
+    
+    
+    
+    <li>
+      <div class="g-plusone" data-size="medium"></div>
+    </li>
+    
+    
+  </ul>
+</div>
+
+
+      <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'SuperfComs';
+    var disqus_identifier = 'http:\/\/kitsu.github.io\/2016\/05\/17\/autolisp-hackery\/';
+    var disqus_title = 'AutoLisp and AutoCAD® Command Script Hackery';
+    var disqus_url = 'http:\/\/kitsu.github.io\/2016\/05\/17\/autolisp-hackery\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+      
+      <div id="pagenavigation-next-prev">
+        
+        <div id="pagenavigation-next">
+          <span class="pagenav-label">Previous</span>
+          <a href="http://kitsu.github.io/2016/05/16/different-search/">Optimizing a Different Filter</a>
+        </div>
+        
+        
+      </div>
+      
+    </div>
+  </footer>
+</div>
+        </div>
+        <div class="sidebar">
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Author</span>
+    </div>
+    <div id="author">
+      <span>Ed Blake</span>
+      <div>
+        
+        
+        <a href="https://plus.google.com/118323029386640613972"><i class="fa fa-google-plus-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://github.com/kitsu"><i class="fa fa-github-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        
+        <a href="https://stackoverflow.com/users/770443"><i class="fa fa-stack-overflow fa-2x" aria-hidden="true"></i></a>
+        
+      </div>
+    </div>
+  </div>
+  
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Categories</span>
+    </div>
+    <div class="categories">
+      <ul>
+        
+        <li>
+          <a href="/categories/blog"><span></span>blog (3)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/development"><span></span>development (2)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/hacks"><span></span>hacks (1)</a>
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>RSS</span>
+    </div>
+    <div id="rss">
+      <a href="/index.xml" type="application/rss+xml" target="_blank">
+        <i class="fa fa-rss-square fa-2x" aria-hidden="true"></i>
+      </a>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Sponsored link</span>
+    </div>
+    <div class="adsense">
+      <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:inline-block;width:300px;height:600px"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="9965311870"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+    </div>
+  </div>
+  
+</div>
+
+      </div>
+      <footer>
+        <div id="site-footer-wrap">
+          <div id="site-footer">
+            <span>Powered by <a href="https://gohugo.io/">Hugo</a>.</span>
+            <span>
+              
+              © 2015 Ed Blake
+              
+           </span>
+           <span id="copyleft">
+              <a rel="license"
+                 href="http://creativecommons.org/licenses/by-sa/4.0/">
+                <img alt="Creative Commons License" style="border-width:0"
+                     src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" />
+              </a>
+            </span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
+

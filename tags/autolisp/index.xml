@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Autolisp on Superfluous Comments</title>
+    <link>http://kitsu.github.io/tags/autolisp/</link>
+    <description>Recent content in Autolisp on Superfluous Comments</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>© 2015 Ed Blake</copyright>
+    <lastBuildDate>Tue, 17 May 2016 14:31:01 -0700</lastBuildDate>
+    <atom:link href="http://kitsu.github.io/tags/autolisp/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>AutoLisp and AutoCAD® Command Script Hackery</title>
+      <link>http://kitsu.github.io/2016/05/17/autolisp-hackery/</link>
+      <pubDate>Tue, 17 May 2016 14:31:01 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/05/17/autolisp-hackery/</guid>
+      <description>&lt;p&gt;Working around AutoCAD quirks using AutoCAD quirks.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
