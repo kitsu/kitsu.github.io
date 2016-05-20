@@ -3,8 +3,13 @@
   
   <url>
     <loc>http://kitsu.github.io/</loc>
-    <lastmod>2016-05-18T14:43:46-07:00</lastmod>
+    <lastmod>2016-05-19T10:24:12-07:00</lastmod>
     <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://kitsu.github.io/2016/05/19/pyqt_cljs_01/</loc>
+    <lastmod>2016-05-19T10:24:12-07:00</lastmod>
   </url>
   
   <url>
