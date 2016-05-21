@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="Hugo 0.15" />
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    
+    <link href="/index.xml" rel="alternate" type="application/rss+xml" title="Superfluous Comments" />
+    <link href="/index.xml" rel="feed" type="application/rss+xml" title="Superfluous Comments" />
+    
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+    
+    <script src="https://apis.google.com/js/platform.js" async defer>{lang: 'ja'}</script>
+    
+    <link rel="stylesheet" href="https://yandex.st/highlightjs/8.0/styles/default.min.css">
+    <script src="https://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <title>ClojureScript in PyQt4 QWebView - Success | Superfluous Comments</title>
+    <meta name="Description" content="Leiningen is the best, and Qt is... challenging.
+">
+  </head>
+  <body>
+    <div id="wrap">
+      
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-77704589-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+      <header class="site-header">
+        <div class="site-header-left">
+          <a class="site-header-title" href="http://kitsu.github.io/">Superfluous Comments</a>
+        </div>
+      </header>
+      <div class="container">
+        <div id="main">
+
+<div class="article">
+  <header>
+    <div class="article-header">
+      <h1>ClojureScript in PyQt4 QWebView - Success</h1>
+      <div class="article-meta">
+        <span class="posttime">2016/05/20</span>
+        
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/code"><span></span>code</a>
+    </li>
+    
+    <li>
+      <a href="/tags/clojurescript"><span></span>clojurescript</a>
+    </li>
+    
+    <li>
+      <a href="/tags/pyqt4"><span></span>pyqt4</a>
+    </li>
+    
+    <li>
+      <a href="/tags/lister"><span></span>lister</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      </div>
+    </div>
+  </header>
+  <div class="content">
+    <p>Leiningen is the best, and Qt is... challenging.</p>
+
+<p><hr/><br/>
+There, it works. Code is up at <a href="https://github.com/kitsu/PyQt4_CLJS">https://github.com/kitsu/PyQt4_CLJS</a>.</p>
+
+<p>The lein setup was super easy, aided by the fact I started with
+<code>lein new figwheel pyqt4_testbed -- --reagent</code>. First I had to muck with the
+path values to get everything output into the <code>testbed</code> folder (where the Python
+code lives and the QWebView loads resources):</p>
+
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">...</span>
+  <span style="color: #e6db74">:clean-targets</span> <span style="color: #f92672">^</span><span style="color: #f8f8f2">{</span><span style="color: #e6db74">:protect</span> <span style="color: #f8f8f2">false}</span> <span style="color: #f8f8f2">[</span><span style="color: #e6db74">&quot;testbed/lib&quot;</span><span style="color: #f8f8f2">]</span>
+
+  <span style="color: #e6db74">:cljsbuild</span> <span style="color: #f8f8f2">{</span><span style="color: #e6db74">:builds</span>
+              <span style="color: #f8f8f2">[{</span><span style="color: #e6db74">:id</span> <span style="color: #e6db74">&quot;dev&quot;</span>
+                <span style="color: #e6db74">:source-paths</span> <span style="color: #f8f8f2">[</span><span style="color: #e6db74">&quot;src&quot;</span><span style="color: #f8f8f2">]</span>
+
+                <span style="color: #e6db74">:compiler</span> <span style="color: #f8f8f2">{</span><span style="color: #e6db74">:main</span> <span style="color: #f8f8f2">pyqt4-testbed.core</span>
+                           <span style="color: #e6db74">:asset-path</span> <span style="color: #e6db74">&quot;testbed/lib&quot;</span>
+                           <span style="color: #e6db74">:output-to</span> <span style="color: #e6db74">&quot;testbed/main.js&quot;</span>
+                           <span style="color: #e6db74">:output-dir</span> <span style="color: #e6db74">&quot;testbed/lib&quot;</span>
+                           <span style="color: #e6db74">:source-map-timestamp</span> <span style="color: #f8f8f2">true}}</span>
+<span style="color: #f8f8f2">...</span>
+</pre></div>
+
+
+<p>Trying to run the dev build still didn't work because of the QWebView path
+resolution problem, but I'll come back to that. The advanced build did work
+except for one small problem: Reagent didn't load, and Figwheel couldn't
+connect to its server. I am pretty sure this is again some QWebView resource
+restriction, and is probably pretty easy to resolve, just add some &quot;schemes&quot; to
+the QWebSettings or something. Since I wasn't that attached to either though I
+chose the easier solution: deleting them completely from the project definition.</p>
+
+<p>So yeah, paths, I thought with my new knowledge of the <code>baseUrl</code> argument it
+would be quick to sort out. That wasn't really the case. Firstly debugging
+<em>where</em> exactly webkit was actually looking is a pain. The only place I found
+that information was in the inspector resources tab when hovering over the html
+file:</p>
+
+<p>
+<figure >
+    
+        <img src="/images/QWebView_inspect_path.JPG" alt="Hover path snip" />
+    
+    
+    <figcaption>
+        <p>
+        No, the title bar text wasn&#39;t (always) the same
+        
+            
+        
+        </p> 
+    </figcaption>
+    
+</figure>
+</p>
+
+<p>From there I had some trouble getting the base path and the resource paths I was
+hard-coding to work out. Because of how things worked previously I was being
+overly specific. In fact I even had a helper function to <em>url-ize</em> resource
+paths for the HTML tags, which foreshadows the final solution.</p>
+
+<p>Once I had the right path components in the right places nothing would load at
+all! It turned out <code>QUrl</code> is &quot;helpful&quot;, and sanitizes paths it is
+provided. This included removing the ever annoying and oh-so important Windows
+drive colon. Since I didn't have a 'c' folder mounted at root '/' nothing
+worked. While researching that issue I learned QUrl has a static method just for
+that purpose: <code>QUrl.fromLocalFile(QString path)</code>. Adding that I promptly got
+paths like &quot;file://file://blah&quot;. After dropping my url-izer though everything
+worked! I could load main.js and get goog/base and all my JS deps resolved.</p>
+
+<p>Final working <code>setHtml</code> call:</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #66d9ef">def</span> <span style="color: #a6e22e">build_page</span><span style="color: #f8f8f2">(self,</span> <span style="color: #f8f8f2">headers,</span> <span style="color: #f8f8f2">data):</span>
+    <span style="color: #e6db74">&quot;&quot;&quot;Build table html containing data rows.&quot;&quot;&quot;</span>
+    <span style="color: #f8f8f2">table</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">html</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">doclist(headers,</span> <span style="color: #f8f8f2">data)</span>
+    <span style="color: #f8f8f2">styles</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">get_styles()</span>
+    <span style="color: #f8f8f2">scripts</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">get_scripts()</span>
+    <span style="color: #f8f8f2">doc</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">html</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">html(styles</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">scripts,</span> <span style="color: #f8f8f2">table,</span> <span style="color: #f8f8f2">cls</span><span style="color: #f92672">=</span><span style="color: #e6db74">&#39;noselect&#39;</span><span style="color: #f8f8f2">)</span>
+    <span style="color: #f8f8f2">basepath</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">os</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">path</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">abspath(os</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">path</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">dirname(__file__))</span>
+    <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">setHtml(doc,</span> <span style="color: #f8f8f2">QtCore</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">QUrl</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">fromLocalFile(basepath))</span>
+</pre></div>
+</p>
+
+<p>Go ahead and play with the code. Remember to kill your <code>cljsbuild auto</code> before
+trying to build an exe. Next time I'll try to get some cool async event code
+working.</p>
+
+  </div>
+  <footer>
+    <div class="article-footer">
+      
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/code"><span></span>code</a>
+    </li>
+    
+    <li>
+      <a href="/tags/clojurescript"><span></span>clojurescript</a>
+    </li>
+    
+    <li>
+      <a href="/tags/pyqt4"><span></span>pyqt4</a>
+    </li>
+    
+    <li>
+      <a href="/tags/lister"><span></span>lister</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      
+      <div class="adsense">
+        <span class="sponsor-label">Sponsored link</span>
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="2442045076"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+      </div>
+      
+      
+<div id="share-buttons">
+  <ul>
+    
+    
+    
+    
+    <li>
+      <div class="g-plusone" data-size="medium"></div>
+    </li>
+    
+    
+  </ul>
+</div>
+
+
+      <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'SuperfComs';
+    var disqus_identifier = 'http:\/\/kitsu.github.io\/2016\/05\/20\/pyqt4_cljs_02\/';
+    var disqus_title = 'ClojureScript in PyQt4 QWebView - Success';
+    var disqus_url = 'http:\/\/kitsu.github.io\/2016\/05\/20\/pyqt4_cljs_02\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+      
+      <div id="pagenavigation-next-prev">
+        
+        <div id="pagenavigation-next">
+          <span class="pagenav-label">Previous</span>
+          <a href="http://kitsu.github.io/2016/05/19/pyqt_cljs_01/">ClojureScript in PyQt4 QWebView - False start</a>
+        </div>
+        
+        
+      </div>
+      
+    </div>
+  </footer>
+</div>
+        </div>
+        <div class="sidebar">
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Author</span>
+    </div>
+    <div id="author">
+      <span>Ed Blake</span>
+      <div>
+        
+        
+        <a href="https://plus.google.com/118323029386640613972"><i class="fa fa-google-plus-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://github.com/kitsu"><i class="fa fa-github-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://www.linkedin.com/in/edward-blake-b3601411b"><i class="fa fa-linkedin-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://stackoverflow.com/users/770443"><i class="fa fa-stack-overflow fa-2x" aria-hidden="true"></i></a>
+        
+      </div>
+    </div>
+  </div>
+  
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Categories</span>
+    </div>
+    <div class="categories">
+      <ul>
+        
+        <li>
+          <a href="/categories/blog"><span></span>blog (3)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/development"><span></span>development (5)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/hacks"><span></span>hacks (1)</a>
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>RSS</span>
+    </div>
+    <div id="rss">
+      <a href="/index.xml" type="application/rss+xml" target="_blank">
+        <i class="fa fa-rss-square fa-2x" aria-hidden="true"></i>
+      </a>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Sponsored link</span>
+    </div>
+    <div class="adsense">
+      <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:inline-block;width:300px;height:600px"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="9965311870"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+    </div>
+  </div>
+  
+</div>
+
+      </div>
+      <footer>
+        <div id="site-footer-wrap">
+          <div id="site-footer">
+            <span>Powered by <a href="https://gohugo.io/">Hugo</a>.</span>
+            <span>
+              
+              © 2015 Ed Blake
+              
+           </span>
+           <span id="copyleft">
+              <a rel="license"
+                 href="http://creativecommons.org/licenses/by-sa/4.0/">
+                <img alt="Creative Commons License" style="border-width:0"
+                     src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" />
+              </a>
+            </span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
+
