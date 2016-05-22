@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="Hugo 0.15" />
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    
+    <link href="/index.xml" rel="alternate" type="application/rss+xml" title="Superfluous Comments" />
+    <link href="/index.xml" rel="feed" type="application/rss+xml" title="Superfluous Comments" />
+    
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+    
+    <script src="https://apis.google.com/js/platform.js" async defer>{lang: 'ja'}</script>
+    
+    <link rel="stylesheet" href="https://yandex.st/highlightjs/8.0/styles/default.min.css">
+    <script src="https://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <title>ClojureScript in PyQt4 QWebView - Code | Superfluous Comments</title>
+    <meta name="Description" content="Actually coding the ClojureScript prototype.
+">
+  </head>
+  <body>
+    <div id="wrap">
+      
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-77704589-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+      <header class="site-header">
+        <div class="site-header-left">
+          <a class="site-header-title" href="http://kitsu.github.io/">Superfluous Comments</a>
+        </div>
+      </header>
+      <div class="container">
+        <div id="main">
+
+<div class="article">
+  <header>
+    <div class="article-header">
+      <h1>ClojureScript in PyQt4 QWebView - Code</h1>
+      <div class="article-meta">
+        <span class="posttime">2016/05/21</span>
+        
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/code"><span></span>code</a>
+    </li>
+    
+    <li>
+      <a href="/tags/clojurescript"><span></span>clojurescript</a>
+    </li>
+    
+    <li>
+      <a href="/tags/pyqt4"><span></span>pyqt4</a>
+    </li>
+    
+    <li>
+      <a href="/tags/lister"><span></span>lister</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      </div>
+    </div>
+  </header>
+  <div class="content">
+    <p><em>Actually</em> coding the ClojureScript prototype.</p>
+
+<p><hr/><br/>
+Firstly a follow up to the last statement in the previous post. It turns out
+Leiningen/cljsbuild is smarter than me, but in a very unhelpful way. Lein
+apparently knows when your code changes and, if the artifacts are up to date
+with the source, it skips building anything. Unfortunately Lein doesn't care if
+you've changed build profiles. Compiling with advanced optimizations looks the
+same as a dev build. I fixed <code>build.cmd</code> to delete the target folder and
+testbed/main.js before running Lein, so now you get a build that isn't dependent
+on the testbed/lib folder.</p>
+
+<p>I've decided to use <a href="https://github.com/plumatic/dommy">Dommy</a> to interact with
+the DOM and setup event feeds. Speaking of event feeds, I had to remember how to
+hook an event callback up to a channel. I've made it overly complicated in the
+past, but it is really simple: You just need a channel accessible in the scope
+of a lambda that is the event handler.</p>
+
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">get-click-chan</span> <span style="color: #f8f8f2">[target]</span>
+  <span style="color: #75715e">;; Connect an event stream to a channel, return channel</span>
+  <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">let </span><span style="color: #f8f8f2">[out</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">chan</span><span style="color: #f8f8f2">)]</span>
+    <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">dommy/listen!</span> <span style="color: #f8f8f2">target</span> <span style="color: #e6db74">:mousedown</span>
+                  <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">fn </span><span style="color: #f8f8f2">[evt]</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">put!</span> <span style="color: #f8f8f2">out</span> <span style="color: #f8f8f2">evt)))</span>
+    <span style="color: #f8f8f2">out))</span>
+</pre></div>
+
+
+<p>The behavior I want is, when the user clicks and drags, the cells between the
+initial click location and the current mouse location have their highlight state
+<em>toggled</em>. The selection is updated as the cursor is moved until the mouse
+button is released. All updates during one composite event are relative to the
+initial condition at the time of clicking.</p>
+
+<p>Note: Dragging past the edge of the frame looses <code>up</code> events.
+<iframe src="/async_highlight_01/index.html"
+        width="100%" height="100px" style="border: 1px solid black"></iframe></p>
+
+<p>I came up with a bunch of ideas about what events to actually capture, and how
+to map those events back onto the DOM. At first I was going to track enter/exit
+in each row div decide to toggle based on if the cursor passed through the top
+or the bottom, which would have been really complicated. Next I tried using the
+difference in clientY to get a pixel range and then... IDK, use the row hight to
+calculate the end row? Using pixel values would be bad since with a scroll bar
+the start coord has to change, and the end coord would stop changing at the edge
+of the window. In the end I cheated and used the excessive ID attributes I added
+when generating the HTML. I think you could use nth-child or
+<code>target.children.indexOf</code> instead, but since I'm adding the IDs anyway.</p>
+
+<p>I'll start at the end and work toward the specific. First the document needs to
+be ready before event listers can be attached:</p>
+
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">dommy/listen!</span> <span style="color: #f8f8f2">js/window</span> <span style="color: #e6db74">:load</span> <span style="color: #f8f8f2">main)</span>
+</pre></div>
+
+
+<p>The main function reads pretty close to the behavior description. After some
+setup I start a loop waiting for Left Mouse Button (LMB) down events. When I get
+one I start a nested loop to update the highlight range that exits on the first
+LMB up event.</p>
+
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">main</span> <span style="color: #f8f8f2">[]</span>
+  <span style="color: #75715e">;; Setup some event input channels and start a process to watch them.</span>
+  <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">let </span><span style="color: #f8f8f2">[target</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">sel1</span> <span style="color: #e6db74">:#doclist</span><span style="color: #f8f8f2">)</span>
+        <span style="color: #f8f8f2">lmb-down-chan</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">evt-chan</span> <span style="color: #f8f8f2">target</span> <span style="color: #e6db74">:mousedown</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">)</span>
+        <span style="color: #f8f8f2">lmb-move-chan</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">evt-chan</span> <span style="color: #f8f8f2">target</span> <span style="color: #e6db74">:mousemove</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">)</span>
+        <span style="color: #f8f8f2">lmb-up-chan</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">evt-chan</span> <span style="color: #f8f8f2">target</span> <span style="color: #e6db74">:mouseup</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">)]</span>
+    <span style="color: #75715e">;; Wait for initial LMB down</span>
+    <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">go-loop</span> <span style="color: #f8f8f2">[evt</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">&lt;!</span> <span style="color: #f8f8f2">lmb-down-chan)]</span>
+      <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">let </span><span style="color: #f8f8f2">[row</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">get-row-num</span> <span style="color: #f8f8f2">evt)</span>
+            <span style="color: #f8f8f2">highlight</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">get-highlight</span> <span style="color: #f8f8f2">target)]</span>
+        <span style="color: #75715e">;; Consume move events until we get an up event</span>
+        <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">loop </span><span style="color: #f8f8f2">[[evt</span> <span style="color: #f8f8f2">ch]</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">alts!</span> <span style="color: #f8f8f2">[lmb-up-chan</span> <span style="color: #f8f8f2">lmb-move-chan]</span> <span style="color: #f8f8f2">{</span><span style="color: #e6db74">:priority</span> <span style="color: #f8f8f2">true})]</span>
+          <span style="color: #75715e">;; update highlighting...</span>
+          <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">toggle-highlight</span> <span style="color: #f8f8f2">highlight</span> <span style="color: #f8f8f2">row</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">get-row-num</span> <span style="color: #f8f8f2">evt))</span>
+          <span style="color: #f8f8f2">(when-not (= ch</span> <span style="color: #f8f8f2">lmb-up-chan)</span>
+            <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">recur</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">alts!</span> <span style="color: #f8f8f2">[lmb-up-chan</span> <span style="color: #f8f8f2">lmb-move-chan]</span> <span style="color: #f8f8f2">{</span><span style="color: #e6db74">:priority</span> <span style="color: #f8f8f2">true})))))</span>
+      <span style="color: #75715e">;; Wait for next LMB down</span>
+      <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">recur</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">&lt;!</span> <span style="color: #f8f8f2">lmb-down-chan)))))</span>
+</pre></div>
+
+
+<p>The duplication of code in the loop binding and recur is annoying, but I can't
+think of a good way to avoid it. The channel builder is a refactoring of
+separate constructor functions into one. I played around with producing tagged
+events or preprocessed event data, but in the end I just had it filter on mouse
+button.</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">evt-chan</span> <span style="color: #f8f8f2">[target</span> <span style="color: #f8f8f2">kind</span> <span style="color: #f8f8f2">btn]</span>
+  <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">let </span><span style="color: #f8f8f2">[out</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">chan</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">sliding-buffer</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">))]</span>
+    <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">dommy/listen!</span> <span style="color: #f8f8f2">target</span> <span style="color: #f8f8f2">kind</span>
+                  <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">fn </span><span style="color: #f8f8f2">[evt]</span>
+                    <span style="color: #f8f8f2">(when (= (</span><span style="color: #a6e22e">.-button</span> <span style="color: #f8f8f2">evt)</span> <span style="color: #f8f8f2">btn)</span>
+                      <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">put!</span> <span style="color: #f8f8f2">out</span> <span style="color: #f8f8f2">evt))))</span>
+    <span style="color: #f8f8f2">out))</span>
+</pre></div>
+</p>
+
+<p>The <code>get-row-num</code> function just gets the number part of the row id. It also
+handles the case when the event target is a child of the containing row.</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">get-row-num</span> <span style="color: #f8f8f2">[evt]</span>
+  <span style="color: #75715e">;; Extract the row number from a mouse event</span>
+  <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">let </span><span style="color: #f8f8f2">[target</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">.-target</span> <span style="color: #f8f8f2">evt)</span>
+        <span style="color: #f8f8f2">id</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">.-id</span> <span style="color: #f8f8f2">target)</span>
+        <span style="color: #f8f8f2">kind</span> <span style="color: #f8f8f2">(subs id</span> <span style="color: #ae81ff">0</span> <span style="color: #ae81ff">3</span><span style="color: #f8f8f2">)</span>
+        <span style="color: #f8f8f2">num</span> <span style="color: #f8f8f2">(int (subs id</span> <span style="color: #ae81ff">3</span><span style="color: #f8f8f2">))]</span>
+    <span style="color: #f8f8f2">(if-not (= kind</span> <span style="color: #e6db74">&quot;row&quot;</span><span style="color: #f8f8f2">)</span>
+      <span style="color: #f8f8f2">(int (subs (</span><span style="color: #a6e22e">.-id</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">.-parentElement</span> <span style="color: #f8f8f2">target))</span> <span style="color: #ae81ff">3</span><span style="color: #f8f8f2">))</span>
+      <span style="color: #f8f8f2">num)))</span>
+</pre></div>
+</p>
+
+<p>On mouse down I store the row number of the initial event target, and generate a
+vector of the highlight state of all rows using <code>get-highlight</code>.</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">get-highlight</span> <span style="color: #f8f8f2">[target]</span>
+  <span style="color: #75715e">;; Return vector of bools where true means highlighted</span>
+  <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">mapv</span> <span style="color: #f92672">#</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">dommy/has-class?</span> <span style="color: #f8f8f2">%</span> <span style="color: #e6db74">&quot;marked&quot;</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">sel</span> <span style="color: #f8f8f2">target</span> <span style="color: #e6db74">&quot;div.row&quot;</span><span style="color: #f8f8f2">)))</span>
+</pre></div>
+</p>
+
+<p>In the inner loop I use <code>alts!</code> to get the next event and its source channel
+from either <code>up</code> or <code>move</code>. Fortunately all mouse events have the same members,
+so regardless of type I update the highlighting. The <code>toggle-highlight</code> function
+is flaky, but it works for now. First, since the user can drag up or down the
+list I have to ensure start is before end. From there I map over <code>[index bool]</code>
+pairs for <em>all</em> rows. I need to ensure that rows outside the selected range
+still have their initial value, and rows inside have the opposite.</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">toggle-highlight</span> <span style="color: #f8f8f2">[initial</span> <span style="color: #f8f8f2">start</span> <span style="color: #f8f8f2">end]</span>
+  <span style="color: #75715e">;; Ensure all rows have correct highlight.</span>
+  <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">let </span><span style="color: #f8f8f2">[[start</span> <span style="color: #f8f8f2">end]</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">if </span><span style="color: #f8f8f2">(&gt; start</span> <span style="color: #f8f8f2">end)</span> <span style="color: #f8f8f2">[end</span> <span style="color: #f8f8f2">start]</span> <span style="color: #f8f8f2">[start</span> <span style="color: #f8f8f2">end])]</span>
+    <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">dorun</span>
+      <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">map-indexed</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">fn </span><span style="color: #f8f8f2">[id</span> <span style="color: #f8f8f2">high]</span>
+                     <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">let </span><span style="color: #f8f8f2">[row</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">sel1</span> <span style="color: #f8f8f2">(str </span><span style="color: #e6db74">&quot;#row&quot;</span> <span style="color: #f8f8f2">id))</span>
+                           <span style="color: #f8f8f2">marked</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">dommy/has-class?</span> <span style="color: #f8f8f2">row</span> <span style="color: #e6db74">&quot;marked&quot;</span><span style="color: #f8f8f2">)]</span>
+                       <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">if </span><span style="color: #f8f8f2">(and (&gt;= id</span> <span style="color: #f8f8f2">start)</span> <span style="color: #f8f8f2">(&lt;= id</span> <span style="color: #f8f8f2">end))</span>
+                         <span style="color: #75715e">;; This row is in selected range</span>
+                         <span style="color: #f8f8f2">(when (= marked</span> <span style="color: #f8f8f2">high)</span>
+                           <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">dommy/toggle-class!</span> <span style="color: #f8f8f2">row</span> <span style="color: #e6db74">&quot;marked&quot;</span><span style="color: #f8f8f2">))</span>
+                         <span style="color: #75715e">;; This row is outside selected range</span>
+                         <span style="color: #f8f8f2">(when-not (= marked</span> <span style="color: #f8f8f2">high)</span>
+                           <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">dommy/toggle-class!</span> <span style="color: #f8f8f2">row</span> <span style="color: #e6db74">&quot;marked&quot;</span><span style="color: #f8f8f2">)))))</span>
+                   <span style="color: #f8f8f2">initial))))</span>
+</pre></div>
+</p>
+
+<p>And that's it.</p>
+
+<p>It performs reasonably well. I can operate on a list of 100 rows
+comfortably. The performance degrades as the list length increases though
+because <code>toggle-highlight</code> iterates over the entire list on every event. I wont
+get a backlog of events because I am using a <code>sliding-buffer</code> of size one, but
+the UI stops responding in the body of <code>toggle-highlight</code>. This is problematic
+though because Lister will handle lists with thousands of rows.</p>
+
+<p>The obvious solution is to avoid even looking at rows that haven't been touched
+yet. You could keep track of the total range around the initial row that has
+been visited and somehow align that with the initial highlight data. Another
+thing to notice is that once a row falls out of range and is returned to initial
+state it doesn't need to be visited again. Since the real problem is lag inside
+the update loop another option is to use another async channel to hold queued
+updates. The update queue could then be cleared by another <code>go-loop</code> without
+blocking user input.</p>
+
+  </div>
+  <footer>
+    <div class="article-footer">
+      
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/code"><span></span>code</a>
+    </li>
+    
+    <li>
+      <a href="/tags/clojurescript"><span></span>clojurescript</a>
+    </li>
+    
+    <li>
+      <a href="/tags/pyqt4"><span></span>pyqt4</a>
+    </li>
+    
+    <li>
+      <a href="/tags/lister"><span></span>lister</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      
+      <div class="adsense">
+        <span class="sponsor-label">Sponsored link</span>
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="2442045076"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+      </div>
+      
+      
+<div id="share-buttons">
+  <ul>
+    
+    
+    
+    
+    <li>
+      <div class="g-plusone" data-size="medium"></div>
+    </li>
+    
+    
+  </ul>
+</div>
+
+
+      <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'SuperfComs';
+    var disqus_identifier = 'http:\/\/kitsu.github.io\/2016\/05\/21\/pyqt4_cljs_03\/';
+    var disqus_title = 'ClojureScript in PyQt4 QWebView - Code';
+    var disqus_url = 'http:\/\/kitsu.github.io\/2016\/05\/21\/pyqt4_cljs_03\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+      
+      <div id="pagenavigation-next-prev">
+        
+        <div id="pagenavigation-next">
+          <span class="pagenav-label">Previous</span>
+          <a href="http://kitsu.github.io/2016/05/20/pyqt4_cljs_02/">ClojureScript in PyQt4 QWebView - Success</a>
+        </div>
+        
+        
+      </div>
+      
+    </div>
+  </footer>
+</div>
+        </div>
+        <div class="sidebar">
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Author</span>
+    </div>
+    <div id="author">
+      <span>Ed Blake</span>
+      <div>
+        
+        
+        <a href="https://plus.google.com/118323029386640613972"><i class="fa fa-google-plus-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://github.com/kitsu"><i class="fa fa-github-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://www.linkedin.com/in/edward-blake-b3601411b"><i class="fa fa-linkedin-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://stackoverflow.com/users/770443"><i class="fa fa-stack-overflow fa-2x" aria-hidden="true"></i></a>
+        
+      </div>
+    </div>
+  </div>
+  
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Categories</span>
+    </div>
+    <div class="categories">
+      <ul>
+        
+        <li>
+          <a href="/categories/blog"><span></span>blog (3)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/development"><span></span>development (6)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/hacks"><span></span>hacks (1)</a>
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>RSS</span>
+    </div>
+    <div id="rss">
+      <a href="/index.xml" type="application/rss+xml" target="_blank">
+        <i class="fa fa-rss-square fa-2x" aria-hidden="true"></i>
+      </a>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Sponsored link</span>
+    </div>
+    <div class="adsense">
+      <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:inline-block;width:300px;height:600px"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="9965311870"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+    </div>
+  </div>
+  
+</div>
+
+      </div>
+      <footer>
+        <div id="site-footer-wrap">
+          <div id="site-footer">
+            <span>Powered by <a href="https://gohugo.io/">Hugo</a>.</span>
+            <span>
+              
+              © 2015 Ed Blake
+              
+           </span>
+           <span id="copyleft">
+              <a rel="license"
+                 href="http://creativecommons.org/licenses/by-sa/4.0/">
+                <img alt="Creative Commons License" style="border-width:0"
+                     src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" />
+              </a>
+            </span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
+
