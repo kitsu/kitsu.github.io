@@ -11,12 +11,12 @@
     <atom:link href="http://kitsu.github.io/tags/lister/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
-      <title>ClojureScript in PyQt4 QWebView - Fix</title>
+      <title>ClojureScript in PyQt4 QWebView - Fix Dragging</title>
       <link>http://kitsu.github.io/2016/05/23/pyqt4_cljs_04/</link>
       <pubDate>Mon, 23 May 2016 13:15:39 -0700</pubDate>
       
       <guid>http://kitsu.github.io/2016/05/23/pyqt4_cljs_04/</guid>
-      <description>&lt;p&gt;Summary...&lt;/p&gt;
+      <description>&lt;p&gt;Higher order event channels for consistent interactions.&lt;/p&gt;
 </description>
     </item>
     
