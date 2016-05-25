@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="Hugo 0.15" />
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    
+    <link href="/index.xml" rel="alternate" type="application/rss+xml" title="Superfluous Comments" />
+    <link href="/index.xml" rel="feed" type="application/rss+xml" title="Superfluous Comments" />
+    
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+    
+    <script src="https://apis.google.com/js/platform.js" async defer>{lang: 'ja'}</script>
+    
+    <link rel="stylesheet" href="https://yandex.st/highlightjs/8.0/styles/default.min.css">
+    <script src="https://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <title>ClojureScript in PyQt4 QWebView - Testing | Superfluous Comments</title>
+    <meta name="Description" content="Setting up basic ClojureScript testing using devcards.
+">
+  </head>
+  <body>
+    <div id="wrap">
+      
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-77704589-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+      <header class="site-header">
+        <div class="site-header-left">
+          <a class="site-header-title" href="http://kitsu.github.io/">Superfluous Comments</a>
+        </div>
+      </header>
+      <div class="container">
+        <div id="main">
+
+<div class="article">
+  <header>
+    <div class="article-header">
+      <h1>ClojureScript in PyQt4 QWebView - Testing</h1>
+      <div class="article-meta">
+        <span class="posttime">2016/05/24</span>
+        
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/code"><span></span>code</a>
+    </li>
+    
+    <li>
+      <a href="/tags/clojurescript"><span></span>clojurescript</a>
+    </li>
+    
+    <li>
+      <a href="/tags/async"><span></span>async</a>
+    </li>
+    
+    <li>
+      <a href="/tags/testing"><span></span>testing</a>
+    </li>
+    
+    <li>
+      <a href="/tags/lister"><span></span>lister</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      </div>
+    </div>
+  </header>
+  <div class="content">
+    <p>Setting up basic ClojureScript testing using devcards.</p>
+
+<p><hr/><br/>
+One thing I have never gotten working nicely in ClojureScript is testing.
+Running cljs tests requires a special build setup and a Javascript runtime.
+Tests run in text-mode in the console, but setting up Node.js used to be a pain,
+and running a browser for its text output seems like a waste. With the new
+reader-conditionals you could probably test your code under regular Clojure, but
+only if you don't need Javascript interop.</p>
+
+<p><a href="https://github.com/bhauman/devcards">Devcards</a>, another tool by Bruce Hauman,
+provides an easy way to expose parts of your ClojureScript code in a webpage. It
+is mainly intended to be used to unroll your application so you can see and
+interact with any component all in one place. It also comes with support for
+exposing test suites in a webpage.</p>
+
+<p>I went with a Figwheel-free setup, but just in playing around a little I am
+already missing auto-reload. The setup is pretty simple, the only problem I ran
+into was putting the <code>:devcards true</code> setting in the wrong part of my testing
+build profile. I didn't have any resource loading problems since I'm using
+Chrome to open the testcard page. Here's how it looks:</p>
+
+<p>
+<figure >
+    
+        <img src="/images/testbed-devcards.JPG" alt="Devcard output" />
+    
+    
+</figure>
+
+<br/></p>
+
+<p>I am not too familier with <code>core.test</code>, the built in Clojure test framework,
+since I usually use <a href="https://github.com/marick/Midje">Midje</a> in normal
+Clojure. While I'm not going to say what I came up with is idiomatic, but I did
+have some fun figuring things out. The first testable function is <code>get-row-num</code>,
+which is pretty straight forward:</p>
+
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #75715e">;; Build some fake evt-&gt;target-&gt;id hierarchies on random input</span>
+<span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">row</span> <span style="color: #f8f8f2">[r]</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">clj-&gt;js</span> <span style="color: #f8f8f2">{</span><span style="color: #e6db74">:id</span> <span style="color: #f8f8f2">(str </span><span style="color: #e6db74">&quot;row&quot;</span> <span style="color: #f8f8f2">r)}))</span>
+<span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">col</span> <span style="color: #f8f8f2">[r]</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">clj-&gt;js</span> <span style="color: #f8f8f2">{</span><span style="color: #e6db74">:id</span> <span style="color: #e6db74">&quot;col1&quot;</span> <span style="color: #e6db74">:parentElement</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">row</span> <span style="color: #f8f8f2">r)}))</span>
+<span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">row-evt</span> <span style="color: #f8f8f2">[r]</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">clj-&gt;js</span> <span style="color: #f8f8f2">{</span><span style="color: #e6db74">:target</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">row</span> <span style="color: #f8f8f2">r)}))</span>
+<span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">col-evt</span> <span style="color: #f8f8f2">[r]</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">clj-&gt;js</span> <span style="color: #f8f8f2">{</span><span style="color: #e6db74">:target</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">col</span> <span style="color: #f8f8f2">r)}))</span>
+
+<span style="color: #f8f8f2">(</span><span style="color: #a6e22e">dc/deftest</span> <span style="color: #f8f8f2">get-row-num</span>
+  <span style="color: #e6db74">&quot;Test row extraction from event using target &amp; id&quot;</span>
+  <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">testing</span> <span style="color: #e6db74">&quot;Returns correct number given row event&quot;</span>
+    <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">let </span><span style="color: #f8f8f2">[r</span> <span style="color: #f8f8f2">(rand-int </span><span style="color: #ae81ff">999</span><span style="color: #f8f8f2">)]</span>
+      <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">is</span> <span style="color: #f8f8f2">(= (</span><span style="color: #a6e22e">testbed/get-row-num</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">row-evt</span> <span style="color: #f8f8f2">r))</span> <span style="color: #f8f8f2">r)</span>
+          <span style="color: #e6db74">&quot;Row number should be number after row prefix&quot;</span><span style="color: #f8f8f2">)))</span>
+  <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">testing</span> <span style="color: #e6db74">&quot;Returns correct number given col event&quot;</span>
+    <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">let </span><span style="color: #f8f8f2">[r</span> <span style="color: #f8f8f2">(rand-int </span><span style="color: #ae81ff">999</span><span style="color: #f8f8f2">)]</span>
+      <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">is</span> <span style="color: #f8f8f2">(= (</span><span style="color: #a6e22e">testbed/get-row-num</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">col-evt</span> <span style="color: #f8f8f2">r))</span> <span style="color: #f8f8f2">r)</span>
+          <span style="color: #e6db74">&quot;Row number should be from column parent&quot;</span><span style="color: #f8f8f2">))))</span>
+</pre></div>
+
+
+<p>The next bit was a little tricky. Channel consumers don't really know or care
+where items on a channel come from, so if you can mock the input you can
+verify the external behavior of a channel-&gt;channel function. Once I factored out
+the input-chan creation I was able to test the <code>build-drag-chan</code> function:</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">get-input-chan</span>
+  <span style="color: #e6db74">&quot;Build fake mouse event stream channel.&quot;</span>
+  <span style="color: #f8f8f2">[]</span>
+  <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">let </span><span style="color: #f8f8f2">[input-chan</span>  <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">chan</span> <span style="color: #ae81ff">12</span><span style="color: #f8f8f2">)</span>
+        <span style="color: #f8f8f2">data</span> <span style="color: #f8f8f2">[[</span><span style="color: #e6db74">:mousemove</span>  <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span>
+              <span style="color: #f8f8f2">[</span><span style="color: #e6db74">:mousemove</span>  <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]</span>
+              <span style="color: #f8f8f2">[</span><span style="color: #e6db74">:mousedown</span>  <span style="color: #ae81ff">2</span><span style="color: #f8f8f2">]</span>
+              <span style="color: #f8f8f2">[</span><span style="color: #e6db74">:mousemove</span>  <span style="color: #ae81ff">3</span><span style="color: #f8f8f2">]</span>
+              <span style="color: #f8f8f2">[</span><span style="color: #e6db74">:mousemove</span>  <span style="color: #ae81ff">4</span><span style="color: #f8f8f2">]</span>
+              <span style="color: #f8f8f2">[</span><span style="color: #e6db74">:mousemove</span>  <span style="color: #ae81ff">5</span><span style="color: #f8f8f2">]</span>
+              <span style="color: #f8f8f2">[</span><span style="color: #e6db74">:mouseleave</span> <span style="color: #ae81ff">6</span><span style="color: #f8f8f2">]</span>
+              <span style="color: #f8f8f2">[</span><span style="color: #e6db74">:mousemove</span>  <span style="color: #ae81ff">7</span><span style="color: #f8f8f2">]</span>
+              <span style="color: #f8f8f2">[</span><span style="color: #e6db74">:mouseup</span>    <span style="color: #ae81ff">8</span><span style="color: #f8f8f2">]</span>
+              <span style="color: #f8f8f2">[</span><span style="color: #e6db74">:mousedown</span>  <span style="color: #ae81ff">9</span><span style="color: #f8f8f2">]</span>
+              <span style="color: #f8f8f2">[</span><span style="color: #e6db74">:mousemove</span> <span style="color: #ae81ff">10</span><span style="color: #f8f8f2">]</span>
+              <span style="color: #f8f8f2">[</span><span style="color: #e6db74">:mousemove</span> <span style="color: #ae81ff">11</span><span style="color: #f8f8f2">]</span>
+              <span style="color: #f8f8f2">[</span><span style="color: #e6db74">:mouseup</span>   <span style="color: #ae81ff">12</span><span style="color: #f8f8f2">]]]</span>
+    <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">go-loop</span> <span style="color: #f8f8f2">[head</span> <span style="color: #f8f8f2">(first data)</span> <span style="color: #f8f8f2">tail</span> <span style="color: #f8f8f2">(rest data)]</span>
+      <span style="color: #f8f8f2">(when head</span>
+        <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">&gt;!</span> <span style="color: #f8f8f2">input-chan</span> <span style="color: #f8f8f2">head)</span>
+        <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">recur</span> <span style="color: #f8f8f2">(first tail)</span> <span style="color: #f8f8f2">(rest tail))))</span>
+    <span style="color: #f8f8f2">input-chan))</span>
+
+<span style="color: #f8f8f2">(</span><span style="color: #66d9ef">def </span><span style="color: #f8f8f2">expected-drags</span> <span style="color: #f8f8f2">[[</span><span style="color: #ae81ff">2</span> <span style="color: #ae81ff">3</span> <span style="color: #ae81ff">4</span> <span style="color: #ae81ff">5</span> <span style="color: #ae81ff">6</span> <span style="color: #f8f8f2">nil]</span> <span style="color: #f8f8f2">[</span><span style="color: #ae81ff">9</span> <span style="color: #ae81ff">10</span> <span style="color: #ae81ff">11</span> <span style="color: #ae81ff">12</span> <span style="color: #f8f8f2">nil]])</span>
+
+<span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">consume-channel</span>
+  <span style="color: #e6db74">&quot;Try to get a channel from source, return vector of channel&#39;s values.&quot;</span>
+  <span style="color: #f8f8f2">[source-chan]</span>
+  <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">go</span>
+    <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">let </span><span style="color: #f8f8f2">[ch</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">poll!</span> <span style="color: #f8f8f2">source-chan)]</span>
+      <span style="color: #f8f8f2">(when ch</span>
+        <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">loop </span><span style="color: #f8f8f2">[val (</span><span style="color: #a6e22e">&lt;!</span> <span style="color: #f8f8f2">ch)</span> <span style="color: #f8f8f2">acc</span> <span style="color: #f8f8f2">[]]</span>
+          <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">if </span><span style="color: #f8f8f2">val</span>
+            <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">recur</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">&lt;!</span> <span style="color: #f8f8f2">ch)</span> <span style="color: #f8f8f2">(conj acc</span> <span style="color: #f8f8f2">val))</span>
+            <span style="color: #f8f8f2">(conj acc</span> <span style="color: #f8f8f2">val)))))))</span>
+
+<span style="color: #f8f8f2">(</span><span style="color: #a6e22e">dc/deftest</span> <span style="color: #f8f8f2">build-drag-chan</span>
+  <span style="color: #e6db74">&quot;Test drag event grouping&quot;</span>
+  <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">testing</span> <span style="color: #e6db74">&quot;Drag event stream behaves correctly&quot;</span>
+    <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">async</span> <span style="color: #f8f8f2">done</span>
+           <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">go</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">let </span><span style="color: #f8f8f2">[drag-chan</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">testbed/build-drag-chan</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">get-input-chan</span><span style="color: #f8f8f2">))</span>
+                     <span style="color: #f8f8f2">drag1</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">&lt;!</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">consume-channel</span> <span style="color: #f8f8f2">drag-chan))</span>
+                     <span style="color: #f8f8f2">drag2</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">&lt;!</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">consume-channel</span> <span style="color: #f8f8f2">drag-chan))</span>
+                     <span style="color: #f8f8f2">drag3</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">&lt;!</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">consume-channel</span> <span style="color: #f8f8f2">drag-chan))]</span>
+                 <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">is</span> <span style="color: #f8f8f2">(= drag1</span> <span style="color: #f8f8f2">(first expected-drags)))</span>
+                 <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">is</span> <span style="color: #f8f8f2">(= drag2</span> <span style="color: #f8f8f2">(second expected-drags)))</span>
+                 <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">is</span> <span style="color: #f8f8f2">(= drag3</span> <span style="color: #f8f8f2">nil))</span>
+                 <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">done</span><span style="color: #f8f8f2">))))))</span>
+</pre></div>
+</p>
+
+<p>I actually had a lot of trouble getting all that working. It started feeling
+like my test code was going to need its own tests. I found two interesting
+things out. First it appears <code>poll!</code> only works in a go block. Second was what
+all that async non-sense was about in the cljs.test documentation. Turns out
+this code doesn't work outside a go block, and adding a go block breaks the
+tests. I went a ways down the rabbit hole trying to unwrap a channel before I
+remembered reading about cljs.test/async (which was mentioned both in the
+cljs.test docs, and again in the devcards testing docs).</p>
+
+  </div>
+  <footer>
+    <div class="article-footer">
+      
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/code"><span></span>code</a>
+    </li>
+    
+    <li>
+      <a href="/tags/clojurescript"><span></span>clojurescript</a>
+    </li>
+    
+    <li>
+      <a href="/tags/async"><span></span>async</a>
+    </li>
+    
+    <li>
+      <a href="/tags/testing"><span></span>testing</a>
+    </li>
+    
+    <li>
+      <a href="/tags/lister"><span></span>lister</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      
+      <div class="adsense">
+        <span class="sponsor-label">Sponsored link</span>
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="2442045076"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+      </div>
+      
+      
+<div id="share-buttons">
+  <ul>
+    
+    
+    
+    
+    <li>
+      <div class="g-plusone" data-size="medium"></div>
+    </li>
+    
+    
+  </ul>
+</div>
+
+
+      <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'SuperfComs';
+    var disqus_identifier = 'http:\/\/kitsu.github.io\/2016\/05\/24\/pyqt4_cljs_05\/';
+    var disqus_title = 'ClojureScript in PyQt4 QWebView - Testing';
+    var disqus_url = 'http:\/\/kitsu.github.io\/2016\/05\/24\/pyqt4_cljs_05\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+      
+      <div id="pagenavigation-next-prev">
+        
+        <div id="pagenavigation-next">
+          <span class="pagenav-label">Previous</span>
+          <a href="http://kitsu.github.io/2016/05/23/pyqt4_cljs_04/">ClojureScript in PyQt4 QWebView - Fix Dragging</a>
+        </div>
+        
+        
+      </div>
+      
+    </div>
+  </footer>
+</div>
+        </div>
+        <div class="sidebar">
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Author</span>
+    </div>
+    <div id="author">
+      <span>Ed Blake</span>
+      <div>
+        
+        
+        <a href="https://plus.google.com/118323029386640613972"><i class="fa fa-google-plus-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://github.com/kitsu"><i class="fa fa-github-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://www.linkedin.com/in/edward-blake-b3601411b"><i class="fa fa-linkedin-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://stackoverflow.com/users/770443"><i class="fa fa-stack-overflow fa-2x" aria-hidden="true"></i></a>
+        
+      </div>
+    </div>
+  </div>
+  
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Categories</span>
+    </div>
+    <div class="categories">
+      <ul>
+        
+        <li>
+          <a href="/categories/blog"><span></span>blog (3)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/development"><span></span>development (8)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/hacks"><span></span>hacks (1)</a>
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>RSS</span>
+    </div>
+    <div id="rss">
+      <a href="/index.xml" type="application/rss+xml" target="_blank">
+        <i class="fa fa-rss-square fa-2x" aria-hidden="true"></i>
+      </a>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Sponsored link</span>
+    </div>
+    <div class="adsense">
+      <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:inline-block;width:300px;height:600px"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="9965311870"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+    </div>
+  </div>
+  
+</div>
+
+      </div>
+      <footer>
+        <div id="site-footer-wrap">
+          <div id="site-footer">
+            <span>Powered by <a href="https://gohugo.io/">Hugo</a>.</span>
+            <span>
+              
+              © 2015 Ed Blake
+              
+           </span>
+           <span id="copyleft">
+              <a rel="license"
+                 href="http://creativecommons.org/licenses/by-sa/4.0/">
+                <img alt="Creative Commons License" style="border-width:0"
+                     src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" />
+              </a>
+            </span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
+

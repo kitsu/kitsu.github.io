@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Clojurescript on Superfluous Comments</title>
-    <link>http://kitsu.github.io/tags/clojurescript/</link>
-    <description>Recent content in Clojurescript on Superfluous Comments</description>
+    <title>Async on Superfluous Comments</title>
+    <link>http://kitsu.github.io/tags/async/</link>
+    <description>Recent content in Async on Superfluous Comments</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© 2015 Ed Blake</copyright>
     <lastBuildDate>Tue, 24 May 2016 19:03:27 -0700</lastBuildDate>
-    <atom:link href="http://kitsu.github.io/tags/clojurescript/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://kitsu.github.io/tags/async/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>ClojureScript in PyQt4 QWebView - Testing</title>
@@ -37,26 +37,6 @@
       
       <guid>http://kitsu.github.io/2016/05/21/pyqt4_cljs_03/</guid>
       <description>&lt;p&gt;&lt;em&gt;Actually&lt;/em&gt; coding the ClojureScript prototype.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>ClojureScript in PyQt4 QWebView - Success</title>
-      <link>http://kitsu.github.io/2016/05/20/pyqt4_cljs_02/</link>
-      <pubDate>Fri, 20 May 2016 15:51:30 -0700</pubDate>
-      
-      <guid>http://kitsu.github.io/2016/05/20/pyqt4_cljs_02/</guid>
-      <description>&lt;p&gt;Leiningen is the best, and Qt is... challenging.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>ClojureScript in PyQt4 QWebView - False start</title>
-      <link>http://kitsu.github.io/2016/05/19/pyqt_cljs_01/</link>
-      <pubDate>Thu, 19 May 2016 10:24:12 -0700</pubDate>
-      
-      <guid>http://kitsu.github.io/2016/05/19/pyqt_cljs_01/</guid>
-      <description>&lt;p&gt;Life is hard when you don&#39;t follow directions.&lt;/p&gt;
 </description>
     </item>
     
