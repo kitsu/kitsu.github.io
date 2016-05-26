@@ -7,8 +7,18 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© 2015 Ed Blake</copyright>
-    <lastBuildDate>Tue, 24 May 2016 19:03:27 -0700</lastBuildDate>
+    <lastBuildDate>Wed, 25 May 2016 17:02:54 -0700</lastBuildDate>
     <atom:link href="http://kitsu.github.io/categories/development/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>ClojureScript in PyQt4 QWebView - More testing</title>
+      <link>http://kitsu.github.io/2016/05/25/pyqt4_cljs_06/</link>
+      <pubDate>Wed, 25 May 2016 17:02:54 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/05/25/pyqt4_cljs_06/</guid>
+      <description>&lt;p&gt;Because testing is more fun than real work?&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>ClojureScript in PyQt4 QWebView - Testing</title>
