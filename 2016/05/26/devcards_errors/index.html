@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="Hugo 0.15" />
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    
+    <link href="/index.xml" rel="alternate" type="application/rss+xml" title="Superfluous Comments" />
+    <link href="/index.xml" rel="feed" type="application/rss+xml" title="Superfluous Comments" />
+    
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+    
+    <script src="https://apis.google.com/js/platform.js" async defer>{lang: 'ja'}</script>
+    
+    <link rel="stylesheet" href="https://yandex.st/highlightjs/8.0/styles/default.min.css">
+    <script src="https://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <title>ClojureScript lows as low as the highs | Superfluous Comments</title>
+    <meta name="Description" content="Dependency resolution quirks bring progress to a halt, temporarily.
+">
+  </head>
+  <body>
+    <div id="wrap">
+      
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-77704589-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+      <header class="site-header">
+        <div class="site-header-left">
+          <a class="site-header-title" href="http://kitsu.github.io/">Superfluous Comments</a>
+        </div>
+      </header>
+      <div class="container">
+        <div id="main">
+
+<div class="article">
+  <header>
+    <div class="article-header">
+      <h1>ClojureScript lows as low as the highs</h1>
+      <div class="article-meta">
+        <span class="posttime">2016/05/26</span>
+        
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/code"><span></span>code</a>
+    </li>
+    
+    <li>
+      <a href="/tags/clojurescript"><span></span>clojurescript</a>
+    </li>
+    
+    <li>
+      <a href="/tags/lister"><span></span>lister</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      </div>
+    </div>
+  </header>
+  <div class="content">
+    <p>Dependency resolution quirks bring progress to a halt, temporarily.</p>
+
+<p><hr/><br/>
+I started rolling all the code from the testbed into my actual application
+today. getting started was easy enough, just copy in the project.clj and some
+folders, fix up some paths and names. Porting my old JQuery code was easy, as
+expected, and I was able to structure the code much nicer.</p>
+
+<p>Once I had things rearranged and got everything to build I remembered one thing
+I didn't try in the testbed. In order for my Python code to interact with the
+Javascript VM I need to be able to call js functions. In advanced compilation
+mode though all the functions and var names are mangled. There are two ways to
+expose ClojureScript symbols in the js runtime:</p>
+
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #75715e">;; Export interop symbols on js global object (window)</span>
+<span style="color: #f8f8f2">(</span><span style="color: #a6e22e">set!</span> <span style="color: #f8f8f2">js/set_history</span> <span style="color: #f8f8f2">set-history)</span>
+
+<span style="color: #75715e">;; Add the :export metadata to the functions you want to access</span>
+<span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f92672">^</span><span style="color: #e6db74">:export</span> <span style="color: #f8f8f2">set-history</span>
+  <span style="color: #e6db74">&quot;Set this page&#39;s filter history&quot;</span>
+  <span style="color: #f8f8f2">[new-hist]</span>
+  <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">reset!</span> <span style="color: #f8f8f2">history</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">js-&gt;clj</span> <span style="color: #f8f8f2">new-hist)))</span>
+</pre></div>
+
+
+<p>The second method is recommended, but the names exported must be fully
+qualified: <code>lister_cljs.filter.set_history</code>. Exporting on the window risks name
+collisions, but it aligns closer to how I had things before. To test that all
+works though I had to build everything together and ensure the symbols really
+exist. That is where I ran into trouble.</p>
+
+<p>When I tried to build with advanced compilation I got some warning, and then a
+big green message saying the code was successfully compiled. When I check in the
+app though I can't see the symbol I exported. I messed around for a while trying
+to get anything to show up, until I noticed that <em>none</em> of my code was running.
+In fact the body of the compiled Javascript file was an empty function!</p>
+
+<p>You may have guessed, the warning I ignored was actually important. It was
+actually an error reported by the Google Closure compiler. And while the
+compiler died with the error the lein process continued to completion and
+reported <em>&quot;success&quot;</em>. The error code was <code>ERROR:
+JSC_CONSTANT_REASSIGNED_VALUE_ERROR. constant reactDOMserver assigned a value
+more than once.</code> which was weird since I wasn't using any react in my code.</p>
+
+<p>What followed was successively banging my head against the cljs compiler docs,
+the lein-cljsbuild docs, the Google Closure compiler docs, and searching high and low
+for similar problems. I did eventually find similar problems, but for some
+reason Google was no help. I figured out the problem was a dependency collision,
+and the only things I was using that involved React were Figwheel and
+Devcards. Since I had the latest versions of both, and there were no documented
+incompatibilities, I resorted to reading through old Github issues.</p>
+
+<p>I found that Devcards had similar issues for other people, and confirmed that
+removing my Devcards dep allowed the build to complete. The odd thing though was
+that I don't use any of the Devcards code in my dev or min build profiles. I
+expected the Google Closure compiler to just drop the unused code, but it seemed
+to be loading all the test code too.</p>
+
+<p>My first attempted solution was to separate the test code from the normal code,
+and only add the test code path to the testcards build:
+<code>:source-paths [&quot;src&quot; &quot;test&quot;]</code>. This had no effect. Because I had Devcards in my
+project-wide dependencies map the offending code was loaded into every build. In
+the end the final solution was so simple, but so painful to come up with -
+Remove Devcards from the project deps and add it only to the testcards build:</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">{</span><span style="color: #e6db74">:id</span> <span style="color: #e6db74">&quot;test&quot;</span>
+ <span style="color: #e6db74">:source-paths</span> <span style="color: #f8f8f2">[</span><span style="color: #e6db74">&quot;src&quot;</span> <span style="color: #e6db74">&quot;test&quot;</span><span style="color: #f8f8f2">]</span>
+ <span style="color: #e6db74">:dependencies</span> <span style="color: #f8f8f2">[[devcards</span> <span style="color: #e6db74">&quot;0.2.1-7&quot;</span><span style="color: #f8f8f2">]]</span> <span style="color: #75715e">;&lt;-- This Here!</span>
+ <span style="color: #e6db74">:figwheel</span> <span style="color: #f8f8f2">{</span><span style="color: #e6db74">:devcards</span> <span style="color: #f8f8f2">true}</span>
+ <span style="color: #e6db74">:compiler</span> <span style="color: #f8f8f2">{</span><span style="color: #e6db74">:main</span> <span style="color: #f8f8f2">lister-cljs.test.core</span>
+            <span style="color: #e6db74">:asset-path</span> <span style="color: #e6db74">&quot;lib&quot;</span>
+            <span style="color: #e6db74">:output-to</span> <span style="color: #e6db74">&quot;testcards/main.js&quot;</span>
+            <span style="color: #e6db74">:output-dir</span> <span style="color: #e6db74">&quot;testcards/lib&quot;</span>
+            <span style="color: #e6db74">:source-map-timestamp</span> <span style="color: #f8f8f2">true}}</span>
+</pre></div>
+</p>
+
+  </div>
+  <footer>
+    <div class="article-footer">
+      
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/code"><span></span>code</a>
+    </li>
+    
+    <li>
+      <a href="/tags/clojurescript"><span></span>clojurescript</a>
+    </li>
+    
+    <li>
+      <a href="/tags/lister"><span></span>lister</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      
+      <div class="adsense">
+        <span class="sponsor-label">Sponsored link</span>
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="2442045076"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+      </div>
+      
+      
+<div id="share-buttons">
+  <ul>
+    
+    
+    
+    
+    <li>
+      <div class="g-plusone" data-size="medium"></div>
+    </li>
+    
+    
+  </ul>
+</div>
+
+
+      <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'SuperfComs';
+    var disqus_identifier = 'http:\/\/kitsu.github.io\/2016\/05\/26\/devcards_errors\/';
+    var disqus_title = 'ClojureScript lows as low as the highs';
+    var disqus_url = 'http:\/\/kitsu.github.io\/2016\/05\/26\/devcards_errors\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+      
+      <div id="pagenavigation-next-prev">
+        
+        <div id="pagenavigation-next">
+          <span class="pagenav-label">Previous</span>
+          <a href="http://kitsu.github.io/2016/05/25/pyqt4_cljs_06/">ClojureScript in PyQt4 QWebView - More testing</a>
+        </div>
+        
+        
+      </div>
+      
+    </div>
+  </footer>
+</div>
+        </div>
+        <div class="sidebar">
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Author</span>
+    </div>
+    <div id="author">
+      <span>Ed Blake</span>
+      <div>
+        
+        
+        <a href="https://plus.google.com/118323029386640613972"><i class="fa fa-google-plus-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://github.com/kitsu"><i class="fa fa-github-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://www.linkedin.com/in/edward-blake-b3601411b"><i class="fa fa-linkedin-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://stackoverflow.com/users/770443"><i class="fa fa-stack-overflow fa-2x" aria-hidden="true"></i></a>
+        
+      </div>
+    </div>
+  </div>
+  
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Categories</span>
+    </div>
+    <div class="categories">
+      <ul>
+        
+        <li>
+          <a href="/categories/blog"><span></span>blog (3)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/development"><span></span>development (10)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/hacks"><span></span>hacks (1)</a>
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>RSS</span>
+    </div>
+    <div id="rss">
+      <a href="/index.xml" type="application/rss+xml" target="_blank">
+        <i class="fa fa-rss-square fa-2x" aria-hidden="true"></i>
+      </a>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Sponsored link</span>
+    </div>
+    <div class="adsense">
+      <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:inline-block;width:300px;height:600px"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="9965311870"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+    </div>
+  </div>
+  
+</div>
+
+      </div>
+      <footer>
+        <div id="site-footer-wrap">
+          <div id="site-footer">
+            <span>Powered by <a href="https://gohugo.io/">Hugo</a>.</span>
+            <span>
+              
+              © 2015 Ed Blake
+              
+           </span>
+           <span id="copyleft">
+              <a rel="license"
+                 href="http://creativecommons.org/licenses/by-sa/4.0/">
+                <img alt="Creative Commons License" style="border-width:0"
+                     src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" />
+              </a>
+            </span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
+

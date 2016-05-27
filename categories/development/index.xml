@@ -7,8 +7,18 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© 2015 Ed Blake</copyright>
-    <lastBuildDate>Wed, 25 May 2016 17:02:54 -0700</lastBuildDate>
+    <lastBuildDate>Thu, 26 May 2016 20:02:47 -0700</lastBuildDate>
     <atom:link href="http://kitsu.github.io/categories/development/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>ClojureScript lows as low as the highs</title>
+      <link>http://kitsu.github.io/2016/05/26/devcards_errors/</link>
+      <pubDate>Thu, 26 May 2016 20:02:47 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/05/26/devcards_errors/</guid>
+      <description>&lt;p&gt;Dependency resolution quirks bring progress to a halt, temporarily.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>ClojureScript in PyQt4 QWebView - More testing</title>
