@@ -73,7 +73,9 @@ ga('send', 'pageview');
     </div>
   </header>
   <div class="content">
-    <p>Dependency resolution quirks bring progress to a halt, temporarily.</p>
+    
+
+<p>Dependency resolution quirks bring progress to a halt, temporarily.</p>
 
 <p><hr/><br/>
 I started rolling all the code from the testbed into my actual application
@@ -149,6 +151,27 @@ Remove Devcards from the project deps and add it only to the testcards build:</p
             <span style="color: #e6db74">:source-map-timestamp</span> <span style="color: #f8f8f2">true}}</span>
 </pre></div>
 </p>
+
+<h3 id="edit-nope-even-harder-than-that:d32f19b7fc4a3d0f103da91f74aae7aa">Edit: Nope, even harder than that</h3>
+
+<p>The next morning I am working on building out my system when I ran into an odd
+error. I try to fire up Figwheel and start writing some tests, and it doesn't
+work. Figwheel complains that I have an invalid key <code>:dependencies</code> in
+my config. Which I do.</p>
+
+<p>The code up above is in <code>:cljsbuild {:builds {...}}</code>, and cljsbuild doesn't deal
+with dependencies, Lein does. To make Devcards an optional dependency I need
+that code under the project.clj <code>:profiles</code> key:</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #e6db74">:profiles</span> <span style="color: #f8f8f2">{</span><span style="color: #e6db74">:test</span> <span style="color: #f8f8f2">{</span><span style="color: #e6db74">:dependencies</span> <span style="color: #f8f8f2">[[devcards</span> <span style="color: #e6db74">&quot;0.2.1-7&quot;</span><span style="color: #f8f8f2">]]}}</span>
+
+<span style="color: #e6db74">:cljsbuild</span> <span style="color: #f8f8f2">{</span><span style="color: #e6db74">:builds</span>
+            <span style="color: #f8f8f2">[{</span><span style="color: #e6db74">:id</span> <span style="color: #e6db74">&quot;test&quot;</span> <span style="color: #f8f8f2">...</span>
+</pre></div>
+</p>
+
+<p>Then I need to run <code>lein with-profile test figwheel test</code> to activate that
+profile and have the Devcards jar added to my classpath.</p>
 
   </div>
   <footer>
