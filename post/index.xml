@@ -7,8 +7,18 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© 2015 Ed Blake</copyright>
-    <lastBuildDate>Thu, 26 May 2016 20:02:47 -0700</lastBuildDate>
+    <lastBuildDate>Fri, 27 May 2016 18:48:46 -0700</lastBuildDate>
     <atom:link href="http://kitsu.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Analyzing Autolisp with Python - Setup</title>
+      <link>http://kitsu.github.io/2016/05/27/autolisp_parse_01/</link>
+      <pubDate>Fri, 27 May 2016 18:48:46 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/05/27/autolisp_parse_01/</guid>
+      <description>&lt;p&gt;Woo, yet another weak parser implementation.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>ClojureScript lows as low as the highs</title>
