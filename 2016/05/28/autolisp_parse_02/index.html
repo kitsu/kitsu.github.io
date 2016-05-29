@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="Hugo 0.15" />
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    
+    <link href="/index.xml" rel="alternate" type="application/rss+xml" title="Superfluous Comments" />
+    <link href="/index.xml" rel="feed" type="application/rss+xml" title="Superfluous Comments" />
+    
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+    
+    <script src="https://apis.google.com/js/platform.js" async defer>{lang: 'ja'}</script>
+    
+    <link rel="stylesheet" href="https://yandex.st/highlightjs/8.0/styles/default.min.css">
+    <script src="https://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <title>Analyzing Autolisp with Python - Parse | Superfluous Comments</title>
+    <meta name="Description" content="Woo, yet another weak parser implementation - continued.
+">
+  </head>
+  <body>
+    <div id="wrap">
+      
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-77704589-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+      <header class="site-header">
+        <div class="site-header-left">
+          <a class="site-header-title" href="http://kitsu.github.io/">Superfluous Comments</a>
+        </div>
+      </header>
+      <div class="container">
+        <div id="main">
+
+<div class="article">
+  <header>
+    <div class="article-header">
+      <h1>Analyzing Autolisp with Python - Parse</h1>
+      <div class="article-meta">
+        <span class="posttime">2016/05/28</span>
+        
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/cad"><span></span>cad</a>
+    </li>
+    
+    <li>
+      <a href="/tags/autolisp"><span></span>autolisp</a>
+    </li>
+    
+    <li>
+      <a href="/tags/code"><span></span>code</a>
+    </li>
+    
+    <li>
+      <a href="/tags/python"><span></span>python</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      </div>
+    </div>
+  </header>
+  <div class="content">
+    <p>Woo, yet another weak parser implementation - continued.</p>
+
+<p><hr/><br/>
+My plan was to use <code>collections.namedtuple</code> to collect data for different types
+of syntax. So for example a function definition would have a name, arguments,
+locals, and a body. Once the tree of nested expressions was built I would be
+able to distinguish different expression types by their <em>types</em>. Under the hood
+namedtuple creates a class with <code>__slots__</code> for its members, so
+<code>isinstance(foo, Defun)</code> will return True if foo was created from the Defun
+namedtuple.</p>
+
+<p>In the end though the only namedtuples were these:</p>
+
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">Number</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">namedtuple(</span><span style="color: #e6db74">&#39;Number&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;value&#39;</span><span style="color: #f8f8f2">)</span>
+<span style="color: #f8f8f2">String</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">namedtuple(</span><span style="color: #e6db74">&#39;String&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;value&#39;</span><span style="color: #f8f8f2">)</span>
+<span style="color: #f8f8f2">Symbol</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">namedtuple(</span><span style="color: #e6db74">&#39;Symbol&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;value&#39;</span><span style="color: #f8f8f2">)</span>
+</pre></div>
+
+
+<p>The rest of my expression data types started growing methods to segregate
+different sub-parsers. I eventually pulled the body of the parse function into a
+<code>Program</code> class that represents an entire lisp file:</p>
+
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #66d9ef">class</span> <span style="color: #a6e22e">Program</span><span style="color: #f8f8f2">(object):</span>
+    <span style="color: #e6db74">&quot;&quot;&quot;Base matcher.&quot;&quot;&quot;</span>
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">__init__</span><span style="color: #f8f8f2">(self,</span> <span style="color: #f8f8f2">tokens):</span>
+        <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">children</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">list()</span>
+        <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">consume(tokens)</span>
+
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">consume</span><span style="color: #f8f8f2">(self,</span> <span style="color: #f8f8f2">tokens):</span>
+        <span style="color: #e6db74">&quot;&quot;&quot;Consume tokens to build children&quot;&quot;&quot;</span>
+        <span style="color: #f8f8f2">body,</span> <span style="color: #f8f8f2">tokens</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">consume_body(tokens)</span>
+        <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">children</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">body</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">tokens:</span>
+            <span style="color: #66d9ef">raise</span> <span style="color: #a6e22e">SyntaxError</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&quot;Unmatched &#39;)&#39; in input.&quot;</span><span style="color: #f8f8f2">)</span>
+
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">__repr__</span><span style="color: #f8f8f2">(self):</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #e6db74">&quot;Program({})&quot;</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">format(self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">children)</span>
+</pre></div>
+
+
+<p>The shared parsing code are pulled out as consumer functions, most importantly
+<code>consume_body</code>. Its job is to grab and parse everything inside a pair of
+parens. It returns the fully parsed tree of children and the un-consumed tokens:</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #66d9ef">def</span> <span style="color: #a6e22e">consume_body</span><span style="color: #f8f8f2">(tokens):</span>
+    <span style="color: #e6db74">&quot;&quot;&quot;Consume all expressions until unpaired closing bracket &#39;)&#39; found.&quot;&quot;&quot;</span>
+    <span style="color: #f8f8f2">children</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">list()</span>
+    <span style="color: #66d9ef">while</span> <span style="color: #f8f8f2">tokens</span> <span style="color: #f92672">and</span> <span style="color: #f92672">not</span> <span style="color: #f8f8f2">tokens[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">==</span> <span style="color: #e6db74">&#39;)&#39;</span><span style="color: #f8f8f2">:</span>
+        <span style="color: #75715e"># These are in order of specificity</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">Defun</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">matches(tokens):</span>
+            <span style="color: #f8f8f2">fn</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">Defun()</span>
+            <span style="color: #f8f8f2">children</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">append(fn)</span>
+            <span style="color: #f8f8f2">tokens</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">fn</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">consume(tokens)</span>
+        <span style="color: #66d9ef">elif</span> <span style="color: #f8f8f2">Apply</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">matches(tokens):</span>
+            <span style="color: #f8f8f2">ap</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">Apply()</span>
+            <span style="color: #f8f8f2">children</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">append(ap)</span>
+            <span style="color: #f8f8f2">tokens</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">ap</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">consume(tokens)</span>
+        <span style="color: #66d9ef">elif</span> <span style="color: #f8f8f2">List</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">matches(tokens):</span>
+            <span style="color: #f8f8f2">li</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">List()</span>
+            <span style="color: #f8f8f2">children</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">append(li)</span>
+            <span style="color: #f8f8f2">tokens</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">li</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">consume(tokens)</span>
+        <span style="color: #66d9ef">else</span><span style="color: #f8f8f2">:</span>
+            <span style="color: #75715e"># First token must be one of Symbol, String, Number</span>
+            <span style="color: #f8f8f2">other,</span> <span style="color: #f8f8f2">tokens</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">consume_other(tokens)</span>
+            <span style="color: #f8f8f2">children</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">append(other)</span>
+    <span style="color: #75715e"># Omit last head if it exists (i.e. &#39;)&#39;)</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">children,</span> <span style="color: #f8f8f2">tokens[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">:]</span>
+</pre></div>
+</p>
+
+<p>Each of the composite expression types implements a classmethod <code>matches</code> that
+looks at the head of the token list and decides if it can consume that
+input. If none of the compound expressions match then a catchall function
+handles data literals:</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #66d9ef">def</span> <span style="color: #a6e22e">consume_other</span><span style="color: #f8f8f2">(tokens):</span>
+    <span style="color: #e6db74">&quot;&quot;&quot;Handle Symbol, String, and Number tokens.&quot;&quot;&quot;</span>
+    <span style="color: #f8f8f2">first</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">tokens[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span>
+    <span style="color: #66d9ef">try</span><span style="color: #f8f8f2">:</span>
+        <span style="color: #f8f8f2">num</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">float(first)</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">Number(num),</span> <span style="color: #f8f8f2">tokens[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">:]</span>
+    <span style="color: #66d9ef">except</span> <span style="color: #a6e22e">ValueError</span><span style="color: #f8f8f2">:</span>
+        <span style="color: #66d9ef">pass</span>
+    <span style="color: #66d9ef">if</span> <span style="color: #e6db74">&#39;&quot;&#39;</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">first[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]:</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">consume_string(tokens)</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">Symbol(first),</span> <span style="color: #f8f8f2">tokens[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">:]</span>
+</pre></div>
+</p>
+
+<p>Strings require special handling because they can contain anything. I'm actually
+loosing all the case and whitespace information in the strings, but that's
+fine. I may also still mis-interpret a few special cases, but it didn't cause
+problems in the output I was looking for:</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #66d9ef">def</span> <span style="color: #a6e22e">consume_string</span><span style="color: #f8f8f2">(tokens):</span>
+    <span style="color: #e6db74">&quot;&quot;&quot;Consume tokens between double-quotes.&quot;&quot;&quot;</span>
+    <span style="color: #f8f8f2">first,</span> <span style="color: #f8f8f2">rest</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">tokens[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">],</span> <span style="color: #f8f8f2">tokens[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">:]</span>
+    <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">first</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">count(</span><span style="color: #e6db74">&#39;&quot;&#39;</span><span style="color: #f8f8f2">)</span><span style="color: #f92672">%</span><span style="color: #ae81ff">2</span> <span style="color: #f92672">==</span> <span style="color: #ae81ff">0</span> <span style="color: #f92672">and</span> <span style="color: #e6db74">&#39;</span><span style="color: #ae81ff">\\</span><span style="color: #e6db74">&quot;&#39;</span> <span style="color: #f92672">not</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">first:</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">String(first</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">strip(</span><span style="color: #e6db74">&#39;&quot;&#39;</span><span style="color: #f8f8f2">)),</span> <span style="color: #f8f8f2">tokens[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">:]</span>
+    <span style="color: #f8f8f2">parts</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">[first]</span>
+    <span style="color: #66d9ef">while</span> <span style="color: #f8f8f2">rest:</span>
+        <span style="color: #f8f8f2">first,</span> <span style="color: #f8f8f2">rest</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">rest[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">],</span> <span style="color: #f8f8f2">rest[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">:]</span>
+        <span style="color: #f8f8f2">parts</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">append(first)</span>
+        <span style="color: #f8f8f2">quotes</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">first</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">count(</span><span style="color: #e6db74">&#39;&quot;&#39;</span><span style="color: #f8f8f2">)</span> <span style="color: #f92672">-</span> <span style="color: #f8f8f2">first</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">count(</span><span style="color: #e6db74">&#39;</span><span style="color: #ae81ff">\\</span><span style="color: #e6db74">&quot;&#39;</span><span style="color: #f8f8f2">)</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">first</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">count(</span><span style="color: #e6db74">&#39;</span><span style="color: #ae81ff">\\\\</span><span style="color: #e6db74">&quot;&#39;</span><span style="color: #f8f8f2">)</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">quotes</span><span style="color: #f92672">%</span><span style="color: #ae81ff">2</span> <span style="color: #f92672">==</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">:</span>
+            <span style="color: #66d9ef">break</span>
+    <span style="color: #66d9ef">else</span><span style="color: #f8f8f2">:</span>
+        <span style="color: #66d9ef">print</span> <span style="color: #f8f8f2">tokens</span>
+        <span style="color: #66d9ef">raise</span> <span style="color: #a6e22e">SyntaxError</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&quot;Reached end of input without matching quote.&quot;</span><span style="color: #f8f8f2">)</span>
+    <span style="color: #f8f8f2">whole</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">String(</span><span style="color: #e6db74">&quot; &quot;</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">join(parts)</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">strip(</span><span style="color: #e6db74">&#39;&quot;&#39;</span><span style="color: #f8f8f2">))</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">whole,</span> <span style="color: #f8f8f2">rest</span>
+</pre></div>
+</p>
+
+<p>I'm not going to go through every class, but Apply is simple and
+representative. An Apply represents a function call, and contains only the
+function name and a body:</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #66d9ef">class</span> <span style="color: #a6e22e">Apply</span><span style="color: #f8f8f2">(object):</span>
+    <span style="color: #e6db74">&quot;&quot;&quot;Match function application.&quot;&quot;&quot;</span>
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">__init__</span><span style="color: #f8f8f2">(self):</span>
+        <span style="color: #f8f8f2">func</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">None</span>
+        <span style="color: #f8f8f2">body</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">None</span>
+
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">__repr__</span><span style="color: #f8f8f2">(self):</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #e6db74">&quot;Apply({0.func}):</span><span style="color: #ae81ff">\n</span><span style="color: #e6db74">{0.body}&quot;</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">format(self)</span>
+
+    <span style="color: #a6e22e">@classmethod</span>
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">matches</span><span style="color: #f8f8f2">(cls,</span> <span style="color: #f8f8f2">tokens):</span>
+        <span style="color: #e6db74">&quot;&quot;&quot;Match &#39;(symbol body).&quot;&quot;&quot;</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">tokens[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">==</span> <span style="color: #e6db74">&#39;(&#39;</span> <span style="color: #f92672">and</span> <span style="color: #f92672">not</span> <span style="color: #f8f8f2">tokens[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">==</span> <span style="color: #e6db74">&#39;(&#39;</span>
+
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">consume</span><span style="color: #f8f8f2">(self,</span> <span style="color: #f8f8f2">tokens):</span>
+        <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">func</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">tokens[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]</span>
+        <span style="color: #f8f8f2">body,</span> <span style="color: #f8f8f2">tokens</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">consume_body(tokens[</span><span style="color: #ae81ff">2</span><span style="color: #f8f8f2">:])</span>
+        <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">body</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">body</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">tokens</span>
+</pre></div>
+</p>
+
+<p>In the next and final installment I'll cover the &quot;analysis&quot; phase, and the
+result of my survey.</p>
+
+  </div>
+  <footer>
+    <div class="article-footer">
+      
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/cad"><span></span>cad</a>
+    </li>
+    
+    <li>
+      <a href="/tags/autolisp"><span></span>autolisp</a>
+    </li>
+    
+    <li>
+      <a href="/tags/code"><span></span>code</a>
+    </li>
+    
+    <li>
+      <a href="/tags/python"><span></span>python</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      
+      <div class="adsense">
+        <span class="sponsor-label">Sponsored link</span>
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="2442045076"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+      </div>
+      
+      
+<div id="share-buttons">
+  <ul>
+    
+    
+    
+    
+    <li>
+      <div class="g-plusone" data-size="medium"></div>
+    </li>
+    
+    
+  </ul>
+</div>
+
+
+      <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'SuperfComs';
+    var disqus_identifier = 'http:\/\/kitsu.github.io\/2016\/05\/28\/autolisp_parse_02\/';
+    var disqus_title = 'Analyzing Autolisp with Python - Parse';
+    var disqus_url = 'http:\/\/kitsu.github.io\/2016\/05\/28\/autolisp_parse_02\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+      
+      <div id="pagenavigation-next-prev">
+        
+        <div id="pagenavigation-next">
+          <span class="pagenav-label">Previous</span>
+          <a href="http://kitsu.github.io/2016/05/27/autolisp_parse_01/">Analyzing Autolisp with Python - Setup</a>
+        </div>
+        
+        
+      </div>
+      
+    </div>
+  </footer>
+</div>
+        </div>
+        <div class="sidebar">
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Author</span>
+    </div>
+    <div id="author">
+      <span>Ed Blake</span>
+      <div>
+        
+        
+        <a href="https://plus.google.com/118323029386640613972"><i class="fa fa-google-plus-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://github.com/kitsu"><i class="fa fa-github-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://www.linkedin.com/in/edward-blake-b3601411b"><i class="fa fa-linkedin-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://stackoverflow.com/users/770443"><i class="fa fa-stack-overflow fa-2x" aria-hidden="true"></i></a>
+        
+      </div>
+    </div>
+  </div>
+  
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Categories</span>
+    </div>
+    <div class="categories">
+      <ul>
+        
+        <li>
+          <a href="/categories/blog"><span></span>blog (3)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/development"><span></span>development (10)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/hacks"><span></span>hacks (3)</a>
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>RSS</span>
+    </div>
+    <div id="rss">
+      <a href="/index.xml" type="application/rss+xml" target="_blank">
+        <i class="fa fa-rss-square fa-2x" aria-hidden="true"></i>
+      </a>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Sponsored link</span>
+    </div>
+    <div class="adsense">
+      <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:inline-block;width:300px;height:600px"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="9965311870"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+    </div>
+  </div>
+  
+</div>
+
+      </div>
+      <footer>
+        <div id="site-footer-wrap">
+          <div id="site-footer">
+            <span>Powered by <a href="https://gohugo.io/">Hugo</a>.</span>
+            <span>
+              
+              © 2015 Ed Blake
+              
+           </span>
+           <span id="copyleft">
+              <a rel="license"
+                 href="http://creativecommons.org/licenses/by-sa/4.0/">
+                <img alt="Creative Commons License" style="border-width:0"
+                     src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" />
+              </a>
+            </span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
+

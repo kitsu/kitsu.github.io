@@ -7,8 +7,18 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© 2015 Ed Blake</copyright>
-    <lastBuildDate>Fri, 27 May 2016 18:48:46 -0700</lastBuildDate>
+    <lastBuildDate>Sat, 28 May 2016 11:04:15 -0700</lastBuildDate>
     <atom:link href="http://kitsu.github.io/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Analyzing Autolisp with Python - Parse</title>
+      <link>http://kitsu.github.io/2016/05/28/autolisp_parse_02/</link>
+      <pubDate>Sat, 28 May 2016 11:04:15 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/05/28/autolisp_parse_02/</guid>
+      <description>&lt;p&gt;Woo, yet another weak parser implementation - continued.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Analyzing Autolisp with Python - Setup</title>
@@ -147,16 +157,6 @@
       
       <guid>http://kitsu.github.io/2016/05/13/setting-up/</guid>
       <description>&lt;p&gt;In which I setup Github hosting, Disqus Comments, Google Analytics and AdSense.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Hello Hugo</title>
-      <link>http://kitsu.github.io/2016/05/12/hello-hugo/</link>
-      <pubDate>Thu, 12 May 2016 15:42:30 -0700</pubDate>
-      
-      <guid>http://kitsu.github.io/2016/05/12/hello-hugo/</guid>
-      <description>&lt;p&gt;Starting a blog, using Hugo, hosted on Github, for reasons.&lt;/p&gt;
 </description>
     </item>
     
