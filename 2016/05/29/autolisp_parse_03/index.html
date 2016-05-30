@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="Hugo 0.15" />
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    
+    <link href="/index.xml" rel="alternate" type="application/rss+xml" title="Superfluous Comments" />
+    <link href="/index.xml" rel="feed" type="application/rss+xml" title="Superfluous Comments" />
+    
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+    
+    <script src="https://apis.google.com/js/platform.js" async defer>{lang: 'ja'}</script>
+    
+    <link rel="stylesheet" href="https://yandex.st/highlightjs/8.0/styles/default.min.css">
+    <script src="https://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <title>Analyzing Autolisp with Python - Analyze | Superfluous Comments</title>
+    <meta name="Description" content="Woo, yet another weak parser implementation - conclusion.
+">
+  </head>
+  <body>
+    <div id="wrap">
+      
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-77704589-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+      <header class="site-header">
+        <div class="site-header-left">
+          <a class="site-header-title" href="http://kitsu.github.io/">Superfluous Comments</a>
+        </div>
+      </header>
+      <div class="container">
+        <div id="main">
+
+<div class="article">
+  <header>
+    <div class="article-header">
+      <h1>Analyzing Autolisp with Python - Analyze</h1>
+      <div class="article-meta">
+        <span class="posttime">2016/05/29</span>
+        
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/cad"><span></span>cad</a>
+    </li>
+    
+    <li>
+      <a href="/tags/autolisp"><span></span>autolisp</a>
+    </li>
+    
+    <li>
+      <a href="/tags/code"><span></span>code</a>
+    </li>
+    
+    <li>
+      <a href="/tags/python"><span></span>python</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      </div>
+    </div>
+  </header>
+  <div class="content">
+    <p>Woo, yet another weak parser implementation - conclusion.</p>
+
+<p><hr/><br/>
+So far I've taken a list of lines from a file and turned it into a single long
+list of tokens, then taken those tokens and broken them up into nested
+collections based on their context. I'll start this time by looking at the
+results of parsing a few expressions, then describe how I extracted information
+from those results.</p>
+
+<p>Given a simple lisp expression:</p>
+
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(SETQ</span> <span style="color: #f8f8f2">foo</span> <span style="color: #e6db74">&quot;bar&quot;</span><span style="color: #f8f8f2">)</span>
+</pre></div>
+
+
+<p>It is first broken into:</p>
+
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">[</span><span style="color: #e6db74">&#39;(&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;setq&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;foo&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;&quot;bar&quot;&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;)&#39;</span><span style="color: #f8f8f2">]</span>
+</pre></div>
+
+
+<p>The parser then matches the outer expression to an <code>Apply</code>, foo to a <code>Symbol</code>,
+and &quot;bar&quot; to a <code>String</code> with the result:</p>
+
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">Apply(func</span><span style="color: #f92672">=</span><span style="color: #e6db74">&#39;setq&#39;</span><span style="color: #f8f8f2">,</span>
+      <span style="color: #f8f8f2">body</span><span style="color: #f92672">=</span><span style="color: #f8f8f2">[Symbol(</span><span style="color: #e6db74">&#39;foo&#39;</span><span style="color: #f8f8f2">),</span> <span style="color: #f8f8f2">String(</span><span style="color: #e6db74">&#39;bar&#39;</span><span style="color: #f8f8f2">)])</span>
+</pre></div>
+
+
+<p>Now on a larger example:</p>
+
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #75715e">;; Internet example</span>
+<span style="color: #f8f8f2">(defun</span> <span style="color: #f8f8f2">TEST</span> <span style="color: #f8f8f2">(</span> <span style="color: #f8f8f2">/</span> <span style="color: #f8f8f2">ANG1</span> <span style="color: #f8f8f2">ANG2)</span>
+ 
+	     <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">setq</span> <span style="color: #f8f8f2">ANG1</span> <span style="color: #e6db74">&quot;Monday&quot;</span><span style="color: #f8f8f2">)</span>
+	     <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">setq</span> <span style="color: #f8f8f2">ANG2</span> <span style="color: #e6db74">&quot;Tuesday&quot;</span><span style="color: #f8f8f2">)</span>
+ 
+	     <span style="color: #f8f8f2">(princ</span> <span style="color: #f8f8f2">(strcat</span> <span style="color: #e6db74">&quot;\nANG1 has the value &quot;</span> <span style="color: #f8f8f2">ANG1))</span>
+	     <span style="color: #f8f8f2">(princ</span> <span style="color: #f8f8f2">(strcat</span> <span style="color: #e6db74">&quot;\nANG2 has the value &quot;</span> <span style="color: #f8f8f2">ANG2))</span>
+	   <span style="color: #f8f8f2">(princ)</span>
+	<span style="color: #f8f8f2">)</span><span style="color: #75715e">;defun</span>
+</pre></div>
+
+
+<p>It has all kinds of random case, whitespace, blank lines, and trailing comments,
+but the tokenizer cleans all that up:</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">[</span><span style="color: #e6db74">&#39;(&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;defun&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;test&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;(&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;/&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;ang1&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;ang2&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;)&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;(&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;setq&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;ang1&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;&quot;monday&quot;&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;)&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;(&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;setq&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;ang2&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;&quot;tuesday&quot;&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;)&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;(&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;princ&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;(&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;strcat&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;&quot;</span><span style="color: #ae81ff">\\</span><span style="color: #e6db74">nang1&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;has&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;the&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;value&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;&quot;&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;ang1&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;)&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;)&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;(&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;princ&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;(&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;strcat&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;&quot;</span><span style="color: #ae81ff">\\</span><span style="color: #e6db74">nang2&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;has&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;the&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;value&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;&quot;&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;ang2&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;)&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;)&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;(&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;princ&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;)&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;)&#39;</span><span style="color: #f8f8f2">]</span>
+</pre></div>
+</p>
+
+<p>Next the tokens are parsed into an object tree:</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">Defun(name</span><span style="color: #f92672">=</span><span style="color: #e6db74">&#39;test&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">params</span><span style="color: #f92672">=</span><span style="color: #f8f8f2">[],</span> <span style="color: #f8f8f2">locals</span><span style="color: #f92672">=</span><span style="color: #f8f8f2">[</span><span style="color: #e6db74">&#39;ang1&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;ang2&#39;</span><span style="color: #f8f8f2">]</span>
+      <span style="color: #f8f8f2">body</span><span style="color: #f92672">=</span><span style="color: #f8f8f2">[Apply(func</span><span style="color: #f92672">=</span><span style="color: #e6db74">&#39;setq&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">body</span><span style="color: #f92672">=</span><span style="color: #f8f8f2">[Symbol(</span><span style="color: #e6db74">&#39;ang1&#39;</span><span style="color: #f8f8f2">),</span> <span style="color: #f8f8f2">String(</span><span style="color: #e6db74">&#39;monday&#39;</span><span style="color: #f8f8f2">)]),</span>
+            <span style="color: #f8f8f2">Apply(func</span><span style="color: #f92672">=</span><span style="color: #e6db74">&#39;setq&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">body</span><span style="color: #f92672">=</span><span style="color: #f8f8f2">[Symbol(</span><span style="color: #e6db74">&#39;ang1&#39;</span><span style="color: #f8f8f2">),</span> <span style="color: #f8f8f2">String(</span><span style="color: #e6db74">&#39;tuesday)]),</span>
+            <span style="color: #f8f8f2">Apply(func</span><span style="color: #f92672">=</span><span style="color: #e6db74">&#39;princ&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">body</span><span style="color: #f92672">=</span><span style="color: #f8f8f2">[Apply(func</span><span style="color: #f92672">=</span><span style="color: #e6db74">&#39;strcat&#39;</span><span style="color: #f8f8f2">,</span>
+                                           <span style="color: #f8f8f2">body</span><span style="color: #f92672">=</span><span style="color: #f8f8f2">[String(</span><span style="color: #e6db74">&#39;</span><span style="color: #ae81ff">\n</span><span style="color: #e6db74">ang1 has the value &#39;</span><span style="color: #f8f8f2">),</span>
+                                                 <span style="color: #f8f8f2">Symbol(</span><span style="color: #e6db74">&#39;ang1&#39;</span><span style="color: #f8f8f2">)])]),</span>
+            <span style="color: #f8f8f2">Apply(func</span><span style="color: #f92672">=</span><span style="color: #e6db74">&#39;princ&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">body</span><span style="color: #f92672">=</span><span style="color: #f8f8f2">[Apply(func</span><span style="color: #f92672">=</span><span style="color: #e6db74">&#39;strcat&#39;</span><span style="color: #f8f8f2">,</span>
+                                           <span style="color: #f8f8f2">body</span><span style="color: #f92672">=</span><span style="color: #f8f8f2">[String(</span><span style="color: #e6db74">&#39;</span><span style="color: #ae81ff">\n</span><span style="color: #e6db74">ang2 has the value &#39;</span><span style="color: #f8f8f2">),</span>
+                                                 <span style="color: #f8f8f2">Symbol(</span><span style="color: #e6db74">&#39;ang2&#39;</span><span style="color: #f8f8f2">)])]),</span>
+            <span style="color: #f8f8f2">Apply(func</span><span style="color: #f92672">=</span><span style="color: #e6db74">&#39;princ&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">body</span><span style="color: #f92672">=</span><span style="color: #f8f8f2">[])])</span>
+</pre></div>
+</p>
+
+<p>Run over an entire lisp source file you get a forest of these deeply nested
+data structures. There is a lot of information there, but it isn't very
+accessible. Since it is a data structure though I could write a program to
+process it further. For every file I processed I created a stats object using
+the following code:</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">Stats</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">namedtuple(</span><span style="color: #e6db74">&#39;Stats&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;funcs, deps, strs, files&#39;</span><span style="color: #f8f8f2">)</span>
+
+<span style="color: #66d9ef">def</span> <span style="color: #a6e22e">analyze</span><span style="color: #f8f8f2">(tree):</span>
+    <span style="color: #e6db74">&quot;&quot;&quot;Collect info about program tree.&quot;&quot;&quot;</span>
+    <span style="color: #f8f8f2">extensions</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">set((</span><span style="color: #e6db74">&#39;.dcl&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;.lsp&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;.mnr&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;.dvb&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;.mnl&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;.vlx&#39;</span><span style="color: #f8f8f2">))</span>
+    <span style="color: #f8f8f2">stats</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">Stats(set(),</span> <span style="color: #f8f8f2">set(),</span> <span style="color: #f8f8f2">set(),</span> <span style="color: #f8f8f2">set())</span>
+    <span style="color: #f8f8f2">exprs</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">tree</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">children[:]</span>
+    <span style="color: #66d9ef">while</span> <span style="color: #f8f8f2">exprs:</span>
+        <span style="color: #f8f8f2">expr</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">exprs</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">pop()</span>
+        <span style="color: #f8f8f2">body</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">None</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">isinstance(expr,</span> <span style="color: #f8f8f2">Defun):</span>
+            <span style="color: #f8f8f2">stats</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">funcs</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">add(expr</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">name)</span>
+            <span style="color: #f8f8f2">stats</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">deps</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">update(expr</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">deps)</span>
+        <span style="color: #66d9ef">elif</span> <span style="color: #f8f8f2">isinstance(expr,</span> <span style="color: #f8f8f2">String):</span>
+            <span style="color: #f8f8f2">val</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">expr</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">value</span>
+            <span style="color: #f8f8f2">stats</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">strs</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">add(val)</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">val[</span><span style="color: #f92672">-</span><span style="color: #ae81ff">4</span><span style="color: #f8f8f2">:]</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">extensions:</span>
+                <span style="color: #f8f8f2">stats</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">files</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">add(val)</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">hasattr(expr,</span> <span style="color: #e6db74">&#39;body&#39;</span><span style="color: #f8f8f2">):</span>
+            <span style="color: #f8f8f2">exprs</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">extend(item</span> <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">item</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">expr</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">body)</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">stats</span>
+</pre></div>
+</p>
+
+<p>This is basically a depth-first search through the program to collect a few
+pieces of data I was interested in, namely defined functions and their
+dependencies, and any strings - especially strings that look like file
+names. There is an accompanying function that then outputs the stats. Here is
+the output for the function above:</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">Functions:</span>
+        <span style="color: #f8f8f2">test</span>
+<span style="color: #f8f8f2">Dependencies:</span>
+        <span style="color: #f8f8f2">princ</span>
+        <span style="color: #f8f8f2">setq</span>
+        <span style="color: #f8f8f2">strcat</span>
+<span style="color: #f8f8f2">Strings:</span>
+        <span style="color: #f8f8f2">monday</span>
+        <span style="color: #f8f8f2">tuesday</span>
+        \<span style="color: #f8f8f2">nang2</span> <span style="color: #f8f8f2">has</span> <span style="color: #f8f8f2">the</span> <span style="color: #f8f8f2">value</span>
+        \<span style="color: #f8f8f2">nang1</span> <span style="color: #f8f8f2">has</span> <span style="color: #f8f8f2">the</span> <span style="color: #f8f8f2">value</span>
+<span style="color: #f8f8f2">Possible</span> <span style="color: #f8f8f2">file</span> <span style="color: #f8f8f2">dependencies:</span>
+<span style="color: #f8f8f2">None</span>
+</pre></div>
+</p>
+
+<p>Now for the disappointing part.</p>
+
+<p>My plan was to use this information to build a
+dependency graph, to identify any missing functions, and to make another pass
+through the CUI files to identify lost functions. I was also going to compile a
+set of used and unused resource files. I was then going to create a new lisp
+file as the single entry point that managed all the loading and resource
+resolution.</p>
+
+<p>I had spent a couple of days at this point looking through things and building
+this tool. I decided before proceeding I should give the people in the original
+email a status report. I let them know that I could fix the things that <em>were</em>
+broken, and that I had a firm grasp of what they had, but also that it was going
+to take some effort, and a lot of what was there was old and irrelevant.</p>
+
+<p>And with that the project evaporated.</p>
+
+<p>I did hear back over a week later that someone else was &quot;taking care of it&quot;, and
+received thanks for my help, the visible total of which was one email reply...</p>
+
+<p>Anyway, I put the code up
+<a href="https://gist.github.com/kitsu/1184b3caf4c209d67ab3f481de104dc3">here as a Gist</a>
+if anyone is interested.</p>
+
+  </div>
+  <footer>
+    <div class="article-footer">
+      
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/cad"><span></span>cad</a>
+    </li>
+    
+    <li>
+      <a href="/tags/autolisp"><span></span>autolisp</a>
+    </li>
+    
+    <li>
+      <a href="/tags/code"><span></span>code</a>
+    </li>
+    
+    <li>
+      <a href="/tags/python"><span></span>python</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      
+      <div class="adsense">
+        <span class="sponsor-label">Sponsored link</span>
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="2442045076"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+      </div>
+      
+      
+<div id="share-buttons">
+  <ul>
+    
+    
+    
+    
+    <li>
+      <div class="g-plusone" data-size="medium"></div>
+    </li>
+    
+    
+  </ul>
+</div>
+
+
+      <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'SuperfComs';
+    var disqus_identifier = 'http:\/\/kitsu.github.io\/2016\/05\/29\/autolisp_parse_03\/';
+    var disqus_title = 'Analyzing Autolisp with Python - Analyze';
+    var disqus_url = 'http:\/\/kitsu.github.io\/2016\/05\/29\/autolisp_parse_03\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+      
+      <div id="pagenavigation-next-prev">
+        
+        <div id="pagenavigation-next">
+          <span class="pagenav-label">Previous</span>
+          <a href="http://kitsu.github.io/2016/05/28/autolisp_parse_02/">Analyzing Autolisp with Python - Parse</a>
+        </div>
+        
+        
+      </div>
+      
+    </div>
+  </footer>
+</div>
+        </div>
+        <div class="sidebar">
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Author</span>
+    </div>
+    <div id="author">
+      <span>Ed Blake</span>
+      <div>
+        
+        
+        <a href="https://plus.google.com/118323029386640613972"><i class="fa fa-google-plus-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://github.com/kitsu"><i class="fa fa-github-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://www.linkedin.com/in/edward-blake-b3601411b"><i class="fa fa-linkedin-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://stackoverflow.com/users/770443"><i class="fa fa-stack-overflow fa-2x" aria-hidden="true"></i></a>
+        
+      </div>
+    </div>
+  </div>
+  
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Categories</span>
+    </div>
+    <div class="categories">
+      <ul>
+        
+        <li>
+          <a href="/categories/blog"><span></span>blog (3)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/development"><span></span>development (10)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/hacks"><span></span>hacks (4)</a>
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>RSS</span>
+    </div>
+    <div id="rss">
+      <a href="/index.xml" type="application/rss+xml" target="_blank">
+        <i class="fa fa-rss-square fa-2x" aria-hidden="true"></i>
+      </a>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Sponsored link</span>
+    </div>
+    <div class="adsense">
+      <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:inline-block;width:300px;height:600px"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="9965311870"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+    </div>
+  </div>
+  
+</div>
+
+      </div>
+      <footer>
+        <div id="site-footer-wrap">
+          <div id="site-footer">
+            <span>Powered by <a href="https://gohugo.io/">Hugo</a>.</span>
+            <span>
+              
+              © 2015 Ed Blake
+              
+           </span>
+           <span id="copyleft">
+              <a rel="license"
+                 href="http://creativecommons.org/licenses/by-sa/4.0/">
+                <img alt="Creative Commons License" style="border-width:0"
+                     src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" />
+              </a>
+            </span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
+

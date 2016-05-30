@@ -7,8 +7,18 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© 2015 Ed Blake</copyright>
-    <lastBuildDate>Sat, 28 May 2016 11:04:15 -0700</lastBuildDate>
+    <lastBuildDate>Sun, 29 May 2016 07:41:30 -0700</lastBuildDate>
     <atom:link href="http://kitsu.github.io/tags/python/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Analyzing Autolisp with Python - Analyze</title>
+      <link>http://kitsu.github.io/2016/05/29/autolisp_parse_03/</link>
+      <pubDate>Sun, 29 May 2016 07:41:30 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/05/29/autolisp_parse_03/</guid>
+      <description>&lt;p&gt;Woo, yet another weak parser implementation - conclusion.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Analyzing Autolisp with Python - Parse</title>
