@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="Hugo 0.15" />
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    
+    <link href="/index.xml" rel="alternate" type="application/rss+xml" title="Superfluous Comments" />
+    <link href="/index.xml" rel="feed" type="application/rss+xml" title="Superfluous Comments" />
+    
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+    
+    <script src="https://apis.google.com/js/platform.js" async defer>{lang: 'ja'}</script>
+    
+    <link rel="stylesheet" href="https://yandex.st/highlightjs/8.0/styles/default.min.css">
+    <script src="https://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <title>Home Grown DOM Animations | Superfluous Comments</title>
+    <meta name="Description" content="Using core.async to animate DOM properties.
+">
+  </head>
+  <body>
+    <div id="wrap">
+      
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-77704589-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+      <header class="site-header">
+        <div class="site-header-left">
+          <a class="site-header-title" href="http://kitsu.github.io/">Superfluous Comments</a>
+        </div>
+      </header>
+      <div class="container">
+        <div id="main">
+
+<div class="article">
+  <header>
+    <div class="article-header">
+      <h1>Home Grown DOM Animations</h1>
+      <div class="article-meta">
+        <span class="posttime">2016/05/31</span>
+        
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/code"><span></span>code</a>
+    </li>
+    
+    <li>
+      <a href="/tags/clojurescript"><span></span>clojurescript</a>
+    </li>
+    
+    <li>
+      <a href="/tags/async"><span></span>async</a>
+    </li>
+    
+    <li>
+      <a href="/tags/lister"><span></span>lister</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      </div>
+    </div>
+  </header>
+  <div class="content">
+    <p>Using core.async to animate DOM properties.</p>
+
+<p><hr/><br/>
+Before I start, to be clear, this is a bad idea. CSS3 has a
+<a href="https://www.w3.org/TR/css3-animations/">specification</a> for defining
+animations, please use it. In this case though I have a number of excuses for
+rolling my own solution, and besides it was a fun exercise.</p>
+
+<p>So previously when I needed to hide/reveal rows in my Lister application I used
+JQuery's <code>slideUp</code> and <code>slideDown</code>, just because they were there. It did look
+really nice though, and I wanted to keep the effect in my replacement
+ClojureScript code. My first thought was to use an async go-loop to execute the
+animation, but before going off on that tangent I had a look around for
+pre-built libraries. Once again it looks like if I were using React my problems
+would be solved, but otherwise I didn't find anything attractive.</p>
+
+<p>I was able to eliminate CSS3 animations pretty quickly. First I wasn't
+completely clear on how to apply the animation from code. More importantly the
+version of Webkit in Qt4 doesn't support modern CSS, along with many other
+things I am finding.</p>
+
+<p>The first thing you need for animation is a source of timing events. In modern
+web development you are advised to use <code>Window.requestAnimationFrame(callback)</code>,
+so I started by writing a function to populate a channel with frame events. This
+is actually pretty tricky - registered callbacks are only called once, so they
+must re-register themselves in the body of the callback.
+Here is what I came up with:</p>
+
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">anim-source</span>
+  <span style="color: #e6db74">&quot;A continually renewing requestAnimationFrame callback.&quot;</span>
+  <span style="color: #f8f8f2">[ch</span> <span style="color: #f8f8f2">time]</span>
+  <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">put!</span> <span style="color: #f8f8f2">ch</span> <span style="color: #f8f8f2">time)</span>
+  <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">js/requestAnimationFrame</span> <span style="color: #f8f8f2">(partial anim-source</span> <span style="color: #f8f8f2">ch)))</span>
+
+<span style="color: #f8f8f2">(</span><span style="color: #66d9ef">def </span><span style="color: #f8f8f2">frame-chan</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">let </span><span style="color: #f8f8f2">[ch</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">chan</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">sliding-buffer</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">))]</span>
+                  <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">js/requestAnimationFrame</span> <span style="color: #f8f8f2">(partial anim-source</span> <span style="color: #f8f8f2">ch))</span>
+                  <span style="color: #f8f8f2">ch))</span>
+<span style="color: #75715e">;</span>
+</pre></div>
+
+
+<p>This would have been fine if it had worked, but it turns out Qt4 Webkit also
+doesn't have <code>requestAnimationFrame</code> or even <code>webkitRequestAnimationFrame</code>.
+Minor setback. I searched around a little and found some advice from
+old-fashioned HTML game development. If you use <code>setTimeout</code> with your expected
+frame rate you can sort of simulate <code>requestAnimationFrame</code>. You don't get any
+guaranty that your event will fire before a screen paint, but you can hope the
+browser figures out what you want. Here is the revised code:</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">def </span><span style="color: #f8f8f2">fps</span> <span style="color: #f8f8f2">(/ </span><span style="color: #ae81ff">1000</span> <span style="color: #ae81ff">60</span><span style="color: #f8f8f2">))</span>
+
+<span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">anim-source</span>
+  <span style="color: #e6db74">&quot;A continually renewing timer simulating requestAnimationFrame callback.&quot;</span>
+  <span style="color: #f8f8f2">[ch]</span>
+  <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">put!</span> <span style="color: #f8f8f2">ch</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">.now</span> <span style="color: #f8f8f2">js/Date))</span>
+  <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">js/setTimeout</span> <span style="color: #f8f8f2">(partial anim-source</span> <span style="color: #f8f8f2">ch)</span> <span style="color: #f8f8f2">fps))</span>
+
+<span style="color: #f8f8f2">(</span><span style="color: #66d9ef">def </span><span style="color: #f8f8f2">frame-chan</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">let </span><span style="color: #f8f8f2">[ch</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">chan</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">sliding-buffer</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">))]</span>
+                  <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">js/setTimeout</span> <span style="color: #f8f8f2">(partial anim-source</span> <span style="color: #f8f8f2">ch)</span> <span style="color: #f8f8f2">fps)</span>
+                  <span style="color: #f8f8f2">ch))</span>
+<span style="color: #75715e">;</span>
+</pre></div>
+</p>
+
+<p>I am of the opinion that it would be preferable to wrap all this in a go-loop
+that managed <em>all</em> queued animations on each tick. The way this works, having
+only one frame source, with lots of animations some might be starved for
+frames. Another option would be to use an async
+<a href="https://clojuredocs.org/clojure.core.async/mult"><code>mult</code></a> with taps for each
+animation. So far though this code has worked well enough.</p>
+
+<p>Next I started writing the actual effect functions. Starting with <code>slide-up</code> I
+implemented the animation in a straight-forward way in a go-loop:</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">slide-up</span>
+  <span style="color: #e6db74">&quot;Animated hide.&quot;</span>
+  <span style="color: #f8f8f2">[elem</span> <span style="color: #f8f8f2">duration]</span>
+  <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">let </span><span style="color: #f8f8f2">[height</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">dommy/px</span> <span style="color: #f8f8f2">elem</span> <span style="color: #e6db74">:height</span><span style="color: #f8f8f2">)</span>
+        <span style="color: #f8f8f2">start</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">.now</span> <span style="color: #f8f8f2">js/Date)]</span>
+    <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">go-loop</span> <span style="color: #f8f8f2">[now</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">&lt;!</span> <span style="color: #f8f8f2">frame-chan)]</span>
+      <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">let </span><span style="color: #f8f8f2">[elapse</span> <span style="color: #f8f8f2">(- now</span> <span style="color: #f8f8f2">start)</span>
+            <span style="color: #f8f8f2">percent</span> <span style="color: #f8f8f2">(/ elapse</span> <span style="color: #f8f8f2">duration)]</span>
+        <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">if </span><span style="color: #f8f8f2">(&lt; elapse</span> <span style="color: #f8f8f2">duration)</span>
+          <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">do </span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">dommy/set-px!</span> <span style="color: #f8f8f2">elem</span> <span style="color: #e6db74">:height</span> <span style="color: #f8f8f2">(* (- </span><span style="color: #ae81ff">1</span> <span style="color: #f8f8f2">percent)</span> <span style="color: #f8f8f2">height))</span>
+              <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">recur</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">&lt;!</span> <span style="color: #f8f8f2">frame-chan)))</span>
+          <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">do </span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">dommy/hide!</span> <span style="color: #f8f8f2">elem)</span>
+              <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">dommy/remove-style!</span> <span style="color: #f8f8f2">elem</span> <span style="color: #e6db74">:height</span><span style="color: #f8f8f2">)))))))</span>
+<span style="color: #75715e">;</span>
+</pre></div>
+</p>
+
+<p>When I started writing the <code>slide-down</code> effect though I started noticing some
+common elements. I went through several passes factoring out the common code,
+and I think I came up with something pretty neat:</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">def </span><span style="color: #f8f8f2">anim-time</span> <span style="color: #ae81ff">250</span><span style="color: #f8f8f2">)</span>
+
+<span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">animate</span>
+  <span style="color: #e6db74">&quot;Generic animation go-loop.&quot;</span>
+  <span style="color: #f8f8f2">[duration</span> <span style="color: #f8f8f2">{</span><span style="color: #e6db74">:keys</span> <span style="color: #f8f8f2">[initialize!</span> <span style="color: #f8f8f2">transition!</span> <span style="color: #f8f8f2">finalize!]}]</span>
+  <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">let </span><span style="color: #f8f8f2">[init</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">initialize!</span><span style="color: #f8f8f2">)</span>
+        <span style="color: #f8f8f2">start</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">.now</span> <span style="color: #f8f8f2">js/Date)]</span>
+    <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">go-loop</span> <span style="color: #f8f8f2">[now</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">&lt;!</span> <span style="color: #f8f8f2">frame-chan)]</span>
+      <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">let </span><span style="color: #f8f8f2">[elapse</span> <span style="color: #f8f8f2">(- now</span> <span style="color: #f8f8f2">start)</span>
+            <span style="color: #f8f8f2">percent</span> <span style="color: #f8f8f2">(/ elapse</span> <span style="color: #f8f8f2">duration)]</span>
+        <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">if </span><span style="color: #f8f8f2">(&lt; elapse</span> <span style="color: #f8f8f2">duration)</span>
+          <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">do </span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">transition!</span> <span style="color: #f8f8f2">init</span> <span style="color: #f8f8f2">percent)</span>
+              <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">recur</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">&lt;!</span> <span style="color: #f8f8f2">frame-chan)))</span>
+          <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">finalize!</span><span style="color: #f8f8f2">))))))</span>
+
+<span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">slide-up</span>
+  <span style="color: #e6db74">&quot;Animated hide.&quot;</span>
+  <span style="color: #f8f8f2">([elem]</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">slide-up</span> <span style="color: #f8f8f2">elem</span> <span style="color: #f8f8f2">anim-time))</span>
+  <span style="color: #f8f8f2">([elem</span> <span style="color: #f8f8f2">duration]</span>
+   <span style="color: #f8f8f2">(when-not (</span><span style="color: #a6e22e">dommy/hidden?</span> <span style="color: #f8f8f2">elem)</span>
+     <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">animate</span> <span style="color: #f8f8f2">duration</span>
+              <span style="color: #f8f8f2">{</span><span style="color: #e6db74">:initialize!</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">fn </span><span style="color: #f8f8f2">[]</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">dommy/px</span> <span style="color: #f8f8f2">elem</span> <span style="color: #e6db74">:height</span><span style="color: #f8f8f2">))</span>
+               <span style="color: #e6db74">:transition!</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">fn </span><span style="color: #f8f8f2">[height</span> <span style="color: #f8f8f2">percent]</span>
+                              <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">dommy/set-px!</span> <span style="color: #f8f8f2">elem</span> <span style="color: #e6db74">:height</span>
+                                             <span style="color: #f8f8f2">(* (- </span><span style="color: #ae81ff">1</span> <span style="color: #f8f8f2">percent)</span> <span style="color: #f8f8f2">height)))</span>
+               <span style="color: #e6db74">:finalize!</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">fn </span><span style="color: #f8f8f2">[]</span>
+                            <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">dommy/hide!</span> <span style="color: #f8f8f2">elem)</span>
+                            <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">dommy/remove-style!</span> <span style="color: #f8f8f2">elem</span> <span style="color: #e6db74">:height</span><span style="color: #f8f8f2">))}))))</span>
+
+<span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">slide-down</span>
+  <span style="color: #e6db74">&quot;Animated reveal.&quot;</span>
+  <span style="color: #f8f8f2">([elem]</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">slide-down</span> <span style="color: #f8f8f2">elem</span> <span style="color: #f8f8f2">anim-time))</span>
+  <span style="color: #f8f8f2">([elem</span> <span style="color: #f8f8f2">duration]</span>
+   <span style="color: #f8f8f2">(when (</span><span style="color: #a6e22e">dommy/hidden?</span> <span style="color: #f8f8f2">elem)</span>
+     <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">animate</span> <span style="color: #f8f8f2">duration</span>
+              <span style="color: #f8f8f2">{</span><span style="color: #e6db74">:initialize!</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">fn </span><span style="color: #f8f8f2">[]</span>
+                              <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">dommy/show!</span> <span style="color: #f8f8f2">elem)</span>
+                              <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">let </span><span style="color: #f8f8f2">[height</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">dommy/px</span> <span style="color: #f8f8f2">elem</span> <span style="color: #e6db74">:height</span><span style="color: #f8f8f2">)]</span>
+                                <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">dommy/set-px!</span> <span style="color: #f8f8f2">elem</span> <span style="color: #e6db74">:height</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">)</span>
+                                <span style="color: #f8f8f2">height))</span>
+               <span style="color: #e6db74">:transition!</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">fn </span><span style="color: #f8f8f2">[height</span> <span style="color: #f8f8f2">percent]</span>
+                              <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">dommy/set-px!</span> <span style="color: #f8f8f2">elem</span> <span style="color: #e6db74">:height</span> <span style="color: #f8f8f2">(* percent</span> <span style="color: #f8f8f2">height)))</span>
+               <span style="color: #e6db74">:finalize!</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">fn </span><span style="color: #f8f8f2">[]</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">dommy/remove-style!</span> <span style="color: #f8f8f2">elem</span> <span style="color: #e6db74">:height</span><span style="color: #f8f8f2">))}))))</span>
+<span style="color: #75715e">;</span>
+</pre></div>
+</p>
+
+<p>Each effect is really just a sentinel expression, and a map of functions passed
+to the <code>animate</code> function. The individual effects are tied via Dommy to the DOM,
+but the animate function is reasonably pure and somewhat testable. I've tried
+this out with nearly 2000 rows and it still looks reasonable, which is good
+enough for me.</p>
+
+<p><strong>Demo:</strong>
+<iframe src="/async_DOM_animation/index.html"
+        width="100%" height="225px" style="border: 1px solid black"></iframe></p>
+
+<p><br/></p>
+
+  </div>
+  <footer>
+    <div class="article-footer">
+      
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/code"><span></span>code</a>
+    </li>
+    
+    <li>
+      <a href="/tags/clojurescript"><span></span>clojurescript</a>
+    </li>
+    
+    <li>
+      <a href="/tags/async"><span></span>async</a>
+    </li>
+    
+    <li>
+      <a href="/tags/lister"><span></span>lister</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      
+      <div class="adsense">
+        <span class="sponsor-label">Sponsored link</span>
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="2442045076"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+      </div>
+      
+      
+<div id="share-buttons">
+  <ul>
+    
+    
+    
+    
+    <li>
+      <div class="g-plusone" data-size="medium"></div>
+    </li>
+    
+    
+  </ul>
+</div>
+
+
+      <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'SuperfComs';
+    var disqus_identifier = 'http:\/\/kitsu.github.io\/2016\/05\/31\/async_dom_animation\/';
+    var disqus_title = 'Home Grown DOM Animations';
+    var disqus_url = 'http:\/\/kitsu.github.io\/2016\/05\/31\/async_dom_animation\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+      
+      <div id="pagenavigation-next-prev">
+        
+        <div id="pagenavigation-next">
+          <span class="pagenav-label">Previous</span>
+          <a href="http://kitsu.github.io/2016/05/29/autolisp_parse_03/">Analyzing Autolisp with Python - Analyze</a>
+        </div>
+        
+        
+      </div>
+      
+    </div>
+  </footer>
+</div>
+        </div>
+        <div class="sidebar">
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Author</span>
+    </div>
+    <div id="author">
+      <span>Ed Blake</span>
+      <div>
+        
+        
+        <a href="https://plus.google.com/118323029386640613972"><i class="fa fa-google-plus-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://github.com/kitsu"><i class="fa fa-github-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://www.linkedin.com/in/edward-blake-b3601411b"><i class="fa fa-linkedin-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://stackoverflow.com/users/770443"><i class="fa fa-stack-overflow fa-2x" aria-hidden="true"></i></a>
+        
+      </div>
+    </div>
+  </div>
+  
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Categories</span>
+    </div>
+    <div class="categories">
+      <ul>
+        
+        <li>
+          <a href="/categories/blog"><span></span>blog (3)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/development"><span></span>development (11)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/hacks"><span></span>hacks (4)</a>
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>RSS</span>
+    </div>
+    <div id="rss">
+      <a href="/index.xml" type="application/rss+xml" target="_blank">
+        <i class="fa fa-rss-square fa-2x" aria-hidden="true"></i>
+      </a>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Sponsored link</span>
+    </div>
+    <div class="adsense">
+      <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:inline-block;width:300px;height:600px"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="9965311870"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+    </div>
+  </div>
+  
+</div>
+
+      </div>
+      <footer>
+        <div id="site-footer-wrap">
+          <div id="site-footer">
+            <span>Powered by <a href="https://gohugo.io/">Hugo</a>.</span>
+            <span>
+              
+              © 2015 Ed Blake
+              
+           </span>
+           <span id="copyleft">
+              <a rel="license"
+                 href="http://creativecommons.org/licenses/by-sa/4.0/">
+                <img alt="Creative Commons License" style="border-width:0"
+                     src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" />
+              </a>
+            </span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
+
