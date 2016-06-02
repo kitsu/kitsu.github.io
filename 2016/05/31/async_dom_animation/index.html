@@ -77,7 +77,9 @@ ga('send', 'pageview');
     </div>
   </header>
   <div class="content">
-    <p>Using core.async to animate DOM properties.</p>
+    
+
+<p>Using core.async to animate DOM properties.</p>
 
 <p><hr/><br/>
 Before I start, to be clear, this is a bad idea. CSS3 has a
@@ -126,7 +128,7 @@ frame rate you can sort of simulate <code>requestAnimationFrame</code>. You don'
 guaranty that your event will fire before a screen paint, but you can hope the
 browser figures out what you want. Here is the revised code:</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">def </span><span style="color: #f8f8f2">fps</span> <span style="color: #f8f8f2">(/ </span><span style="color: #ae81ff">1000</span> <span style="color: #ae81ff">60</span><span style="color: #f8f8f2">))</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">def </span><span style="color: #f8f8f2">fps</span> <span style="color: #f8f8f2">(/ </span><span style="color: #ae81ff">1000</span> <span style="color: #ae81ff">60</span><span style="color: #f8f8f2">))</span>
 
 <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">anim-source</span>
   <span style="color: #e6db74">&quot;A continually renewing timer simulating requestAnimationFrame callback.&quot;</span>
@@ -139,7 +141,7 @@ browser figures out what you want. Here is the revised code:</p>
                   <span style="color: #f8f8f2">ch))</span>
 <span style="color: #75715e">;</span>
 </pre></div>
-</p>
+
 
 <p>I am of the opinion that it would be preferable to wrap all this in a go-loop
 that managed <em>all</em> queued animations on each tick. The way this works, having
@@ -148,10 +150,10 @@ frames. Another option would be to use an async
 <a href="https://clojuredocs.org/clojure.core.async/mult"><code>mult</code></a> with taps for each
 animation. So far though this code has worked well enough.</p>
 
-<p>Next I started writing the actual effect functions. Starting with <code>slide-up</code> I
+<p>Next I started writing the actual effect functions. Starting with <code>slide-up!</code> I
 implemented the animation in a straight-forward way in a go-loop:</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">slide-up</span>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">slide-up!</span>
   <span style="color: #e6db74">&quot;Animated hide.&quot;</span>
   <span style="color: #f8f8f2">[elem</span> <span style="color: #f8f8f2">duration]</span>
   <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">let </span><span style="color: #f8f8f2">[height</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">dommy/px</span> <span style="color: #f8f8f2">elem</span> <span style="color: #e6db74">:height</span><span style="color: #f8f8f2">)</span>
@@ -168,7 +170,7 @@ implemented the animation in a straight-forward way in a go-loop:</p>
 </pre></div>
 </p>
 
-<p>When I started writing the <code>slide-down</code> effect though I started noticing some
+<p>When I started writing the <code>slide-down!</code> effect though I started noticing some
 common elements. I went through several passes factoring out the common code,
 and I think I came up with something pretty neat:</p>
 
@@ -187,9 +189,9 @@ and I think I came up with something pretty neat:</p>
               <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">recur</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">&lt;!</span> <span style="color: #f8f8f2">frame-chan)))</span>
           <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">finalize!</span><span style="color: #f8f8f2">))))))</span>
 
-<span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">slide-up</span>
+<span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">slide-up!</span>
   <span style="color: #e6db74">&quot;Animated hide.&quot;</span>
-  <span style="color: #f8f8f2">([elem]</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">slide-up</span> <span style="color: #f8f8f2">elem</span> <span style="color: #f8f8f2">anim-time))</span>
+  <span style="color: #f8f8f2">([elem]</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">slide-up!</span> <span style="color: #f8f8f2">elem</span> <span style="color: #f8f8f2">anim-time))</span>
   <span style="color: #f8f8f2">([elem</span> <span style="color: #f8f8f2">duration]</span>
    <span style="color: #f8f8f2">(when-not (</span><span style="color: #a6e22e">dommy/hidden?</span> <span style="color: #f8f8f2">elem)</span>
      <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">animate</span> <span style="color: #f8f8f2">duration</span>
@@ -201,9 +203,9 @@ and I think I came up with something pretty neat:</p>
                             <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">dommy/hide!</span> <span style="color: #f8f8f2">elem)</span>
                             <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">dommy/remove-style!</span> <span style="color: #f8f8f2">elem</span> <span style="color: #e6db74">:height</span><span style="color: #f8f8f2">))}))))</span>
 
-<span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">slide-down</span>
+<span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">slide-down!</span>
   <span style="color: #e6db74">&quot;Animated reveal.&quot;</span>
-  <span style="color: #f8f8f2">([elem]</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">slide-down</span> <span style="color: #f8f8f2">elem</span> <span style="color: #f8f8f2">anim-time))</span>
+  <span style="color: #f8f8f2">([elem]</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">slide-down!</span> <span style="color: #f8f8f2">elem</span> <span style="color: #f8f8f2">anim-time))</span>
   <span style="color: #f8f8f2">([elem</span> <span style="color: #f8f8f2">duration]</span>
    <span style="color: #f8f8f2">(when (</span><span style="color: #a6e22e">dommy/hidden?</span> <span style="color: #f8f8f2">elem)</span>
      <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">animate</span> <span style="color: #f8f8f2">duration</span>
@@ -221,15 +223,63 @@ and I think I came up with something pretty neat:</p>
 
 <p>Each effect is really just a sentinel expression, and a map of functions passed
 to the <code>animate</code> function. The individual effects are tied via Dommy to the DOM,
-but the animate function is reasonably pure and somewhat testable. I've tried
+but the animate function is reasonably pure and somewhat testable. <del>I've tried
 this out with nearly 2000 rows and it still looks reasonable, which is good
-enough for me.</p>
+enough for me.</del></p>
 
 <p><strong>Demo:</strong>
 <iframe src="/async_DOM_animation/index.html"
         width="100%" height="225px" style="border: 1px solid black"></iframe></p>
 
 <p><br/></p>
+
+<h3 id="edit-corrections:6239459dd76f12680bef1391d5c779de">Edit - Corrections</h3>
+
+<p>I was finalizing my changes today, and I found that using the above code caused
+some really odd behavior with long lists (1200+ rows). The total animation time
+was the sum of all simultaneous animation durations, and Ii ran into a limit on
+the number of blocking takes on one <code>async/chan</code> (1024 BTW). My first attempt to
+convert to a <code>mult</code> caused my app to hang inescapably. The animations bothered
+me more and more though, so I took another shot at it. Here is the revised code:</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">anim-source</span>
+  <span style="color: #e6db74">&quot;A continually renewing timer simulating requestAnimationFrame callback.&quot;</span>
+  <span style="color: #f8f8f2">[ch]</span>
+  <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">put!</span> <span style="color: #f8f8f2">ch</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">.now</span> <span style="color: #f8f8f2">js/Date))</span>
+  <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">js/setTimeout</span> <span style="color: #f8f8f2">(partial anim-source</span> <span style="color: #f8f8f2">ch)</span> <span style="color: #f8f8f2">fps))</span>
+
+<span style="color: #f8f8f2">(</span><span style="color: #66d9ef">def </span><span style="color: #f8f8f2">frame-mult</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">let </span><span style="color: #f8f8f2">[ch</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">chan</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">sliding-buffer</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">))]</span>
+                  <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">js/setTimeout</span> <span style="color: #f8f8f2">(partial anim-source</span> <span style="color: #f8f8f2">ch)</span> <span style="color: #f8f8f2">fps)</span>
+                  <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">async/mult</span> <span style="color: #f8f8f2">ch)))</span> <span style="color: #75715e">; &lt;- Only store the mult wrapping the channel</span>
+
+<span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">animate</span>
+  <span style="color: #e6db74">&quot;Generic animation go-loop.&quot;</span>
+  <span style="color: #f8f8f2">[duration</span> <span style="color: #f8f8f2">{</span><span style="color: #e6db74">:keys</span> <span style="color: #f8f8f2">[initialize!</span> <span style="color: #f8f8f2">transition!</span> <span style="color: #f8f8f2">finalize!]}]</span>
+  <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">let </span><span style="color: #f8f8f2">[frame-chan</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">chan</span><span style="color: #f8f8f2">)</span> <span style="color: #75715e">; &lt;- Channel created in each animation</span>
+        <span style="color: #f8f8f2">init</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">initialize!</span><span style="color: #f8f8f2">)</span>
+        <span style="color: #f8f8f2">start</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">.now</span> <span style="color: #f8f8f2">js/Date)]</span>
+    <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">async/tap</span> <span style="color: #f8f8f2">frame-mult</span> <span style="color: #f8f8f2">frame-chan)</span> <span style="color: #75715e">; &lt;- Add tap to module-level frame-mult</span>
+    <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">go-loop</span> <span style="color: #f8f8f2">[now</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">&lt;!</span> <span style="color: #f8f8f2">frame-chan)]</span>
+      <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">let </span><span style="color: #f8f8f2">[elapse</span> <span style="color: #f8f8f2">(- now</span> <span style="color: #f8f8f2">start)</span>
+            <span style="color: #f8f8f2">percent</span> <span style="color: #f8f8f2">(/ elapse</span> <span style="color: #f8f8f2">duration)]</span>
+        <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">if </span><span style="color: #f8f8f2">(&lt; elapse</span> <span style="color: #f8f8f2">duration)</span>
+          <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">do </span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">transition!</span> <span style="color: #f8f8f2">init</span> <span style="color: #f8f8f2">percent)</span>
+              <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">recur</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">&lt;!</span> <span style="color: #f8f8f2">frame-chan)))</span>
+          <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">finalize!</span><span style="color: #f8f8f2">)))</span>
+      <span style="color: #75715e">;; This was initially outside the go-loop, resulting in *no* animation</span>
+      <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">async/untap</span> <span style="color: #f8f8f2">frame-mult</span> <span style="color: #f8f8f2">frame-chan))))</span>
+<span style="color: #75715e">;</span>
+</pre></div>
+</p>
+
+<p>Now all animations should update on each frame, and all the animations should
+complete near where their duration elapses. There are still some visual
+glitches, but without access to <code>requestAnimationFrame</code> that is to be expected.</p>
+
+<p>As an additional optimization I factored the row hiding/showing code out of all
+the exported functions. I then chose the function to use for hiding depending on
+the number of rows acted upon - <code>slide-up!</code>/<code>slide-down!</code> if the count is less
+than 100 else <code>dommy/hide!</code>/<code>dommy/show!</code>.</p>
 
   </div>
   <footer>
