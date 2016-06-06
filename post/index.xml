@@ -7,8 +7,18 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© 2015 Ed Blake</copyright>
-    <lastBuildDate>Thu, 02 Jun 2016 18:43:22 -0700</lastBuildDate>
+    <lastBuildDate>Mon, 06 Jun 2016 15:29:20 -0700</lastBuildDate>
     <atom:link href="http://kitsu.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>First Weekend Off</title>
+      <link>http://kitsu.github.io/2016/06/06/first-weekend-off/</link>
+      <pubDate>Mon, 06 Jun 2016 15:29:20 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/06/06/first-weekend-off/</guid>
+      <description>&lt;p&gt;Re-grouping and thinking about next steps.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Big Pitch - Mild Depression</title>
@@ -147,16 +157,6 @@
       
       <guid>http://kitsu.github.io/2016/05/17/autolisp-hackery/</guid>
       <description>&lt;p&gt;Working around AutoCAD quirks using AutoCAD quirks.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Optimizing a Different Filter</title>
-      <link>http://kitsu.github.io/2016/05/16/different-search/</link>
-      <pubDate>Mon, 16 May 2016 20:52:05 -0700</pubDate>
-      
-      <guid>http://kitsu.github.io/2016/05/16/different-search/</guid>
-      <description>&lt;p&gt;More fun with Hugo, Go templates, and Google services.&lt;/p&gt;
 </description>
     </item>
     
