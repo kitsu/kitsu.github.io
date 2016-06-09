@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="Hugo 0.15" />
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    
+    <link href="/index.xml" rel="alternate" type="application/rss+xml" title="Superfluous Comments" />
+    <link href="/index.xml" rel="feed" type="application/rss+xml" title="Superfluous Comments" />
+    
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+    
+    <script src="https://apis.google.com/js/platform.js" async defer>{lang: 'ja'}</script>
+    
+    <link rel="stylesheet" href="https://yandex.st/highlightjs/8.0/styles/default.min.css">
+    <script src="https://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <title>Unemployment Project - Breakthrough | Superfluous Comments</title>
+    <meta name="Description" content="Surmounting the challenge of API churn in the MS ecosystem.
+">
+  </head>
+  <body>
+    <div id="wrap">
+      
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-77704589-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+      <header class="site-header">
+        <div class="site-header-left">
+          <a class="site-header-title" href="http://kitsu.github.io/">Superfluous Comments</a>
+        </div>
+      </header>
+      <div class="container">
+        <div id="main">
+
+<div class="article">
+  <header>
+    <div class="article-header">
+      <h1>Unemployment Project - Breakthrough</h1>
+      <div class="article-meta">
+        <span class="posttime">2016/06/09</span>
+        
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/c"><span></span>c#</a>
+    </li>
+    
+    <li>
+      <a href="/tags/asp.net-core"><span></span>asp.net core</a>
+    </li>
+    
+    <li>
+      <a href="/tags/mvc5"><span></span>mvc5&#43;</a>
+    </li>
+    
+    <li>
+      <a href="/tags/code"><span></span>code</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      </div>
+    </div>
+  </header>
+  <div class="content">
+    <p>Surmounting the challenge of API churn in the MS ecosystem.</p>
+
+<p><hr/><br/>
+I think I've figured out enough to actually get to work on this project. The
+last piece was very tricky though, so I want to post about it before moving
+on. First though some corrections:</p>
+
+<ul>
+<li>Firstly it seems I am actually using MS MVC 5+, maybe 6? I'm not really sure.</li>
+<li>Second it seems I am using asp.net &quot;vNext&quot; or &quot;Core&quot; i.e. &quot;Extreemly Beta&quot;.</li>
+<li>Finally similarly I am using whatever the latest incarnation of Entity
+Framework is as well.</li>
+</ul>
+
+<p>It seems my version of VS (community 2015 latest update) defaults to all
+bleeding edge tech for new projects. Not that I have a problem with that, but it
+does make research harder, especially when information on the last three
+versions still proliferates.</p>
+
+<p>I spent some more time this morning reading up on the latest version of
+<a href="https://ef.readthedocs.io/en/latest/modeling/index.html">Entity Framework</a>. The
+official docs were a much better source of information that what I found
+yesterday, but in the end I only had to make a few changes:</p>
+
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">    <span style="color: #75715e">// First make the base class abstract</span>
+    <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">abstract</span> <span style="color: #66d9ef">class</span> <span style="color: #a6e22e">BaseLog</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #75715e">// Drop the manual descriptor, EF will create one automatically</span>
+
+        <span style="color: #75715e">// Reciprocal link to user data (not strictly required)</span>
+        <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">virtual</span> <span style="color: #f8f8f2">ApplicationUser</span> <span style="color: #f8f8f2">ApplicationUser</span>  <span style="color: #f8f8f2">{</span> <span style="color: #66d9ef">get</span><span style="color: #f8f8f2">;</span> <span style="color: #66d9ef">set</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">}</span>
+        <span style="color: #f8f8f2">...</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #75715e">// Next add a DbSet(table) to the DB context</span>
+    <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">class</span> <span style="color: #a6e22e">ApplicationDbContext</span> <span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">IdentityDbContext&lt;ApplicationUser&gt;</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">public</span> <span style="color: #f8f8f2">DbSet&lt;BaseLog&gt;</span> <span style="color: #f8f8f2">Logs</span> <span style="color: #f8f8f2">{</span> <span style="color: #66d9ef">get</span><span style="color: #f8f8f2">;</span> <span style="color: #66d9ef">set</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">}</span>
+        <span style="color: #f8f8f2">...</span>
+
+        <span style="color: #66d9ef">protected</span> <span style="color: #66d9ef">override</span> <span style="color: #66d9ef">void</span> <span style="color: #a6e22e">OnModelCreating</span><span style="color: #f8f8f2">(ModelBuilder</span> <span style="color: #f8f8f2">builder)</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">base</span><span style="color: #f8f8f2">.OnModelCreating(builder);</span>
+            <span style="color: #75715e">// These are required because BaseLog is not instantiable</span>
+            <span style="color: #f8f8f2">builder.Entity&lt;ActivityLog&gt;();</span>
+            <span style="color: #f8f8f2">builder.Entity&lt;ContactLog&gt;();</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">}</span>
+</pre></div>
+
+
+<p>Adding that <code>DbSet</code> has an unfortunate implication - I will have one big table
+of all logs for all users. It's not what I had in mind, but it shouldn't be a
+problem. EF deals with all the data association, and whatever DB backend I use
+should deal with persisting/replicating the table.</p>
+
+<p>The next step is to somehow get the user log data so it can be displayed and
+edited. This turned out to be a major roadblock. The first problem is that
+virtually no tutorials cover applications with per-user data. It seems asp.net
+applications only support users that consume content, not produce it? The other
+problem is that user handling seems to be Microsoft's fastest evolving API. I
+ran into a great deal of conflicting advice, and none of it was applicable to my
+situation.</p>
+
+<p>It seems that in previous versions there was a method called <code>GetUserId</code>. It
+seems to have had many homes but, when you could find it, you could use it to
+get your user model from the DB context. As far as I can tell that method has
+been obliterated from all current asp.net/mvc/ef code.</p>
+
+<p>After several hours reading and vetting code with Intellisense I effectively
+circled back to where I already was. I ended up at
+<a href="https://github.com/aspnet/Identity">this repo</a> looking at the sample
+controllers, which happen to look exactly like the autogen code in my
+project. The key to understanding what was going on though was a bullet I
+caught while reading through the
+<a href="https://docs.asp.net/en/latest/conceptual-overview/aspnet.html">asp.net core overview</a>:
+<em>Built-in dependency injection</em>.</p>
+
+<p>Here is the example that got me excited:
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">    <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">class</span> <span style="color: #a6e22e">ManageController</span> <span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">Controller</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">private</span> <span style="color: #66d9ef">readonly</span> <span style="color: #f8f8f2">UserManager&lt;ApplicationUser&gt;</span> <span style="color: #f8f8f2">_userManager;</span>
+        <span style="color: #f8f8f2">...</span>
+
+        <span style="color: #66d9ef">public</span> <span style="color: #a6e22e">ManageController</span><span style="color: #f8f8f2">(</span>
+        <span style="color: #f8f8f2">UserManager&lt;ApplicationUser&gt;</span> <span style="color: #f8f8f2">userManager,</span> <span style="color: #75715e">//&lt;- Where does this come from?</span>
+        <span style="color: #f8f8f2">...)</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">_userManager</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">userManager;</span>
+            <span style="color: #f8f8f2">...</span>
+        <span style="color: #f8f8f2">}</span>
+
+<span style="color: #a6e22e">        [HttpGet]</span>
+        <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">async</span> <span style="color: #f8f8f2">Task&lt;IActionResult&gt;</span> <span style="color: #f8f8f2">Index(...)</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">...</span>
+            <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">user</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">await</span> <span style="color: #f8f8f2">GetCurrentUserAsync();</span> <span style="color: #75715e">//&lt;- This is what I need</span>
+            <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">model</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">IndexViewModel</span>
+            <span style="color: #f8f8f2">{</span>
+                <span style="color: #f8f8f2">HasPassword</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">await</span> <span style="color: #f8f8f2">_userManager.HasPasswordAsync(user),</span>
+                <span style="color: #f8f8f2">PhoneNumber</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">await</span> <span style="color: #f8f8f2">_userManager.GetPhoneNumberAsync(user),</span>
+                <span style="color: #f8f8f2">...</span>
+            <span style="color: #f8f8f2">};</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #a6e22e">View</span><span style="color: #f8f8f2">(model);</span>
+        <span style="color: #f8f8f2">}</span>
+
+        <span style="color: #66d9ef">private</span> <span style="color: #f8f8f2">Task&lt;ApplicationUser&gt;</span> <span style="color: #f8f8f2">GetCurrentUserAsync()</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #75715e">// Using the thing from nowhere to get the thing I need</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">_userManager.GetUserAsync(HttpContext.User);</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">}</span>
+</pre></div>
+</p>
+
+<p>Here is what my controller looked like before:
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">    <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">class</span> <span style="color: #a6e22e">HomeController</span> <span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">Controller</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">private</span> <span style="color: #66d9ef">readonly</span> <span style="color: #f8f8f2">ApplicationDbContext</span> <span style="color: #f8f8f2">_context;</span>
+
+        <span style="color: #66d9ef">public</span> <span style="color: #a6e22e">HomeController</span><span style="color: #f8f8f2">(ApplicationDbContext</span> <span style="color: #f8f8f2">context)</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">_context</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">context;</span>
+        <span style="color: #f8f8f2">}</span>
+        <span style="color: #f8f8f2">...</span>
+    <span style="color: #f8f8f2">}</span>
+</pre></div>
+</p>
+
+<p>Despite the difference in shape between the example and my code I decided to try
+patching in what I needed:</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%">    <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">class</span> <span style="color: #a6e22e">HomeController</span> <span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">Controller</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">private</span> <span style="color: #66d9ef">readonly</span> <span style="color: #f8f8f2">ApplicationDbContext</span> <span style="color: #f8f8f2">_context;</span>
+        <span style="color: #66d9ef">private</span> <span style="color: #66d9ef">readonly</span> <span style="color: #f8f8f2">UserManager&lt;ApplicationUser&gt;</span> <span style="color: #f8f8f2">_userManager;</span>
+
+        <span style="color: #66d9ef">public</span> <span style="color: #a6e22e">HomeController</span><span style="color: #f8f8f2">(ApplicationDbContext</span> <span style="color: #f8f8f2">context,</span>
+                              <span style="color: #75715e">// Still don&#39;t know where it comes from:</span>
+                              <span style="color: #f8f8f2">UserManager&lt;ApplicationUser&gt;</span> <span style="color: #f8f8f2">userManager)</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">_context</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">context;</span>
+            <span style="color: #f8f8f2">_userManager</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">userManager;</span>
+        <span style="color: #f8f8f2">}</span>
+        <span style="color: #f8f8f2">...</span>
+    <span style="color: #f8f8f2">}</span>
+</pre></div>
+</p>
+
+<p>I added the helper method and used it in my &quot;Action&quot; method. I didn't get any
+intellisense warnings, and I was able to reference user.JobLogs, so I built the
+project, and VS reported &quot;Built successfully&quot;!</p>
+
+<p>It all sounds very promising, I was even able to run (Ctrl-F5) the server and
+exercise the page a little. Now to see if I can build the UI on it.</p>
+
+  </div>
+  <footer>
+    <div class="article-footer">
+      
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/c"><span></span>c#</a>
+    </li>
+    
+    <li>
+      <a href="/tags/asp.net-core"><span></span>asp.net core</a>
+    </li>
+    
+    <li>
+      <a href="/tags/mvc5"><span></span>mvc5&#43;</a>
+    </li>
+    
+    <li>
+      <a href="/tags/code"><span></span>code</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      
+      <div class="adsense">
+        <span class="sponsor-label">Sponsored link</span>
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="2442045076"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+      </div>
+      
+      
+<div id="share-buttons">
+  <ul>
+    
+    
+    
+    
+    <li>
+      <div class="g-plusone" data-size="medium"></div>
+    </li>
+    
+    
+  </ul>
+</div>
+
+
+      <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'SuperfComs';
+    var disqus_identifier = 'http:\/\/kitsu.github.io\/2016\/06\/09\/unemployment-project-03\/';
+    var disqus_title = 'Unemployment Project - Breakthrough';
+    var disqus_url = 'http:\/\/kitsu.github.io\/2016\/06\/09\/unemployment-project-03\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+      
+      <div id="pagenavigation-next-prev">
+        
+        <div id="pagenavigation-next">
+          <span class="pagenav-label">Previous</span>
+          <a href="http://kitsu.github.io/2016/06/08/unemployment-project-02/">Unemployment Project - Struggle</a>
+        </div>
+        
+        
+      </div>
+      
+    </div>
+  </footer>
+</div>
+        </div>
+        <div class="sidebar">
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Author</span>
+    </div>
+    <div id="author">
+      <span>Ed Blake</span>
+      <div>
+        
+        
+        <a href="https://plus.google.com/118323029386640613972"><i class="fa fa-google-plus-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://github.com/kitsu"><i class="fa fa-github-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://www.linkedin.com/in/edward-blake-b3601411b"><i class="fa fa-linkedin-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://stackoverflow.com/users/770443"><i class="fa fa-stack-overflow fa-2x" aria-hidden="true"></i></a>
+        
+      </div>
+    </div>
+  </div>
+  
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Categories</span>
+    </div>
+    <div class="categories">
+      <ul>
+        
+        <li>
+          <a href="/categories/blog"><span></span>blog (3)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/development"><span></span>development (14)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/hacks"><span></span>hacks (4)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/personal"><span></span>personal (2)</a>
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>RSS</span>
+    </div>
+    <div id="rss">
+      <a href="/index.xml" type="application/rss+xml" target="_blank">
+        <i class="fa fa-rss-square fa-2x" aria-hidden="true"></i>
+      </a>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Sponsored link</span>
+    </div>
+    <div class="adsense">
+      <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:inline-block;width:300px;height:600px"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="9965311870"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+    </div>
+  </div>
+  
+</div>
+
+      </div>
+      <footer>
+        <div id="site-footer-wrap">
+          <div id="site-footer">
+            <span>Powered by <a href="https://gohugo.io/">Hugo</a>.</span>
+            <span>
+              
+              © 2015 Ed Blake
+              
+           </span>
+           <span id="copyleft">
+              <a rel="license"
+                 href="http://creativecommons.org/licenses/by-sa/4.0/">
+                <img alt="Creative Commons License" style="border-width:0"
+                     src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" />
+              </a>
+            </span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
+

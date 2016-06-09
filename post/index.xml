@@ -7,8 +7,18 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© 2015 Ed Blake</copyright>
-    <lastBuildDate>Wed, 08 Jun 2016 19:16:20 -0700</lastBuildDate>
+    <lastBuildDate>Thu, 09 Jun 2016 12:22:09 -0700</lastBuildDate>
     <atom:link href="http://kitsu.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Unemployment Project - Breakthrough</title>
+      <link>http://kitsu.github.io/2016/06/09/unemployment-project-03/</link>
+      <pubDate>Thu, 09 Jun 2016 12:22:09 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/06/09/unemployment-project-03/</guid>
+      <description>&lt;p&gt;Surmounting the challenge of API churn in the MS ecosystem.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Unemployment Project - Struggle</title>
@@ -147,16 +157,6 @@
       
       <guid>http://kitsu.github.io/2016/05/20/pyqt4_cljs_02/</guid>
       <description>&lt;p&gt;Leiningen is the best, and Qt is... challenging.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>ClojureScript in PyQt4 QWebView - False start</title>
-      <link>http://kitsu.github.io/2016/05/19/pyqt_cljs_01/</link>
-      <pubDate>Thu, 19 May 2016 10:24:12 -0700</pubDate>
-      
-      <guid>http://kitsu.github.io/2016/05/19/pyqt_cljs_01/</guid>
-      <description>&lt;p&gt;Life is hard when you don&#39;t follow directions.&lt;/p&gt;
 </description>
     </item>
     
