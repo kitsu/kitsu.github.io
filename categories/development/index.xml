@@ -7,8 +7,18 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© 2015 Ed Blake</copyright>
-    <lastBuildDate>Thu, 09 Jun 2016 12:22:09 -0700</lastBuildDate>
+    <lastBuildDate>Fri, 10 Jun 2016 08:06:25 -0700</lastBuildDate>
     <atom:link href="http://kitsu.github.io/categories/development/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Unemployed Project - Untested</title>
+      <link>http://kitsu.github.io/2016/06/10/unemployed-project-04/</link>
+      <pubDate>Fri, 10 Jun 2016 08:06:25 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/06/10/unemployed-project-04/</guid>
+      <description>&lt;p&gt;Even more ecosystem problems, now with working forms.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Unemployment Project - Breakthrough</title>

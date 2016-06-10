@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="Hugo 0.15" />
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    
+    <link href="/index.xml" rel="alternate" type="application/rss+xml" title="Superfluous Comments" />
+    <link href="/index.xml" rel="feed" type="application/rss+xml" title="Superfluous Comments" />
+    
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+    
+    <script src="https://apis.google.com/js/platform.js" async defer>{lang: 'ja'}</script>
+    
+    <link rel="stylesheet" href="https://yandex.st/highlightjs/8.0/styles/default.min.css">
+    <script src="https://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <title>Unemployed Project - Untested | Superfluous Comments</title>
+    <meta name="Description" content="Even more ecosystem problems, now with working forms.
+">
+  </head>
+  <body>
+    <div id="wrap">
+      
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-77704589-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+      <header class="site-header">
+        <div class="site-header-left">
+          <a class="site-header-title" href="http://kitsu.github.io/">Superfluous Comments</a>
+        </div>
+      </header>
+      <div class="container">
+        <div id="main">
+
+<div class="article">
+  <header>
+    <div class="article-header">
+      <h1>Unemployed Project - Untested</h1>
+      <div class="article-meta">
+        <span class="posttime">2016/06/10</span>
+        
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/c"><span></span>c#</a>
+    </li>
+    
+    <li>
+      <a href="/tags/asp.net-core"><span></span>asp.net core</a>
+    </li>
+    
+    <li>
+      <a href="/tags/mvc5"><span></span>mvc5&#43;</a>
+    </li>
+    
+    <li>
+      <a href="/tags/code"><span></span>code</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      </div>
+    </div>
+  </header>
+  <div class="content">
+    <p>Even more ecosystem problems, now with working forms.</p>
+
+<p><hr/><br/>
+After yesterday's post I <em>was</em> going to dig into the UI side straight away but I
+got distracted by something shinny instead. I had run into several shallow
+guides to testing an asp.net application in my readings, and I thought it seemed
+like a good time to start adding tests.</p>
+
+<p>Now I think this project is a perfect example of where Test Driven Development
+makes no sense. To write tests you first need a place to put them. You need some
+infrastructure to build, run, and report them. Most importantly you need
+something coherent to build tests against. Thus far my primary test focus has
+been &quot;does all this work&quot;, and my testing has consisted of Intellisense prompts
+and building/running the app.</p>
+
+<p>Since I am starting to have some structure emerge from the haze though I would
+like to have tests inform development moving forward. First though I had some
+cleanup to do. I had seen a pattern pop up a number of times in yesterday's
+readings, and thinking about testing I could really feel it's motivations. In
+the code I posted yesterday I had the controller code coupled directly to the
+Entity Framework code, which means in testing I would need to either provide a
+fake EF implementation, or provide EF with a fake DB to make anything work.</p>
+
+<p>The pattern I used to decouple the controller from the EF-DB is called
+<em>repository</em>. It involves wrapping your data access layer in a simple collection
+interface. Thus in your application code it seems like you are just using a
+basic data type, and a basic data type is all you need in your tests.</p>
+
+<p>This is another case where I really feel handcuffed by static typing. Because I
+need to declare what <em>type</em> of thing I pass to my controller I then need to pass
+something of the correct type in my tests. In Python you don't need all that
+ceremony, you just pass in an object that has the expected methods/attributes
+and who cares what it is. I do actually like the formal specification provided
+by interfaces, but really it is just a list of required members - not a type.</p>
+
+<p>Anyway, here are the changes I made:
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #66d9ef">namespace</span> <span style="color: #f8f8f2">JobLogger.Controllers</span>
+<span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">class</span> <span style="color: #a6e22e">HomeController</span> <span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">Controller</span>
+    <span style="color: #f8f8f2">{</span>
+
+        <span style="color: #75715e">// The references to the DbContext and UserManager are</span>
+        <span style="color: #75715e">// replaced by the new repo interface</span>
+        <span style="color: #66d9ef">private</span> <span style="color: #66d9ef">readonly</span> <span style="color: #f8f8f2">ILogRepository</span> <span style="color: #f8f8f2">_logRepository;</span>
+
+        <span style="color: #66d9ef">public</span> <span style="color: #a6e22e">HomeController</span><span style="color: #f8f8f2">(ILogRepository</span> <span style="color: #f8f8f2">logRepository)</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">_logRepository</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">logRepository;</span>
+        <span style="color: #f8f8f2">}</span>
+        
+        <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">async</span> <span style="color: #f8f8f2">Task&lt;IActionResult&gt;</span> <span style="color: #f8f8f2">Index()</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #75715e">// The current user is one dependency I couldn&#39;t unravel</span>
+            <span style="color: #75715e">// though I think the controller context can be mocked in testing</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #a6e22e">View</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">await</span> <span style="color: #f8f8f2">_logRepository.JobLogs(HttpContext.User));</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #75715e">// In LogRepository.cs</span>
+<span style="color: #66d9ef">namespace</span> <span style="color: #f8f8f2">JobLogger.Models</span>
+<span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">interface</span> <span style="color: #f8f8f2">ILogRepository</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">Task&lt;IEnumerable&lt;BaseLog&gt;&gt;</span> <span style="color: #f8f8f2">JobLogs(IPrincipal</span> <span style="color: #f8f8f2">user);</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">class</span> <span style="color: #a6e22e">LogRepository</span> <span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">ILogRepository</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #75715e">// The LogRepository implementation now bears the burden of</span>
+        <span style="color: #75715e">// data layer coupling</span>
+        <span style="color: #66d9ef">private</span> <span style="color: #66d9ef">readonly</span> <span style="color: #f8f8f2">UserManager&lt;ApplicationUser&gt;</span> <span style="color: #f8f8f2">_userManager;</span>
+
+        <span style="color: #66d9ef">public</span> <span style="color: #a6e22e">LogRepository</span><span style="color: #f8f8f2">(UserManager&lt;ApplicationUser&gt;</span> <span style="color: #f8f8f2">userManager)</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">_userManager</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">userManager;</span>
+        <span style="color: #f8f8f2">}</span>
+
+        <span style="color: #75715e">// Here user log access just looks like requesting a list from somewhere</span>
+        <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">async</span> <span style="color: #f8f8f2">Task&lt;IEnumerable&lt;BaseLog&gt;&gt;</span> <span style="color: #f8f8f2">JobLogs(IPrincipal</span> <span style="color: #f8f8f2">user)</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">cuser</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">await</span> <span style="color: #f8f8f2">_userManager.GetUserAsync((ClaimsPrincipal)user);</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(cuser</span> <span style="color: #f8f8f2">!=</span> <span style="color: #66d9ef">null</span><span style="color: #f8f8f2">)</span>
+            <span style="color: #f8f8f2">{</span>
+                <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">logs</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">cuser.JobLogs;</span>
+                <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(logs</span> <span style="color: #f8f8f2">!=</span> <span style="color: #66d9ef">null</span><span style="color: #f8f8f2">)</span> <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">logs.ToList();</span>
+            <span style="color: #f8f8f2">}</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">List&lt;BaseLog&gt;();</span>
+        <span style="color: #f8f8f2">}</span>
+
+        <span style="color: #75715e">// Other methods will be added for other CRUD operations</span>
+        <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">void</span> <span style="color: #a6e22e">Add</span><span style="color: #f8f8f2">(BaseLog</span> <span style="color: #f8f8f2">log,</span> <span style="color: #f8f8f2">IPrincipal</span> <span style="color: #f8f8f2">user){}</span>
+    <span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #75715e">// In Startup.cs</span>
+<span style="color: #66d9ef">namespace</span> <span style="color: #f8f8f2">JobLogger</span>
+<span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">class</span> <span style="color: #a6e22e">Startup</span>
+    <span style="color: #f8f8f2">{</span>
+    <span style="color: #f8f8f2">...</span>
+        <span style="color: #75715e">// In the Starup.Configureservices method is were the Dependency</span>
+        <span style="color: #75715e">// Injection magic happens, just adding our &quot;service&quot; is enough</span>
+        <span style="color: #75715e">// to get it populated for the controller</span>
+        <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">void</span> <span style="color: #a6e22e">ConfigureServices</span><span style="color: #f8f8f2">(IServiceCollection</span> <span style="color: #f8f8f2">services)</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">...</span>
+            <span style="color: #75715e">// Add application services.</span>
+            <span style="color: #f8f8f2">services.AddScoped&lt;ILogRepository,</span> <span style="color: #f8f8f2">LogRepository&gt;();</span>
+            <span style="color: #f8f8f2">...</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">...</span>
+    <span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">}</span>
+</pre></div>
+</p>
+
+<p>I think it cleaned up pretty nicely. I am annoyed at how the user argument is
+conjured inside the Index method. Since the user is only known by the context at
+runtime though I couldn't really pull it out of the controller. It all looks
+pretty simple, but it did take some research and mental gymnastics to get into
+shape.</p>
+
+<p>With that sorted I turned to writing tests. Or at least I would have. I spent
+hours reading the Internet, and tried no less than six times to get some testing
+configuration that would work. All the tutorials (including the MS
+Documentation) were wrong, none of the frameworks or templates worked, there was
+no configuration that would just work. Even after I restructured the whole
+project, rebuilt the whole thing from scratch, nothing worked.</p>
+
+<p>After wasting so much time on that pointless pursuit I only had the late hours
+of the night to play with the UI. And oh surprise, despite the lack of test
+evidence, every thing did in fact work. Playing with Bootstrap is fun, and the
+results are reasonably attractive. It is Friday today, and I still believe I can
+have something usable by Monday (first day I need to record my log).</p>
+
+<p>I will have to try again some time, but right now I am tired of wrestling with the
+MS morass.</p>
+
+  </div>
+  <footer>
+    <div class="article-footer">
+      
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/c"><span></span>c#</a>
+    </li>
+    
+    <li>
+      <a href="/tags/asp.net-core"><span></span>asp.net core</a>
+    </li>
+    
+    <li>
+      <a href="/tags/mvc5"><span></span>mvc5&#43;</a>
+    </li>
+    
+    <li>
+      <a href="/tags/code"><span></span>code</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      
+      <div class="adsense">
+        <span class="sponsor-label">Sponsored link</span>
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="2442045076"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+      </div>
+      
+      
+<div id="share-buttons">
+  <ul>
+    
+    
+    
+    
+    <li>
+      <div class="g-plusone" data-size="medium"></div>
+    </li>
+    
+    
+  </ul>
+</div>
+
+
+      <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'SuperfComs';
+    var disqus_identifier = 'http:\/\/kitsu.github.io\/2016\/06\/10\/unemployed-project-04\/';
+    var disqus_title = 'Unemployed Project - Untested';
+    var disqus_url = 'http:\/\/kitsu.github.io\/2016\/06\/10\/unemployed-project-04\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+      
+      <div id="pagenavigation-next-prev">
+        
+        <div id="pagenavigation-next">
+          <span class="pagenav-label">Previous</span>
+          <a href="http://kitsu.github.io/2016/06/09/unemployment-project-03/">Unemployment Project - Breakthrough</a>
+        </div>
+        
+        
+      </div>
+      
+    </div>
+  </footer>
+</div>
+        </div>
+        <div class="sidebar">
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Author</span>
+    </div>
+    <div id="author">
+      <span>Ed Blake</span>
+      <div>
+        
+        
+        <a href="https://plus.google.com/118323029386640613972"><i class="fa fa-google-plus-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://github.com/kitsu"><i class="fa fa-github-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://www.linkedin.com/in/edward-blake-b3601411b"><i class="fa fa-linkedin-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://stackoverflow.com/users/770443"><i class="fa fa-stack-overflow fa-2x" aria-hidden="true"></i></a>
+        
+      </div>
+    </div>
+  </div>
+  
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Categories</span>
+    </div>
+    <div class="categories">
+      <ul>
+        
+        <li>
+          <a href="/categories/blog"><span></span>blog (3)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/development"><span></span>development (15)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/hacks"><span></span>hacks (4)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/personal"><span></span>personal (2)</a>
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>RSS</span>
+    </div>
+    <div id="rss">
+      <a href="/index.xml" type="application/rss+xml" target="_blank">
+        <i class="fa fa-rss-square fa-2x" aria-hidden="true"></i>
+      </a>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Sponsored link</span>
+    </div>
+    <div class="adsense">
+      <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:inline-block;width:300px;height:600px"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="9965311870"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+    </div>
+  </div>
+  
+</div>
+
+      </div>
+      <footer>
+        <div id="site-footer-wrap">
+          <div id="site-footer">
+            <span>Powered by <a href="https://gohugo.io/">Hugo</a>.</span>
+            <span>
+              
+              © 2015 Ed Blake
+              
+           </span>
+           <span id="copyleft">
+              <a rel="license"
+                 href="http://creativecommons.org/licenses/by-sa/4.0/">
+                <img alt="Creative Commons License" style="border-width:0"
+                     src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" />
+              </a>
+            </span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
+
