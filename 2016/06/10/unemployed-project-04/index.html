@@ -131,7 +131,7 @@ by interfaces, but really it is just a list of required members - not a type.</p
         <span style="color: #f8f8f2">{</span>
             <span style="color: #75715e">// The current user is one dependency I couldn&#39;t unravel</span>
             <span style="color: #75715e">// though I think the controller context can be mocked in testing</span>
-            <span style="color: #66d9ef">return</span> <span style="color: #a6e22e">View</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">await</span> <span style="color: #f8f8f2">_logRepository.JobLogs(HttpContext.User));</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #a6e22e">View</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">await</span> <span style="color: #f8f8f2">_logRepository.JobLogsAsync(HttpContext.User));</span>
         <span style="color: #f8f8f2">}</span>
     <span style="color: #f8f8f2">}</span>
 <span style="color: #f8f8f2">}</span>
@@ -141,7 +141,7 @@ by interfaces, but really it is just a list of required members - not a type.</p
 <span style="color: #f8f8f2">{</span>
     <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">interface</span> <span style="color: #f8f8f2">ILogRepository</span>
     <span style="color: #f8f8f2">{</span>
-        <span style="color: #f8f8f2">Task&lt;IEnumerable&lt;BaseLog&gt;&gt;</span> <span style="color: #f8f8f2">JobLogs(IPrincipal</span> <span style="color: #f8f8f2">user);</span>
+        <span style="color: #f8f8f2">Task&lt;IEnumerable&lt;BaseLog&gt;&gt;</span> <span style="color: #f8f8f2">JobLogsAsync(IPrincipal</span> <span style="color: #f8f8f2">user);</span>
     <span style="color: #f8f8f2">}</span>
 
     <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">class</span> <span style="color: #a6e22e">LogRepository</span> <span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">ILogRepository</span>
@@ -156,7 +156,7 @@ by interfaces, but really it is just a list of required members - not a type.</p
         <span style="color: #f8f8f2">}</span>
 
         <span style="color: #75715e">// Here user log access just looks like requesting a list from somewhere</span>
-        <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">async</span> <span style="color: #f8f8f2">Task&lt;IEnumerable&lt;BaseLog&gt;&gt;</span> <span style="color: #f8f8f2">JobLogs(IPrincipal</span> <span style="color: #f8f8f2">user)</span>
+        <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">async</span> <span style="color: #f8f8f2">Task&lt;IEnumerable&lt;BaseLog&gt;&gt;</span> <span style="color: #f8f8f2">JobLogsAsync(IPrincipal</span> <span style="color: #f8f8f2">user)</span>
         <span style="color: #f8f8f2">{</span>
             <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">cuser</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">await</span> <span style="color: #f8f8f2">_userManager.GetUserAsync((ClaimsPrincipal)user);</span>
             <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(cuser</span> <span style="color: #f8f8f2">!=</span> <span style="color: #66d9ef">null</span><span style="color: #f8f8f2">)</span>
