@@ -7,8 +7,18 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© 2015 Ed Blake</copyright>
-    <lastBuildDate>Fri, 10 Jun 2016 08:06:25 -0700</lastBuildDate>
+    <lastBuildDate>Sun, 12 Jun 2016 16:03:48 -0700</lastBuildDate>
     <atom:link href="http://kitsu.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Unemployed Project - Frontend</title>
+      <link>http://kitsu.github.io/2016/06/12/unemployed-project-05/</link>
+      <pubDate>Sun, 12 Jun 2016 16:03:48 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/06/12/unemployed-project-05/</guid>
+      <description>&lt;p&gt;Fun with Bootstrap, JQuery, Knockout, Typescript, and more.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Unemployed Project - Untested</title>
@@ -147,16 +157,6 @@
       
       <guid>http://kitsu.github.io/2016/05/23/pyqt4_cljs_04/</guid>
       <description>&lt;p&gt;Higher order event channels for consistent interactions.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>ClojureScript in PyQt4 QWebView - Code</title>
-      <link>http://kitsu.github.io/2016/05/21/pyqt4_cljs_03/</link>
-      <pubDate>Sat, 21 May 2016 13:12:37 -0700</pubDate>
-      
-      <guid>http://kitsu.github.io/2016/05/21/pyqt4_cljs_03/</guid>
-      <description>&lt;p&gt;&lt;em&gt;Actually&lt;/em&gt; coding the ClojureScript prototype.&lt;/p&gt;
 </description>
     </item>
     

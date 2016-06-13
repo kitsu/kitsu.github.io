@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Typescript on Superfluous Comments</title>
+    <link>http://kitsu.github.io/tags/typescript/</link>
+    <description>Recent content in Typescript on Superfluous Comments</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>© 2015 Ed Blake</copyright>
+    <lastBuildDate>Sun, 12 Jun 2016 16:03:48 -0700</lastBuildDate>
+    <atom:link href="http://kitsu.github.io/tags/typescript/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Unemployed Project - Frontend</title>
+      <link>http://kitsu.github.io/2016/06/12/unemployed-project-05/</link>
+      <pubDate>Sun, 12 Jun 2016 16:03:48 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/06/12/unemployed-project-05/</guid>
+      <description>&lt;p&gt;Fun with Bootstrap, JQuery, Knockout, Typescript, and more.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

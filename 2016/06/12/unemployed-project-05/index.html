@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="Hugo 0.15" />
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    
+    <link href="/index.xml" rel="alternate" type="application/rss+xml" title="Superfluous Comments" />
+    <link href="/index.xml" rel="feed" type="application/rss+xml" title="Superfluous Comments" />
+    
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+    
+    <script src="https://apis.google.com/js/platform.js" async defer>{lang: 'ja'}</script>
+    
+    <link rel="stylesheet" href="https://yandex.st/highlightjs/8.0/styles/default.min.css">
+    <script src="https://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <title>Unemployed Project - Frontend | Superfluous Comments</title>
+    <meta name="Description" content="Fun with Bootstrap, JQuery, Knockout, Typescript, and more.
+">
+  </head>
+  <body>
+    <div id="wrap">
+      
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-77704589-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+      <header class="site-header">
+        <div class="site-header-left">
+          <a class="site-header-title" href="http://kitsu.github.io/">Superfluous Comments</a>
+        </div>
+      </header>
+      <div class="container">
+        <div id="main">
+
+<div class="article">
+  <header>
+    <div class="article-header">
+      <h1>Unemployed Project - Frontend</h1>
+      <div class="article-meta">
+        <span class="posttime">2016/06/12</span>
+        
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/c"><span></span>c#</a>
+    </li>
+    
+    <li>
+      <a href="/tags/asp.net-core"><span></span>asp.net core</a>
+    </li>
+    
+    <li>
+      <a href="/tags/mvc5"><span></span>mvc5&#43;</a>
+    </li>
+    
+    <li>
+      <a href="/tags/code"><span></span>code</a>
+    </li>
+    
+    <li>
+      <a href="/tags/typescript"><span></span>typescript</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      </div>
+    </div>
+  </header>
+  <div class="content">
+    <p>Fun with Bootstrap, JQuery, Knockout, Typescript, and more.</p>
+
+<p><hr /><br />
+So I finally spent some time to build the log forms. I started by trying to
+build the forms using plain old html with some Bootstrap for layout. It wasn't
+working very well though so I stopped to take a deeper read through the Bootstrap
+docs. I learned a lot of things along the way. It turns out Bootstrap expects
+forms to be structured in a very specific way to participate in grid sizing and
+styling.</p>
+
+<p>The keys are:</p>
+
+<ul>
+<li>Add <code>class=&quot;form-horizontal&quot;</code> to the form (makes a form act as a grid container).</li>
+<li>Wrap <code>row</code>s of controls in <code>&lt;div class=&quot;form-group&quot;&gt;</code>.</li>
+<li>Add a <code>&lt;label class=&quot;control-label&quot;&gt;</code> for every control (mainly for accessibility?).</li>
+<li>Add <code>class=&quot;form-control&quot;</code> to every control.</li>
+</ul>
+
+<p>Here is the form part of the <em>Activity Log</em>:
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">&lt;</span><span style="color: #f92672">form</span> <span style="color: #a6e22e">id</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;LogActivity&quot;</span> <span style="color: #a6e22e">class</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;form-horizontal&quot;</span> <span style="color: #a6e22e">data-bind</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;submit: postLog&quot;</span><span style="color: #f8f8f2">&gt;</span>
+    <span style="color: #f8f8f2">&lt;</span><span style="color: #f92672">div</span> <span style="color: #a6e22e">class</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;form-group&quot;</span><span style="color: #f8f8f2">&gt;</span>
+        <span style="color: #f8f8f2">&lt;</span><span style="color: #f92672">label</span> <span style="color: #a6e22e">for</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;LogActDate&quot;</span> <span style="color: #a6e22e">class</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;col-md-1 control-label&quot;</span><span style="color: #f8f8f2">&gt;</span>Date<span style="color: #f8f8f2">&lt;/</span><span style="color: #f92672">label</span><span style="color: #f8f8f2">&gt;</span>
+        <span style="color: #f8f8f2">&lt;</span><span style="color: #f92672">div</span> <span style="color: #a6e22e">class</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;col-md-4&quot;</span><span style="color: #f8f8f2">&gt;</span>
+            <span style="color: #f8f8f2">&lt;</span><span style="color: #f92672">input</span> <span style="color: #a6e22e">type</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;date&quot;</span> <span style="color: #a6e22e">class</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;form-control&quot;</span> <span style="color: #a6e22e">id</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;LogActDate&quot;</span>
+                   <span style="color: #a6e22e">data-bind</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;value: LogDate&quot;</span> <span style="color: #f8f8f2">/&gt;</span>
+        <span style="color: #f8f8f2">&lt;/</span><span style="color: #f92672">div</span><span style="color: #f8f8f2">&gt;</span>
+        <span style="color: #f8f8f2">&lt;</span><span style="color: #f92672">label</span> <span style="color: #a6e22e">for</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;LogLoc&quot;</span> <span style="color: #a6e22e">class</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;col-md-1 control-label&quot;</span><span style="color: #f8f8f2">&gt;</span>Location<span style="color: #f8f8f2">&lt;/</span><span style="color: #f92672">label</span><span style="color: #f8f8f2">&gt;</span>
+        <span style="color: #f8f8f2">&lt;</span><span style="color: #f92672">div</span> <span style="color: #a6e22e">class</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;col-md-6&quot;</span><span style="color: #f8f8f2">&gt;</span>
+            <span style="color: #f8f8f2">&lt;</span><span style="color: #f92672">input</span> <span style="color: #a6e22e">type</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;text&quot;</span> <span style="color: #a6e22e">class</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;form-control&quot;</span> <span style="color: #a6e22e">id</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;LogLoc&quot;</span>
+                   <span style="color: #a6e22e">maxlength</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;64&quot;</span> <span style="color: #a6e22e">placeholder</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;e.g. WorkSource&quot;</span>
+                   <span style="color: #a6e22e">data-bind</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;value: Location&quot;</span> <span style="color: #f8f8f2">/&gt;</span>
+        <span style="color: #f8f8f2">&lt;/</span><span style="color: #f92672">div</span><span style="color: #f8f8f2">&gt;</span>
+    <span style="color: #f8f8f2">&lt;/</span><span style="color: #f92672">div</span><span style="color: #f8f8f2">&gt;</span>
+    <span style="color: #f8f8f2">&lt;</span><span style="color: #f92672">div</span> <span style="color: #a6e22e">class</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;form-group&quot;</span><span style="color: #f8f8f2">&gt;</span>
+        <span style="color: #f8f8f2">&lt;</span><span style="color: #f92672">label</span> <span style="color: #a6e22e">for</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;LogActDesc&quot;</span> <span style="color: #a6e22e">class</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;col-md-1 control-label&quot;</span><span style="color: #f8f8f2">&gt;</span>Description<span style="color: #f8f8f2">&lt;/</span><span style="color: #f92672">label</span><span style="color: #f8f8f2">&gt;</span>
+        <span style="color: #f8f8f2">&lt;</span><span style="color: #f92672">div</span> <span style="color: #a6e22e">class</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;col-md-11&quot;</span><span style="color: #f8f8f2">&gt;</span>
+            <span style="color: #f8f8f2">&lt;</span><span style="color: #f92672">textarea</span> <span style="color: #a6e22e">class</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;form-control&quot;</span> <span style="color: #a6e22e">id</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;LogActDesc&quot;</span> <span style="color: #a6e22e">rows</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;5&quot;</span>
+                      <span style="color: #a6e22e">maxlength</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;256&quot;</span> <span style="color: #a6e22e">placeholder</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;Required&quot;</span>
+                      <span style="color: #a6e22e">data-bind</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;value: Description&quot;</span><span style="color: #f8f8f2">&gt;&lt;/</span><span style="color: #f92672">textarea</span><span style="color: #f8f8f2">&gt;</span>
+        <span style="color: #f8f8f2">&lt;/</span><span style="color: #f92672">div</span><span style="color: #f8f8f2">&gt;</span>
+    <span style="color: #f8f8f2">&lt;/</span><span style="color: #f92672">div</span><span style="color: #f8f8f2">&gt;</span>
+    <span style="color: #f8f8f2">&lt;</span><span style="color: #f92672">div</span> <span style="color: #a6e22e">class</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;form-group&quot;</span><span style="color: #f8f8f2">&gt;</span>
+        <span style="color: #f8f8f2">&lt;</span><span style="color: #f92672">div</span> <span style="color: #a6e22e">class</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;col-md-2 col-md-offset-10&quot;</span><span style="color: #f8f8f2">&gt;</span>
+            <span style="color: #f8f8f2">&lt;</span><span style="color: #f92672">button</span> <span style="color: #a6e22e">type</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;submit&quot;</span> <span style="color: #a6e22e">class</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;form-control btn-primary&quot;</span> <span style="color: #a6e22e">id</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;LogActSubmit&quot;</span><span style="color: #f8f8f2">&gt;</span>
+                Add Log
+            <span style="color: #f8f8f2">&lt;/</span><span style="color: #f92672">button</span><span style="color: #f8f8f2">&gt;</span>
+        <span style="color: #f8f8f2">&lt;/</span><span style="color: #f92672">div</span><span style="color: #f8f8f2">&gt;</span>
+    <span style="color: #f8f8f2">&lt;/</span><span style="color: #f92672">div</span><span style="color: #f8f8f2">&gt;</span>
+    <span style="color: #75715e">&lt;!-- This is just for debugging --&gt;</span>
+    <span style="color: #f8f8f2">&lt;</span><span style="color: #f92672">pre</span> <span style="color: #a6e22e">data-bind</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;text: ko.toJSON(actModel)&quot;</span><span style="color: #f8f8f2">&gt;&lt;/</span><span style="color: #f92672">pre</span><span style="color: #f8f8f2">&gt;</span>
+<span style="color: #f8f8f2">&lt;/</span><span style="color: #f92672">form</span><span style="color: #f8f8f2">&gt;</span>
+</pre></div>
+</p>
+
+<p>I put an ID on every control thinking that on submit I would use them to pull
+all the values out. I am posting JSON data back to the server with jquery's
+ajax method, and I prototyped the submit function long before I had everything
+built. Once I had everything built though I just couldn't see pulling all that
+data out manually. I actually have two forms on the page hidden by tabs, and the
+second form has nearly a dozen fields.</p>
+
+<p>I just saw <a href="http://knockoutjs.com/">Knockout.js</a> for the time the other day. It
+seemed like a neat idea, kind of reminds me of Clojure atom watches, or
+<a href="https://github.com/hoplon/javelin">Javelin</a> cells. It lets you make declarative
+data bindings between a data structure and the DOM. It also provides an easy way
+to hook up to form submission, and serialize a bound data structure to json. It
+turns out to be a perfect fit for this application. Because of the way the
+bindings work I don't need to figure out what was submitted, each form just has
+it's own model that does the right thing.</p>
+
+<p>While reading through the Knockout docs I was thinking how nicely it would go
+with <a href="https://www.typescriptlang.org/docs/tutorial.html">Typescript</a>. Setting up
+Typescript in my VS project wasn't too hard, but it was a little messy. You need
+to tweak your project.js, edit your Gulp build, you need to use npm to install a
+commandline tool to use Javascript modules, etc. The docs make it pretty clear
+but it's a lot of hoops. Initially I thought I could use Typescript's simplified
+inheritance syntax to let the forms share common information, but that didn't
+work out. I still think the typing helped me out a little.</p>
+
+<p>Here are my models:
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #66d9ef">class</span> <span style="color: #a6e22e">ActLogModel</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">static</span> <span style="color: #a6e22e">AjaxOptions</span>: <span style="color: #66d9ef">any</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #a6e22e">url</span><span style="color: #f92672">:</span> <span style="color: #e6db74">&quot;/LogLists/AddActivity&quot;</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #a6e22e">type</span><span style="color: #f92672">:</span> <span style="color: #e6db74">&quot;POST&quot;</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #a6e22e">contentType</span><span style="color: #f92672">:</span> <span style="color: #e6db74">&quot;application/json&quot;</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #a6e22e">processData</span>: <span style="color: #66d9ef">false</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #a6e22e">data</span><span style="color: #f92672">:</span> <span style="color: #e6db74">&quot;{}&quot;</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #a6e22e">dataType</span><span style="color: #f92672">:</span> <span style="color: #e6db74">&quot;json&quot;</span>
+    <span style="color: #f8f8f2">};</span>
+    <span style="color: #a6e22e">LogDate</span>: <span style="color: #66d9ef">KnockoutObservable</span><span style="color: #f92672">&lt;</span><span style="color: #66d9ef">string</span><span style="color: #f92672">&gt;</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #a6e22e">Description</span> : <span style="color: #66d9ef">KnockoutObservable</span><span style="color: #f92672">&lt;</span><span style="color: #66d9ef">string</span><span style="color: #f92672">&gt;</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #a6e22e">Location</span>: <span style="color: #66d9ef">KnockoutObservable</span><span style="color: #f92672">&lt;</span><span style="color: #66d9ef">string</span><span style="color: #f92672">&gt;</span><span style="color: #f8f8f2">;</span>
+
+    <span style="color: #66d9ef">constructor</span><span style="color: #f8f8f2">()</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">let</span> <span style="color: #a6e22e">date</span>: <span style="color: #66d9ef">string</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">moment</span><span style="color: #f8f8f2">().</span><span style="color: #a6e22e">format</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&quot;YYYY-MM-DD&quot;</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #66d9ef">this</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">LogDate</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">ko</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">observable</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">date</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #66d9ef">this</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">Description</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">ko</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">observable</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&quot;&quot;</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #66d9ef">this</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">Location</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">ko</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">observable</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&quot;&quot;</span><span style="color: #f8f8f2">);</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #a6e22e">postLog</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">form</span>: <span style="color: #66d9ef">Element</span><span style="color: #f8f8f2">)</span><span style="color: #f92672">:</span> <span style="color: #66d9ef">void</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">let</span> <span style="color: #a6e22e">data</span>: <span style="color: #66d9ef">string</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">ko</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">toJSON</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">this</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #a6e22e">ActLogModel</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">AjaxOptions</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">data</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">data</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #a6e22e">console</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">log</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&quot;Posting: &quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #a6e22e">data</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #a6e22e">$</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">ajax</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">ActLogModel</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">AjaxOptions</span><span style="color: #f8f8f2">).</span><span style="color: #a6e22e">done</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">this</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">renderResult</span><span style="color: #f8f8f2">);</span>
+
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #a6e22e">renderResult</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">data</span>: <span style="color: #66d9ef">JSON</span><span style="color: #f8f8f2">)</span><span style="color: #f92672">:</span> <span style="color: #66d9ef">void</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #a6e22e">console</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">log</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">data</span><span style="color: #f8f8f2">);</span>
+    <span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #66d9ef">class</span> <span style="color: #a6e22e">ConLogModel</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">static</span> <span style="color: #a6e22e">AjaxOptions</span>: <span style="color: #66d9ef">any</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #a6e22e">url</span><span style="color: #f92672">:</span> <span style="color: #e6db74">&quot;/LogLists/AddContact&quot;</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #a6e22e">type</span><span style="color: #f92672">:</span> <span style="color: #e6db74">&quot;POST&quot;</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #a6e22e">contentType</span><span style="color: #f92672">:</span> <span style="color: #e6db74">&quot;application/json&quot;</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #a6e22e">processData</span>: <span style="color: #66d9ef">false</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #a6e22e">data</span><span style="color: #f92672">:</span> <span style="color: #e6db74">&quot;{}&quot;</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #a6e22e">dataType</span><span style="color: #f92672">:</span> <span style="color: #e6db74">&quot;json&quot;</span>
+    <span style="color: #f8f8f2">};</span>
+    <span style="color: #a6e22e">LogDate</span>: <span style="color: #66d9ef">KnockoutObservable</span><span style="color: #f92672">&lt;</span><span style="color: #66d9ef">string</span><span style="color: #f92672">&gt;</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #a6e22e">Description</span>: <span style="color: #66d9ef">KnockoutObservable</span><span style="color: #f92672">&lt;</span><span style="color: #66d9ef">string</span><span style="color: #f92672">&gt;</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #a6e22e">MethodType</span>: <span style="color: #66d9ef">KnockoutObservable</span><span style="color: #f92672">&lt;</span><span style="color: #66d9ef">string</span><span style="color: #f92672">&gt;</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #a6e22e">MeansType</span>: <span style="color: #66d9ef">KnockoutObservable</span><span style="color: #f92672">&lt;</span><span style="color: #66d9ef">string</span><span style="color: #f92672">&gt;</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #a6e22e">Employer</span>: <span style="color: #66d9ef">KnockoutObservable</span><span style="color: #f92672">&lt;</span><span style="color: #66d9ef">string</span><span style="color: #f92672">&gt;</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #a6e22e">Contact</span>: <span style="color: #66d9ef">KnockoutObservable</span><span style="color: #f92672">&lt;</span><span style="color: #66d9ef">string</span><span style="color: #f92672">&gt;</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #a6e22e">Phone</span>: <span style="color: #66d9ef">KnockoutObservable</span><span style="color: #f92672">&lt;</span><span style="color: #66d9ef">string</span><span style="color: #f92672">&gt;</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #a6e22e">Address</span>: <span style="color: #66d9ef">KnockoutObservable</span><span style="color: #f92672">&lt;</span><span style="color: #66d9ef">string</span><span style="color: #f92672">&gt;</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #a6e22e">City</span>: <span style="color: #66d9ef">KnockoutObservable</span><span style="color: #f92672">&lt;</span><span style="color: #66d9ef">string</span><span style="color: #f92672">&gt;</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #a6e22e">State</span>: <span style="color: #66d9ef">KnockoutObservable</span><span style="color: #f92672">&lt;</span><span style="color: #66d9ef">string</span><span style="color: #f92672">&gt;</span><span style="color: #f8f8f2">;</span>
+
+    <span style="color: #66d9ef">constructor</span><span style="color: #f8f8f2">()</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">let</span> <span style="color: #a6e22e">date</span>: <span style="color: #66d9ef">string</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">moment</span><span style="color: #f8f8f2">().</span><span style="color: #a6e22e">format</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&quot;YYYY-MM-DD&quot;</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #66d9ef">this</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">LogDate</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">ko</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">observable</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">date</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #66d9ef">this</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">Description</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">ko</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">observable</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&quot;&quot;</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #66d9ef">this</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">MethodType</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">ko</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">observable</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&quot;0&quot;</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #66d9ef">this</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">MeansType</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">ko</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">observable</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&quot;0&quot;</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #66d9ef">this</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">Employer</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">ko</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">observable</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&quot;&quot;</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #66d9ef">this</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">Contact</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">ko</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">observable</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&quot;&quot;</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #66d9ef">this</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">Phone</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">ko</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">observable</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&quot;&quot;</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #66d9ef">this</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">Address</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">ko</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">observable</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&quot;&quot;</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #66d9ef">this</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">City</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">ko</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">observable</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&quot;&quot;</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #66d9ef">this</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">State</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">ko</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">observable</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&quot;&quot;</span><span style="color: #f8f8f2">);</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #a6e22e">postLog</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">form</span>: <span style="color: #66d9ef">Element</span><span style="color: #f8f8f2">)</span><span style="color: #f92672">:</span> <span style="color: #66d9ef">void</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">let</span> <span style="color: #a6e22e">data</span>: <span style="color: #66d9ef">string</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">ko</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">toJSON</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">this</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #a6e22e">ConLogModel</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">AjaxOptions</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">data</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">data</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #a6e22e">console</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">log</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&quot;Posting: &quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #a6e22e">data</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #a6e22e">$</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">ajax</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">ConLogModel</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">AjaxOptions</span><span style="color: #f8f8f2">).</span><span style="color: #a6e22e">done</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">this</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">renderResult</span><span style="color: #f8f8f2">);</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #a6e22e">renderResult</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">data</span>: <span style="color: #66d9ef">JSON</span><span style="color: #f8f8f2">)</span><span style="color: #f92672">:</span> <span style="color: #66d9ef">void</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #a6e22e">console</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">log</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">data</span><span style="color: #f8f8f2">);</span>
+    <span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #75715e">// setup all the models and bind them to the view</span>
+<span style="color: #66d9ef">let</span> <span style="color: #a6e22e">actModel</span>: <span style="color: #66d9ef">ActLogModel</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">new</span> <span style="color: #a6e22e">ActLogModel</span><span style="color: #f8f8f2">();</span>
+<span style="color: #a6e22e">ko</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">applyBindings</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">actModel</span><span style="color: #f8f8f2">,</span> <span style="color: #a6e22e">$</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&quot;#LogActivity&quot;</span><span style="color: #f8f8f2">)[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]);</span>
+<span style="color: #66d9ef">let</span> <span style="color: #a6e22e">conModel</span>: <span style="color: #66d9ef">ConLogModel</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">new</span> <span style="color: #a6e22e">ConLogModel</span><span style="color: #f8f8f2">();</span>
+<span style="color: #a6e22e">ko</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">applyBindings</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">conModel</span><span style="color: #f8f8f2">,</span> <span style="color: #a6e22e">$</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&quot;#LogContact&quot;</span><span style="color: #f8f8f2">)[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]);</span>
+</pre></div>
+</p>
+
+<p>Due to how <code>&lt;input type=&quot;date&quot; /&gt;</code> values work I couldn't use a <code>&lt;Date&gt;</code>, and I
+had to add <a href="http://momentjs.com/">Moment.js</a> to handle date formatting because
+of insufficiencies in Javascript date handling. I also didn't bother casting my
+enums to numbers. The good news is that asp.net correctly handles the
+conversions on post!</p>
+
+<p>One thing that didn't work was Knockout binding to radio buttons. I am using
+Bootstrap to convert <code>&lt;input type=&quot;radio&quot; /&gt;</code> into proper buttons. In doing so
+Bootstrap consumes the click event and thus Knockout never sees updates. I did
+find a library that bridges the gap (and more). The
+<a href="https://faulknercs.github.io/Knockstrap/">Knockstrap</a> library allows a number
+of interesting interactions with Bootstrap UI components, but the library isn't
+hosted on any CDN.</p>
+
+<p>Rather than hast the whole library myself I chose to port just the relevant code
+to Typescript:</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #75715e">// Note: Typescript doesn&#39;t allow assigning new members to a type</span>
+<span style="color: #a6e22e">ko</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">bindingHandlers</span><span style="color: #f8f8f2">[</span><span style="color: #e6db74">&quot;radio&quot;</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #a6e22e">init</span>: <span style="color: #66d9ef">function</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">elem</span>: <span style="color: #66d9ef">Element</span><span style="color: #f8f8f2">,</span> <span style="color: #a6e22e">valueAccessor</span>: <span style="color: #66d9ef">KnockoutObservable</span><span style="color: #f92672">&lt;</span><span style="color: #a6e22e">any</span><span style="color: #f92672">&gt;</span><span style="color: #f8f8f2">)</span><span style="color: #f92672">:</span> <span style="color: #66d9ef">void</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(</span><span style="color: #f92672">!</span><span style="color: #a6e22e">ko</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">isObservable</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">valueAccessor</span><span style="color: #f8f8f2">()))</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">throw</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">Error(</span><span style="color: #e6db74">&quot;A radio binding should only be used with observable values.&quot;</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #f8f8f2">}</span>
+
+        <span style="color: #a6e22e">$</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">elem</span><span style="color: #f8f8f2">).</span><span style="color: #a6e22e">on</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&quot;change&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;input:radio&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #66d9ef">function</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">evt</span>: <span style="color: #66d9ef">Event</span><span style="color: #f8f8f2">)</span><span style="color: #f92672">:</span> <span style="color: #66d9ef">void</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #75715e">// add handler to event queue for defered execution</span>
+            <span style="color: #a6e22e">setTimeout</span><span style="color: #f8f8f2">(()</span> <span style="color: #f92672">=&gt;</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #66d9ef">let</span> <span style="color: #a6e22e">radio</span>: <span style="color: #66d9ef">JQuery</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">$</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">evt</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">target</span><span style="color: #f8f8f2">);</span>
+                <span style="color: #66d9ef">let</span> <span style="color: #a6e22e">value</span>: <span style="color: #66d9ef">any</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">valueAccessor</span><span style="color: #f8f8f2">();</span>
+                <span style="color: #66d9ef">let</span> <span style="color: #a6e22e">newValue</span>: <span style="color: #66d9ef">string</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">radio</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">val</span><span style="color: #f8f8f2">();</span>
+
+                <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(</span><span style="color: #f92672">!</span><span style="color: #a6e22e">radio</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">prop</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&quot;disabled&quot;</span><span style="color: #f8f8f2">))</span> <span style="color: #f8f8f2">{</span>
+                    <span style="color: #75715e">// this sets the observable</span>
+                    <span style="color: #a6e22e">value</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">newValue</span><span style="color: #f8f8f2">);</span>
+                <span style="color: #f8f8f2">}</span>
+            <span style="color: #f8f8f2">},</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #f8f8f2">});</span>
+    <span style="color: #f8f8f2">},</span>
+
+    <span style="color: #a6e22e">update</span>: <span style="color: #66d9ef">function</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">elem</span>: <span style="color: #66d9ef">Element</span><span style="color: #f8f8f2">,</span> <span style="color: #a6e22e">valueAccessor</span>: <span style="color: #66d9ef">KnockoutObservable</span><span style="color: #f92672">&lt;</span><span style="color: #a6e22e">any</span><span style="color: #f92672">&gt;</span><span style="color: #f8f8f2">)</span><span style="color: #f92672">:</span> <span style="color: #66d9ef">void</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">let</span> <span style="color: #a6e22e">value</span>: <span style="color: #66d9ef">string</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">ko</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">unwrap</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">valueAccessor</span><span style="color: #f8f8f2">())</span> <span style="color: #f92672">||</span> <span style="color: #e6db74">&quot;&quot;</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #66d9ef">let</span> <span style="color: #a6e22e">selector</span>: <span style="color: #66d9ef">string</span> <span style="color: #f92672">=</span> <span style="color: #e6db74">&#39;input[value=&quot;&#39;</span> <span style="color: #f92672">+</span> <span style="color: #a6e22e">value</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">replace</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">/&quot;/g</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;\\&quot;&#39;</span><span style="color: #f8f8f2">)</span> <span style="color: #f92672">+</span> <span style="color: #e6db74">&#39;&quot;]&#39;</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #66d9ef">let</span> <span style="color: #a6e22e">radioButton</span>: <span style="color: #66d9ef">JQuery</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">$</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">elem</span><span style="color: #f8f8f2">).</span><span style="color: #a6e22e">find</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">selector</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #66d9ef">let</span> <span style="color: #a6e22e">radioButtonWrapper</span>: <span style="color: #66d9ef">JQuery</span><span style="color: #f8f8f2">;</span> <span style="color: #75715e">// the radio grouping label</span>
+
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">radioButton</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">length</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #a6e22e">radioButtonWrapper</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">radioButton</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">parent</span><span style="color: #f8f8f2">();</span>
+            <span style="color: #a6e22e">radioButtonWrapper</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">siblings</span><span style="color: #f8f8f2">().</span><span style="color: #a6e22e">removeClass</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&quot;active&quot;</span><span style="color: #f8f8f2">);</span>
+            <span style="color: #a6e22e">radioButtonWrapper</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">addClass</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&quot;active&quot;</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #a6e22e">radioButtonWrapper</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">$</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">elem</span><span style="color: #f8f8f2">).</span><span style="color: #a6e22e">find</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&quot;.active&quot;</span><span style="color: #f8f8f2">);</span>
+            <span style="color: #a6e22e">radioButtonWrapper</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">removeClass</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&quot;active&quot;</span><span style="color: #f8f8f2">);</span>
+            <span style="color: #a6e22e">radioButtonWrapper</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">find</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&quot;input&quot;</span><span style="color: #f8f8f2">).</span><span style="color: #a6e22e">prop</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&quot;checked&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #66d9ef">false</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">};</span>
+</pre></div>
+</p>
+
+<p>And the html:
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">&lt;</span><span style="color: #f92672">div</span> <span style="color: #a6e22e">class</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;btn-group&quot;</span> <span style="color: #a6e22e">data-toggle</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;buttons&quot;</span>
+     <span style="color: #a6e22e">data-bind</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;radio: MethodType&quot;</span><span style="color: #f8f8f2">&gt;</span>
+    <span style="color: #f8f8f2">&lt;</span><span style="color: #f92672">label</span> <span style="color: #a6e22e">class</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;btn btn-primary active&quot;</span><span style="color: #f8f8f2">&gt;</span>
+        <span style="color: #f8f8f2">&lt;</span><span style="color: #f92672">input</span> <span style="color: #a6e22e">type</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;radio&quot;</span> <span style="color: #a6e22e">name</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;method&quot;</span> <span style="color: #a6e22e">id</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;methodApply&quot;</span>
+               <span style="color: #a6e22e">value</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;0&quot;</span> <span style="color: #a6e22e">autocomplete</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;off&quot;</span> <span style="color: #a6e22e">checked</span> <span style="color: #f8f8f2">/&gt;</span> Application
+    <span style="color: #f8f8f2">&lt;/</span><span style="color: #f92672">label</span><span style="color: #f8f8f2">&gt;</span>
+    <span style="color: #f8f8f2">&lt;</span><span style="color: #f92672">label</span> <span style="color: #a6e22e">class</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;btn btn-primary&quot;</span><span style="color: #f8f8f2">&gt;</span>
+        <span style="color: #f8f8f2">&lt;</span><span style="color: #f92672">input</span> <span style="color: #a6e22e">type</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;radio&quot;</span> <span style="color: #a6e22e">name</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;method&quot;</span> <span style="color: #a6e22e">id</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;methodInter&quot;</span>
+               <span style="color: #a6e22e">value</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;1&quot;</span> <span style="color: #a6e22e">autocomplete</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;off&quot;</span> <span style="color: #f8f8f2">/&gt;</span> Interview
+    <span style="color: #f8f8f2">&lt;/</span><span style="color: #f92672">label</span><span style="color: #f8f8f2">&gt;</span>
+    <span style="color: #f8f8f2">&lt;</span><span style="color: #f92672">label</span> <span style="color: #a6e22e">class</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;btn btn-primary&quot;</span><span style="color: #f8f8f2">&gt;</span>
+        <span style="color: #f8f8f2">&lt;</span><span style="color: #f92672">input</span> <span style="color: #a6e22e">type</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;radio&quot;</span> <span style="color: #a6e22e">name</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;method&quot;</span> <span style="color: #a6e22e">id</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;methodInquiry&quot;</span>
+               <span style="color: #a6e22e">value</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;2&quot;</span> <span style="color: #a6e22e">autocomplete</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;off&quot;</span> <span style="color: #f8f8f2">/&gt;</span> Inquery
+    <span style="color: #f8f8f2">&lt;/</span><span style="color: #f92672">label</span><span style="color: #f8f8f2">&gt;</span>
+<span style="color: #f8f8f2">&lt;/</span><span style="color: #f92672">div</span><span style="color: #f8f8f2">&gt;</span>
+</pre></div>
+</p>
+
+<p>Handling the submitted json in the controller was easy:
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #75715e">// POST: /LogLists/AddActivity</span>
+<span style="color: #a6e22e">[HttpPost]</span>
+<span style="color: #66d9ef">public</span> <span style="color: #66d9ef">async</span> <span style="color: #f8f8f2">Task&lt;JsonResult&gt;</span> <span style="color: #f8f8f2">AddActivity([FromBody]</span> <span style="color: #f8f8f2">ActivityLog</span> <span style="color: #f8f8f2">log)</span>
+<span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(ModelState.IsValid)</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">await</span> <span style="color: #f8f8f2">_logRepository.AddAsync(log,</span> <span style="color: #f8f8f2">HttpContext.User);</span>
+        <span style="color: #75715e">// Return a status and the processed data</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #a6e22e">Json</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">{good</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">true</span><span style="color: #f8f8f2">,</span>
+                         <span style="color: #f8f8f2">data</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">Json(log)</span>
+        <span style="color: #f8f8f2">});</span>
+    <span style="color: #f8f8f2">}</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #a6e22e">Json</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">{</span> <span style="color: #f8f8f2">good</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">false</span> <span style="color: #f8f8f2">});</span>
+<span style="color: #f8f8f2">}</span>
+</pre></div>
+</p>
+
+<p>With that my forms are done. I can build a pretty form, pull all the data out,
+send it up to the server, and convert it into a EF POCO.</p>
+
+<p>Once I got that far I of course tried to go the last yard and get the data
+persisted into the database. Unfortunately it seems what I was doing with the
+<code>ApplicationUser</code> doesn't actually work. Because of how I decoupled from the
+data store though, I can just swap in something else without any changes to my
+controller or frontend code. I'm thinking of just adding my own user data store
+keyed off the user ID I already found.</p>
+
+  </div>
+  <footer>
+    <div class="article-footer">
+      
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/c"><span></span>c#</a>
+    </li>
+    
+    <li>
+      <a href="/tags/asp.net-core"><span></span>asp.net core</a>
+    </li>
+    
+    <li>
+      <a href="/tags/mvc5"><span></span>mvc5&#43;</a>
+    </li>
+    
+    <li>
+      <a href="/tags/code"><span></span>code</a>
+    </li>
+    
+    <li>
+      <a href="/tags/typescript"><span></span>typescript</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      
+      <div class="adsense">
+        <span class="sponsor-label">Sponsored link</span>
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="2442045076"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+      </div>
+      
+      
+<div id="share-buttons">
+  <ul>
+    
+    
+    
+    
+    <li>
+      <div class="g-plusone" data-size="medium"></div>
+    </li>
+    
+    
+  </ul>
+</div>
+
+
+      <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'SuperfComs';
+    var disqus_identifier = 'http:\/\/kitsu.github.io\/2016\/06\/12\/unemployed-project-05\/';
+    var disqus_title = 'Unemployed Project - Frontend';
+    var disqus_url = 'http:\/\/kitsu.github.io\/2016\/06\/12\/unemployed-project-05\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+      
+      <div id="pagenavigation-next-prev">
+        
+        <div id="pagenavigation-next">
+          <span class="pagenav-label">Previous</span>
+          <a href="http://kitsu.github.io/2016/06/10/unemployed-project-04/">Unemployed Project - Untested</a>
+        </div>
+        
+        
+      </div>
+      
+    </div>
+  </footer>
+</div>
+        </div>
+        <div class="sidebar">
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Author</span>
+    </div>
+    <div id="author">
+      <span>Ed Blake</span>
+      <div>
+        
+        
+        <a href="https://plus.google.com/118323029386640613972"><i class="fa fa-google-plus-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://github.com/kitsu"><i class="fa fa-github-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://www.linkedin.com/in/edward-blake-b3601411b"><i class="fa fa-linkedin-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://stackoverflow.com/users/770443"><i class="fa fa-stack-overflow fa-2x" aria-hidden="true"></i></a>
+        
+      </div>
+    </div>
+  </div>
+  
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Categories</span>
+    </div>
+    <div class="categories">
+      <ul>
+        
+        <li>
+          <a href="/categories/blog"><span></span>blog (3)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/development"><span></span>development (16)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/hacks"><span></span>hacks (4)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/personal"><span></span>personal (2)</a>
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>RSS</span>
+    </div>
+    <div id="rss">
+      <a href="/index.xml" type="application/rss+xml" target="_blank">
+        <i class="fa fa-rss-square fa-2x" aria-hidden="true"></i>
+      </a>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Sponsored link</span>
+    </div>
+    <div class="adsense">
+      <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:inline-block;width:300px;height:600px"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="9965311870"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+    </div>
+  </div>
+  
+</div>
+
+      </div>
+      <footer>
+        <div id="site-footer-wrap">
+          <div id="site-footer">
+            <span>Powered by <a href="https://gohugo.io/">Hugo</a>.</span>
+            <span>
+              
+              © 2015 Ed Blake
+              
+           </span>
+           <span id="copyleft">
+              <a rel="license"
+                 href="http://creativecommons.org/licenses/by-sa/4.0/">
+                <img alt="Creative Commons License" style="border-width:0"
+                     src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" />
+              </a>
+            </span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
+
