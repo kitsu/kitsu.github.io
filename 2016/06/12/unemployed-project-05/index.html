@@ -81,7 +81,9 @@ ga('send', 'pageview');
     </div>
   </header>
   <div class="content">
-    <p>Fun with Bootstrap, JQuery, Knockout, Typescript, and more.</p>
+    
+
+<p>Fun with Bootstrap, JQuery, Knockout, Typescript, and more.</p>
 
 <p><hr /><br />
 So I finally spent some time to build the log forms. I started by trying to
@@ -354,6 +356,84 @@ persisted into the database. Unfortunately it seems what I was doing with the
 data store though, I can just swap in something else without any changes to my
 controller or frontend code. I'm thinking of just adding my own user data store
 keyed off the user ID I already found.</p>
+
+<h3 id="edit-scratch-that:508f4f4015f753e185876daeef4cead6">Edit - Scratch that</h3>
+
+<p>I just now got the per user lists working!</p>
+
+<p>The last problem I ran into was a <code>ClassCastException</code> casting an <code>IPrincipal</code>
+instance to an <code>ApplicationUser</code> while calling <code>_userManager.UpdateAsync</code>. All I
+needed to do was use the actual user I had acquired earlier in the method. While
+figuring that out though I also learned how to get access to the <code>HttpContext</code>
+in my repo object, removing the need to pass in the user from the controller.</p>
+
+<p>That fixed JobLog storage (confirmed in the database explorer), but I still
+couldn't see a user's log list. It
+<a href="https://msdn.microsoft.com/en-us/data/jj574232">turns out</a> EF7 doesn't
+rehydrate &quot;navigation properties&quot; automatically. Since I am getting
+access to the user object via the UserManager I also can't force child data
+inclusion. By including a db context in my repo object though I can query to get
+the user logs</p>
+
+<p>Updated LogRepository class:</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #66d9ef">public</span> <span style="color: #66d9ef">class</span> <span style="color: #a6e22e">LogRepository</span> <span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">ILogRepository</span>
+<span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">private</span> <span style="color: #66d9ef">readonly</span> <span style="color: #f8f8f2">IHttpContextAccessor</span> <span style="color: #f8f8f2">_httpContextAccessor;</span>
+    <span style="color: #66d9ef">private</span> <span style="color: #66d9ef">readonly</span> <span style="color: #f8f8f2">UserManager&lt;ApplicationUser&gt;</span> <span style="color: #f8f8f2">_userManager;</span>
+    <span style="color: #66d9ef">private</span> <span style="color: #66d9ef">readonly</span> <span style="color: #f8f8f2">ApplicationDbContext</span> <span style="color: #f8f8f2">_context;</span>
+
+    <span style="color: #66d9ef">public</span> <span style="color: #a6e22e">LogRepository</span><span style="color: #f8f8f2">(IHttpContextAccessor</span> <span style="color: #f8f8f2">httpContextAccessor,</span>
+                         <span style="color: #f8f8f2">UserManager&lt;ApplicationUser&gt;</span> <span style="color: #f8f8f2">userManager,</span>
+                         <span style="color: #f8f8f2">ApplicationDbContext</span> <span style="color: #f8f8f2">context)</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">_httpContextAccessor</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">httpContextAccessor;</span>
+        <span style="color: #f8f8f2">_userManager</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">userManager;</span>
+        <span style="color: #f8f8f2">_context</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">context;</span>    
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #66d9ef">private</span> <span style="color: #66d9ef">async</span> <span style="color: #f8f8f2">Task&lt;ApplicationUser&gt;</span> <span style="color: #f8f8f2">GetCurrentUser()</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">user</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">_httpContextAccessor.HttpContext.User;</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #66d9ef">await</span> <span style="color: #f8f8f2">_userManager.GetUserAsync(user);</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">async</span> <span style="color: #f8f8f2">Task&lt;IEnumerable&lt;BaseLog&gt;&gt;</span> <span style="color: #f8f8f2">JobLogsAsync()</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">cuser</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">await</span> <span style="color: #f8f8f2">GetCurrentUser();</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(cuser</span> <span style="color: #f8f8f2">!=</span> <span style="color: #66d9ef">null</span><span style="color: #f8f8f2">)</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">uid</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">cuser.Id;</span>
+            <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">logs</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">from</span> <span style="color: #f8f8f2">log</span> <span style="color: #66d9ef">in</span> <span style="color: #f8f8f2">_context.JobLogs</span>
+                       <span style="color: #66d9ef">where</span> <span style="color: #f8f8f2">log.ApplicationUser.Id</span> <span style="color: #f8f8f2">==</span> <span style="color: #f8f8f2">uid</span>
+                       <span style="color: #66d9ef">orderby</span> <span style="color: #f8f8f2">log.LogDate</span>
+                       <span style="color: #66d9ef">select</span> <span style="color: #f8f8f2">log;</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">logs.ToList();</span>
+        <span style="color: #f8f8f2">}</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">List&lt;BaseLog&gt;();</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">async</span> <span style="color: #f8f8f2">Task</span> <span style="color: #a6e22e">AddAsync</span><span style="color: #f8f8f2">(BaseLog</span> <span style="color: #f8f8f2">log)</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">cuser</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">await</span> <span style="color: #f8f8f2">GetCurrentUser();</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(cuser</span> <span style="color: #f8f8f2">!=</span> <span style="color: #66d9ef">null</span><span style="color: #f8f8f2">)</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(cuser.JobLogs</span> <span style="color: #f8f8f2">==</span> <span style="color: #66d9ef">null</span><span style="color: #f8f8f2">)</span>
+            <span style="color: #f8f8f2">{</span>
+                 <span style="color: #f8f8f2">cuser.JobLogs</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">List&lt;BaseLog&gt;();</span>
+            <span style="color: #f8f8f2">}</span>
+            <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">logs</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">cuser.JobLogs;</span>
+            <span style="color: #f8f8f2">log.Id</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">Guid();</span>
+            <span style="color: #f8f8f2">logs.Add(log);</span>
+            <span style="color: #66d9ef">await</span> <span style="color: #f8f8f2">_userManager.UpdateAsync(cuser);</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">}</span>
+</pre></div>
+</p>
+
+<p>With that I have all the key moving parts working and can finally start working
+on features.</p>
 
   </div>
   <footer>
