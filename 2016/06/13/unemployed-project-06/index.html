@@ -18,8 +18,8 @@
     <script src="https://yandex.st/highlightjs/8.0/highlight.min.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
     <link rel="stylesheet" type="text/css" href="/css/style.css">
-    <title>ClojureScript in PyQt4 QWebView - False start | Superfluous Comments</title>
-    <meta name="Description" content="Life is hard when you don&#39;t follow directions.
+    <title>Unemployed project - Testing | Superfluous Comments</title>
+    <meta name="Description" content="Getting a test config working, and a Github repo setup.
 ">
   </head>
   <body>
@@ -46,27 +46,23 @@ ga('send', 'pageview');
 <div class="article">
   <header>
     <div class="article-header">
-      <h1>ClojureScript in PyQt4 QWebView - False start</h1>
+      <h1>Unemployed project - Testing</h1>
       <div class="article-meta">
-        <span class="posttime">2016/05/19</span>
+        <span class="posttime">2016/06/13</span>
         
 <div class="tags">
   <ul>
     
     <li>
-      <a href="/tags/clojurescript"><span></span>clojurescript</a>
+      <a href="/tags/c"><span></span>c#</a>
     </li>
     
     <li>
-      <a href="/tags/pyqt4"><span></span>pyqt4</a>
+      <a href="/tags/asp.net-core"><span></span>asp.net core</a>
     </li>
     
     <li>
-      <a href="/tags/lister"><span></span>lister</a>
-    </li>
-    
-    <li>
-      <a href="/tags/fail"><span></span>fail</a>
+      <a href="/tags/xunit"><span></span>xunit</a>
     </li>
     
   </ul>
@@ -77,82 +73,35 @@ ga('send', 'pageview');
     </div>
   </header>
   <div class="content">
-    <p>Life is hard when you don't follow directions.</p>
+    <p>Getting a test config working, and a Github repo setup.</p>
 
 <p><hr/><br/>
-I've started working on a testbed for CLJS embedded in a QWebView, creatively
-named &quot;Testbed&quot;. I actually made quite a bit of progress, but I've decided to
-scrap most of it. First though I'll break down what worked, my stupid mistakes,
-and what I'm going to do instead.</p>
+I spent most of the morning getting my data model in shape, which you can read
+about at the end of the previous post. With that piece finally in place I
+decided it was time to setup source control. I found a nice <code>.gitignore</code> file
+<a href="https://github.com/github/gitignore/blob/master/VisualStudio.gitignore">on Github</a>
+that only needed a little tweaking. Then I added a very basic readme and a
+license and pushed everything up to a
+<a href="https://github.com/kitsu/JobLogger">new Github repo</a>.</p>
 
-<p>The first step of the process was relatively easy. I just grabbed the most of
-the Lister table widget and slapped it in a generic QMainWindow, and copied the
-build script and spec file. Formatting the dummy data and stubbing out config
-values were probably the hardest part.</p>
+<p>Afterward, with my mess now hosted up where anyone can see, I decided to spend
+some more time trying to get unit tests working. Referencing a
+<a href="https://ievangelistblog.wordpress.com/2016/02/12/asp-net-core-1-0-unit-testing/">blog post</a>
+I found (with a
+<a href="https://github.com/IEvangelist/Dnx.Xunit.Testing">Github project link</a>),
+the Xunit docs, and the Asp.net core
+testing docs I was able to piece something together that finally worked. I think
+the key was adding a &quot;Class library (.NET core)&quot; project for my tests, but I
+also have a much better understanding of the <code>project.js</code> file after my previous
+attempts.</p>
 
-<p>Getting the ClojureScript build setup correctly on the other hand was much
-harder than I expected. A lot has changed over the past months of ClojureScript
-development. Creating a minimal ClojureScript build is actually much simpler
-than when I last played with it. Several dumb mistakes, and the weird container
-I'm shoe-horning it into, really tripped me up though.</p>
+<p><a href="https://github.com/kitsu/JobLogger/commit/4b9ba7258277f1eb01215268a8c34f3d28de5a17">Here is a link</a>
+to the change-set where I added Xunit. I also added one fairly trivial
+controller test to confirm everything really worked.</p>
 
-<p>I've always used <a href="http://leiningen.org/">Leiningen</a> for Clojure, and when I
-first tried ClojureScript
-<a href="https://github.com/emezeske/lein-cljsbuild">lein-cljsbuild</a> was the only
-practical choice. ClojureScript recently had its version synced with Clojure
-though, and grew the ability to eval and compile its own code. With all the
-recent changes I figured I should start fresh with the new
-<a href="https://github.com/clojure/clojurescript/wiki/Quick-Start">Quick Start Guide</a>.
-If (unlike me) you manage to follow the directions everything works as
-advertised BTW.</p>
-
-<p>So Clojure is hosted on the JVM, and it has inherited some traits from its host,
-and ClojureScript kept many of them. Due to mandates Java file structure Clojure
-expects the shape of your file-system to match your namespace hierarchy. I
-forgot this at first though and just threw my CLJS file in with all my Python
-code. Using the Quick Start build instructions raised no errors, and produced an
-output Javascript file. All the output was just boiler plate though, and no
-executable code was produced. It wasn't until I tried advanced compilation that
-I got an error message.</p>
-
-<p>Even after making sub-folders and renaming my file the build still didn't
-work. The other peculiarity of the file to namespace parity is that Clojure
-prefers hyphens in code, while requiring <em>under scores</em> in the
-file-system. Which I knew, and which was clearly stated in the Quick Start.</p>
-
-<p>The next problem I ran into was getting the generated file and all the library
-output to load correctly. I played around with my working directory and the
-build function's <code>:output-dir</code> and <code>:asset-path</code> settings, but nothing worked.
-I'm pretty sure it had to do with how the embedded WebKit browser was resolving
-resource paths. <del>Judging from a
-<a href="http://stackoverflow.com/search?q=%5Bqwebview%5D+resources">StackOverflow search</a>
-it seems like it is a common problem with QWebKit (Note <a href="http://doc.qt.io/qt-5/portingguide.html">QWebKit is being
-replaced in Qt5</a>).</del>
-Edit: <a href="http://doc.qt.io/qt-4.8/qwebview.html#setHtml">looks like</a> I needed to
-provide a second argument to <code>setHtml</code> of <code>baseUrl=QUrl(&quot;File://&quot;)</code> so local
-resources resolve. Regardless, advanced compilation to the rescue again - when
-the only output is the file you're already including manually it is pretty easy
-to get right.</p>
-
-<p>And with that it all worked, even when complied to an Windows exe. After
-overcoming all that trouble though it just took one small thing to send me
-running back to Lein. At the very bottom of the Quick Start is a short section
-on <em>Dependencies</em>, and after a short preamble about
-<a href="http://cljsjs.github.io/">CLJSJS</a> (which is awesome)
-and how to require another namespace in your code, they reveal the default
-stand-alone solution for ClojureScript dependency management: String
-concatenation onto the build command...</p>
-
-<p>Seriously? Lein, Clojars, Maven, the deps management story in Clojure was one of
-my favorite features. I totally expected this magic stand-alone <code>CLJS.jar</code> to
-just have that stuff baked in. Just one more vector in the build map. Not to
-diminish the current state of the magic jar - Getting started with ClojureScript
-is so much easier and better now. But, unless you have very limited goals, Lein
-(or Boot) should be your first stop after hello world.</p>
-
-<p>So that is my plan for tomorrow. Setup a Lein project using some template
-(Figwheel?), and then integrate my Python code into a Lein project instead. I
-bet I can make a pretty cool PyInstaller task for Lein too.</p>
+<p>After that I've just been working on adding content and features. I'm sure I'll
+come up with more interesting things to post, but for now it is just so nice to
+finally have things working.</p>
 
   </div>
   <footer>
@@ -162,19 +111,15 @@ bet I can make a pretty cool PyInstaller task for Lein too.</p>
   <ul>
     
     <li>
-      <a href="/tags/clojurescript"><span></span>clojurescript</a>
+      <a href="/tags/c"><span></span>c#</a>
     </li>
     
     <li>
-      <a href="/tags/pyqt4"><span></span>pyqt4</a>
+      <a href="/tags/asp.net-core"><span></span>asp.net core</a>
     </li>
     
     <li>
-      <a href="/tags/lister"><span></span>lister</a>
-    </li>
-    
-    <li>
-      <a href="/tags/fail"><span></span>fail</a>
+      <a href="/tags/xunit"><span></span>xunit</a>
     </li>
     
   </ul>
@@ -215,9 +160,9 @@ bet I can make a pretty cool PyInstaller task for Lein too.</p>
       <div id="disqus_thread"></div>
 <script type="text/javascript">
     var disqus_shortname = 'SuperfComs';
-    var disqus_identifier = 'http:\/\/kitsu.github.io\/2016\/05\/19\/pyqt_cljs_01\/';
-    var disqus_title = 'ClojureScript in PyQt4 QWebView - False start';
-    var disqus_url = 'http:\/\/kitsu.github.io\/2016\/05\/19\/pyqt_cljs_01\/';
+    var disqus_identifier = 'http:\/\/kitsu.github.io\/2016\/06\/13\/unemployed-project-06\/';
+    var disqus_title = 'Unemployed project - Testing';
+    var disqus_url = 'http:\/\/kitsu.github.io\/2016\/06\/13\/unemployed-project-06\/';
 
     (function() {
         var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
@@ -232,14 +177,9 @@ bet I can make a pretty cool PyInstaller task for Lein too.</p>
         
         <div id="pagenavigation-next">
           <span class="pagenav-label">Previous</span>
-          <a href="http://kitsu.github.io/2016/05/18/functional-html/">Generating HTML on the fly in Python</a>
+          <a href="http://kitsu.github.io/2016/06/12/unemployed-project-05/">Unemployed Project - Frontend</a>
         </div>
         
-        
-        <div id="pagenavigation-prev">
-          <span class="pagenav-label">Next</span>
-          <a href="http://kitsu.github.io/2016/05/20/pyqt4_cljs_02/">ClojureScript in PyQt4 QWebView - Success</a>
-        </div>
         
       </div>
       

@@ -7,8 +7,18 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© 2015 Ed Blake</copyright>
-    <lastBuildDate>Sun, 12 Jun 2016 16:03:48 -0700</lastBuildDate>
+    <lastBuildDate>Mon, 13 Jun 2016 20:49:22 -0700</lastBuildDate>
     <atom:link href="http://kitsu.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Unemployed project - Testing</title>
+      <link>http://kitsu.github.io/2016/06/13/unemployed-project-06/</link>
+      <pubDate>Mon, 13 Jun 2016 20:49:22 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/06/13/unemployed-project-06/</guid>
+      <description>&lt;p&gt;Getting a test config working, and a Github repo setup.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Unemployed Project - Frontend</title>
@@ -147,16 +157,6 @@
       
       <guid>http://kitsu.github.io/2016/05/24/pyqt4_cljs_05/</guid>
       <description>&lt;p&gt;Setting up basic ClojureScript testing using devcards.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>ClojureScript in PyQt4 QWebView - Fix Dragging</title>
-      <link>http://kitsu.github.io/2016/05/23/pyqt4_cljs_04/</link>
-      <pubDate>Mon, 23 May 2016 13:15:39 -0700</pubDate>
-      
-      <guid>http://kitsu.github.io/2016/05/23/pyqt4_cljs_04/</guid>
-      <description>&lt;p&gt;Higher order event channels for consistent interactions.&lt;/p&gt;
 </description>
     </item>
     

@@ -7,8 +7,18 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© 2015 Ed Blake</copyright>
-    <lastBuildDate>Sun, 12 Jun 2016 16:03:48 -0700</lastBuildDate>
+    <lastBuildDate>Mon, 13 Jun 2016 20:49:22 -0700</lastBuildDate>
     <atom:link href="http://kitsu.github.io/categories/development/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Unemployed project - Testing</title>
+      <link>http://kitsu.github.io/2016/06/13/unemployed-project-06/</link>
+      <pubDate>Mon, 13 Jun 2016 20:49:22 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/06/13/unemployed-project-06/</guid>
+      <description>&lt;p&gt;Getting a test config working, and a Github repo setup.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Unemployed Project - Frontend</title>
@@ -147,16 +157,6 @@
       
       <guid>http://kitsu.github.io/2016/05/18/functional-html/</guid>
       <description>&lt;p&gt;More like &lt;em&gt;data as code&lt;/em&gt; than &lt;em&gt;code as data&lt;/em&gt;.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Composing Function Compositions</title>
-      <link>http://kitsu.github.io/2016/05/15/functional-stack/</link>
-      <pubDate>Sun, 15 May 2016 18:47:44 -0700</pubDate>
-      
-      <guid>http://kitsu.github.io/2016/05/15/functional-stack/</guid>
-      <description>&lt;p&gt;Using a push down automata and functional programming IRL.&lt;/p&gt;
 </description>
     </item>
     
