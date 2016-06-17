@@ -7,8 +7,18 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© 2015 Ed Blake</copyright>
-    <lastBuildDate>Mon, 13 Jun 2016 20:49:22 -0700</lastBuildDate>
+    <lastBuildDate>Thu, 16 Jun 2016 20:33:04 -0700</lastBuildDate>
     <atom:link href="http://kitsu.github.io/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Unemployed project - Progress</title>
+      <link>http://kitsu.github.io/2016/06/16/unemployed-project-07/</link>
+      <pubDate>Thu, 16 Jun 2016 20:33:04 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/06/16/unemployed-project-07/</guid>
+      <description>&lt;p&gt;Slow but steady progress toward a usable application.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Unemployed project - Testing</title>
@@ -147,16 +157,6 @@
       
       <guid>http://kitsu.github.io/2016/05/25/pyqt4_cljs_06/</guid>
       <description>&lt;p&gt;Because testing is more fun than real work?&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>ClojureScript in PyQt4 QWebView - Testing</title>
-      <link>http://kitsu.github.io/2016/05/24/pyqt4_cljs_05/</link>
-      <pubDate>Tue, 24 May 2016 19:03:27 -0700</pubDate>
-      
-      <guid>http://kitsu.github.io/2016/05/24/pyqt4_cljs_05/</guid>
-      <description>&lt;p&gt;Setting up basic ClojureScript testing using devcards.&lt;/p&gt;
 </description>
     </item>
     

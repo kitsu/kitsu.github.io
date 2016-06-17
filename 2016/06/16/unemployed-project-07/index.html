@@ -18,8 +18,8 @@
     <script src="https://yandex.st/highlightjs/8.0/highlight.min.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
     <link rel="stylesheet" type="text/css" href="/css/style.css">
-    <title>Unemployment Project - Setup | Superfluous Comments</title>
-    <meta name="Description" content="Picking a project based on desirable qualifications and my current situation.
+    <title>Unemployed project - Progress | Superfluous Comments</title>
+    <meta name="Description" content="Slow but steady progress toward a usable application.
 ">
   </head>
   <body>
@@ -46,9 +46,9 @@ ga('send', 'pageview');
 <div class="article">
   <header>
     <div class="article-header">
-      <h1>Unemployment Project - Setup</h1>
+      <h1>Unemployed project - Progress</h1>
       <div class="article-meta">
-        <span class="posttime">2016/06/07</span>
+        <span class="posttime">2016/06/16</span>
         
 <div class="tags">
   <ul>
@@ -61,6 +61,10 @@ ga('send', 'pageview');
       <a href="/tags/aspnetcore"><span></span>AspNetCore</a>
     </li>
     
+    <li>
+      <a href="/tags/xunit"><span></span>xUnit</a>
+    </li>
+    
   </ul>
 </div>
 
@@ -69,57 +73,48 @@ ga('send', 'pageview');
     </div>
   </header>
   <div class="content">
-    <p>Picking a project based on desirable qualifications and my current situation.</p>
+    <p>Slow but steady progress toward a usable application.</p>
 
 <p><hr/><br/>
-I finished my unemployment application and read the unemployment guide this
-morning. I also applied for several more local developer positions. It seems the
-sweet-spot for developers in my area lies somewhere between C# and the web, with
-asp.net figuring prominently in many postings.</p>
+I haven't had much to write about because things have been going so smoothly. At
+this point I have several frontiers I can push forward on. I can play with the
+back end code - models, repos, controllers. I now have testing working, so I can
+make progress jumping back and forth between tests and implementation. And I
+have the front end code which I can tweak endlessly.</p>
 
-<p>Here in Washington there are a number of odd conditions to receiving
-unemployment benefits. For instance your application doesn't go into effect
-until Sunday of the week you applied, which is <em>great</em> since I applied on a
-Monday. You also have to apply to at least three jobs a week (or perform
-alternative activities) and file a report stating that you did so. You don't
-actually have to tell them what jobs you applied for, but you are expected to
-keep a detailed log, and you are subject to random audits. You also have to
-go through the whole process the first week without getting paid, you know -
-just for fun.</p>
+<p>I did discover one interesting detail the other day that is worth mentioning.
+When I started writing tests for the LogListController I ran into a problem - I
+couldn't access the <code>JsonResult</code> values to confirm behavior. The problem was
+that I was using adhoc objects to define the json, which are marked internal by
+default. In order to access them in my tests (which are in a separate
+sub-project) I had to make the tests a <em>friend assembly</em> to my main project.</p>
 
-<p>Almost the entire process can be taken care of online. The one notable exception
-is the job search log. You are expected to keep a log, but the only resource they
-provide is a non-editable pdf, which you are presumably supposed to print and
-fill out manually. The form is pretty simple, it has three sub-forms for each
-event, check boxes for the type of event, and some additional fields to fill in
-given the chosen type. You aren't actually required to use their form though,
-and I was planning on just doing something in plain text or maybe emacs
-org-mode. When I looked at the form though the thought occurred to me that it
-would make a wonderful little application.</p>
+<p>As usual all the information on the Internet is either wrong or outdated. The
+guidance I found was that I just needed to add an attribute to my
+<code>properties &gt; AssemblyInfo.cs</code> file. It seems though that an Asp.net Core
+application doesn't have assembly info. Visual Studio also wouldn't let me
+create any files under properties. Even when I manually created the file with
+the correct settings my tests still wouldn't run... until they did. I tried
+several times before getting the builds to go off in just the right way so</p>
 
-<p>My immediate impulse was to write something in Clojure, maybe using the
-<a href="https://github.com/hoplon/hoplon">Hoplon</a> stack. Given the disposition of local
-job offerings though I know it would be more beneficial to get some experiance
-using the Microsoft tech stack. I thought for a moment about building a desktop
-app using xaml+WPF, but web tech just has so much going for it that I can't
-justify writing something that isn't served as html (except maybe a Xamarin app).</p>
+<p><a href="https://github.com/kitsu/JobLogger/blob/e8e0436140e67edfd369942793a8bbed3cc3920f/src/JobLogger/Properties/AssemblyInfo.cs">Here is a link</a>
+to the file in question.</p>
 
-<p>So to warm up for the project I started with some research. I read some primer
-material on asp.net, found a promising tutorial I intend to follow, and started
-watching some free Lynda training included with my LinkedIn premium trial. It all
-seems pretty trivial, some basic routing, an html templating language, and
-Microsoft's take on an ORM. I also read up on &quot;T-SQL&quot; because it kept popping up
-in postings - it is just MS flavored SQL. I also watched some videos on
-TypeScript and read the
-<a href="https://www.typescriptlang.org/docs/handbook/basic-types.html">entire handbook</a>. Seems
-like a nice choice for a compiles-to-JS language if you are comfortable with C#
-and want to stick close to future ECMAscript standards.</p>
+<p>The other thing I've been doing is refining the UI. I just decided today to
+scrap all the <em>LogList</em> pages I've built and replace them with a single unified
+page. Since I was already using ajax for all my interactions it felt really
+silly to have them in different places. The initial motivation was that the edit
+forms for existing logs were going to be complete ripoffs of the add log form. I
+also wanted to reuse the Knockout models I built for the add page on the list
+page. I also couldn't figure out what to do upon successful submission on the
+add page. Now I don't have any of those problems.</p>
 
-<p>So hopefully by this time tomorrow I'll have the beginnings of a logging
-application, even if it's just a styled cshtml file and a boilerplate
-project. If I can get something usable this week I'll try pushing it up to Azure
-for hosting. It will be fun getting auth and analytics and all the other website
-things working for myself.</p>
+<p>My design has basically morphed into a Single Page Application (SPA), modulo a
+few ancillary pages. I am seriously debating having Knockout run the entire
+front end, and making the back end primarily serve json to ajax requests. There
+is no point building all the elements and Javascript code in Razor when I still
+have to support live updates in the client anyway. Just push all the rendering
+logic to the client and serve data ala-cart.</p>
 
   </div>
   <footer>
@@ -134,6 +129,10 @@ things working for myself.</p>
     
     <li>
       <a href="/tags/aspnetcore"><span></span>AspNetCore</a>
+    </li>
+    
+    <li>
+      <a href="/tags/xunit"><span></span>xUnit</a>
     </li>
     
   </ul>
@@ -174,9 +173,9 @@ things working for myself.</p>
       <div id="disqus_thread"></div>
 <script type="text/javascript">
     var disqus_shortname = 'SuperfComs';
-    var disqus_identifier = 'http:\/\/kitsu.github.io\/2016\/06\/07\/unemployment-project-01\/';
-    var disqus_title = 'Unemployment Project - Setup';
-    var disqus_url = 'http:\/\/kitsu.github.io\/2016\/06\/07\/unemployment-project-01\/';
+    var disqus_identifier = 'http:\/\/kitsu.github.io\/2016\/06\/16\/unemployed-project-07\/';
+    var disqus_title = 'Unemployed project - Progress';
+    var disqus_url = 'http:\/\/kitsu.github.io\/2016\/06\/16\/unemployed-project-07\/';
 
     (function() {
         var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
@@ -191,14 +190,9 @@ things working for myself.</p>
         
         <div id="pagenavigation-next">
           <span class="pagenav-label">Previous</span>
-          <a href="http://kitsu.github.io/2016/06/06/first-weekend-off/">First Weekend Off</a>
+          <a href="http://kitsu.github.io/2016/06/13/unemployed-project-06/">Unemployed project - Testing</a>
         </div>
         
-        
-        <div id="pagenavigation-prev">
-          <span class="pagenav-label">Next</span>
-          <a href="http://kitsu.github.io/2016/06/08/unemployment-project-02/">Unemployment Project - Struggle</a>
-        </div>
         
       </div>
       
