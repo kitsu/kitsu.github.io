@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Csharp on Superfluous Comments</title>
+    <link>http://kitsu.github.io/tags/csharp/</link>
+    <description>Recent content in Csharp on Superfluous Comments</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>© 2015 Ed Blake</copyright>
+    <lastBuildDate>Thu, 16 Jun 2016 20:33:04 -0700</lastBuildDate>
+    <atom:link href="http://kitsu.github.io/tags/csharp/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Unemployed project - Progress</title>
+      <link>http://kitsu.github.io/2016/06/16/unemployed-project-07/</link>
+      <pubDate>Thu, 16 Jun 2016 20:33:04 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/06/16/unemployed-project-07/</guid>
+      <description>&lt;p&gt;Slow but steady progress toward a usable application.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Unemployed project - Testing</title>
+      <link>http://kitsu.github.io/2016/06/13/unemployed-project-06/</link>
+      <pubDate>Mon, 13 Jun 2016 20:49:22 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/06/13/unemployed-project-06/</guid>
+      <description>&lt;p&gt;Getting a test config working, and a Github repo setup.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Unemployed Project - Frontend</title>
+      <link>http://kitsu.github.io/2016/06/12/unemployed-project-05/</link>
+      <pubDate>Sun, 12 Jun 2016 16:03:48 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/06/12/unemployed-project-05/</guid>
+      <description>&lt;p&gt;Fun with Bootstrap, JQuery, Knockout, Typescript, and more.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Unemployed Project - Untested</title>
+      <link>http://kitsu.github.io/2016/06/10/unemployed-project-04/</link>
+      <pubDate>Fri, 10 Jun 2016 08:06:25 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/06/10/unemployed-project-04/</guid>
+      <description>&lt;p&gt;Even more ecosystem problems, now with working forms.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Unemployment Project - Breakthrough</title>
+      <link>http://kitsu.github.io/2016/06/09/unemployment-project-03/</link>
+      <pubDate>Thu, 09 Jun 2016 12:22:09 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/06/09/unemployment-project-03/</guid>
+      <description>&lt;p&gt;Surmounting the challenge of API churn in the MS ecosystem.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Unemployment Project - Setup</title>
+      <link>http://kitsu.github.io/2016/06/07/unemployment-project-01/</link>
+      <pubDate>Tue, 07 Jun 2016 18:30:21 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/06/07/unemployment-project-01/</guid>
+      <description>&lt;p&gt;Picking a project based on desirable qualifications and my current situation.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
