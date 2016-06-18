@@ -18,8 +18,8 @@
     <script src="https://yandex.st/highlightjs/8.0/highlight.min.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
     <link rel="stylesheet" type="text/css" href="/css/style.css">
-    <title>Setting Everything Up | Superfluous Comments</title>
-    <meta name="Description" content="In which I setup Github hosting, Disqus Comments, Google Analytics and AdSense.
+    <title>Unemployed project - Serialization | Superfluous Comments</title>
+    <meta name="Description" content="A Entity Framework serialization issue solved by data sanitization.
 ">
   </head>
   <body>
@@ -46,15 +46,23 @@ ga('send', 'pageview');
 <div class="article">
   <header>
     <div class="article-header">
-      <h1>Setting Everything Up</h1>
+      <h1>Unemployed project - Serialization</h1>
       <div class="article-meta">
-        <span class="posttime">2016/05/13</span>
+        <span class="posttime">2016/06/17</span>
         
 <div class="tags">
   <ul>
     
     <li>
-      <a href="/tags/meta"><span></span>meta</a>
+      <a href="/tags/csharp"><span></span>CSharp</a>
+    </li>
+    
+    <li>
+      <a href="/tags/aspnetcore"><span></span>AspNetCore</a>
+    </li>
+    
+    <li>
+      <a href="/tags/xunit"><span></span>xUnit</a>
     </li>
     
   </ul>
@@ -65,68 +73,61 @@ ga('send', 'pageview');
     </div>
   </header>
   <div class="content">
-    
-
-<p>In which I setup Github hosting, Disqus Comments, Google Analytics and AdSense.</p>
+    <p>A Entity Framework serialization issue solved by data sanitization.</p>
 
 <p><hr/><br/>
-After spending some time yesterday customizing the
-<a href="http://themes.gohugo.io/polymer/">Polymer</a> theme I changed my mind and switched
-to a theme called <a href="http://themes.gohugo.io/hugo-theme-geppaku/">Geppaku</a>.
-Both the style and the structure of Geppaku are simpler, which makes it easier
-to understand and change. I darkened the colors a little, and added some
-accents, but the Geppaku code is mostly unchanged.</p>
+I'm right in the middle of the conversion from serving pages to serving Json. I
+was just testing out my post-load ajax request for log data when I found that my
+log list wasn't getting serialized correctly. I was getting an array with only
+one log item. I tried wrapping the list in an object to no effect, I also
+included the list count to confirm what I wasn't getting. I did find though that
+I could build a query for log ids and the result serialized correctly.</p>
 
-<p><strong>First cool thing:</strong> Geppaku uses something called
-<a href="http://fontawesome.io/">Font Awesome</a> for its icons. I had to customize the
-images that came with Polymer, but with FA I had everything I needed.</p>
+<p>One troubling thing I <em>did</em> notice on the entry that was successfully
+transfered: it included the ApplicationUser reference. The user only had an
+empty LogList member, but I would still prefer scrubbing that info somehow.
+The presence of the user data turned out to be good hint at what the real
+problem was.</p>
 
-<p>With the visual styling basically setup I had to turn to the technical -
-actually getting this thing online. I'm still not that confident in how to setup
-the Git and Github parts though, so instead I played around with some
-extras. Hugo claims to support easy integration with Google Analytics and Discus
-Comments, and the Geppaku theme comes with Google AdSense integration (sorry).</p>
+<p>While searching for similar problems I found a relevant
+<a href="http://stackoverflow.com/a/34836837/770443">StackOverflow post</a>. The key though
+was actually the related questions in the sidebar - the top question was &quot;Json
+and Circular Reference Exception&quot;. When I saw that I suddenly realized what the
+problem was: the serializer was following the link from the log to the user
+which then had the same log as the first element in it's log array.</p>
 
-<p><strong>Second cool thing:</strong> Signing up for
-<a href="https://www.google.com/analytics/">Google Analytics</a> and
-<a href="https://publishers.disqus.com/engage">Disqus Comments</a> were both easy.
-With that account info I just added a couple strings to my Hugo config and
-everything worked. <a href="https://www.google.com/adsense/">AdSense</a> on the other
-hand seems to have some (lengthy) approval process, so I slapped some dummy
-templates in until I get the AdSense code.</p>
+<p>Unlike the poster of the linked question though I wasn't getting an error. In
+fact I don't get any errors or exceptions. I spent some time earlier today
+trying to find the &quot;break on exception&quot; setting in VS, but as far as I could
+tell I already have all reporting enabled. It would be really helpful if
+exceptions were at least reported, especially in debug mode...</p>
 
-<p>With nothing else left to futz with I had to decide how to push to Github. By
-now I've read all the Hugo Github tutorials at least a couple of times. Most of
-the material is on creating <em>project pages</em> which use a specially named branch
-for content. I'm going with a normal <em>personal page</em> though, which just serves
-from the root of the main branch. I would prefer to keep the whole thing in one
-repo, but any way I come up with just seems awkward. Instead I'm setting
-up one <a href="https://github.com/kitsu/blog">repo</a> of the source code, and a
-<a href="https://github.com/kitsu/kitsu.github.io">sub-repo</a> for the content.</p>
+<p>Anyway, after adding <code>ReferenceLoopHandling.Ignore</code> to my startup.cs file per
+the above post everything works as expected. I still have the problem with the
+user being included though, and now it includes <em>all</em> the user object
+information! Not good. With a little more research I found the <code>[JsonIgnore]</code>
+attribute, which successfully removes the user, and also solves the reference
+loop problem:</p>
 
-<p>I might still try to automate building/pushing the site, but at this point I've
-spent far too long getting this working.</p>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #66d9ef">public</span> <span style="color: #66d9ef">abstract</span> <span style="color: #66d9ef">class</span> <span style="color: #a6e22e">BaseLog</span>
+<span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">public</span> <span style="color: #f8f8f2">Guid</span> <span style="color: #f8f8f2">Id</span> <span style="color: #f8f8f2">{</span> <span style="color: #66d9ef">get</span><span style="color: #f8f8f2">;</span> <span style="color: #66d9ef">set</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">}</span>
 
-<h3 id="edit:9cc19b767474709e57f2eb1461398238">Edit</h3>
+    <span style="color: #75715e">// Reciprocal link to user data (not serialized!)</span>
+<span style="color: #a6e22e">    [JsonIgnore]</span>
+    <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">virtual</span> <span style="color: #f8f8f2">ApplicationUser</span> <span style="color: #f8f8f2">ApplicationUser</span>  <span style="color: #f8f8f2">{</span> <span style="color: #66d9ef">get</span><span style="color: #f8f8f2">;</span> <span style="color: #66d9ef">set</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">}</span>
 
-<p>Well, the deploy didn't go as smooth as it could have. It seems I was using a
-really old version of Git (MSYS Git 1.7.1), and something had broken since the last time I pushed
-to Github. Every time I tried to push I got <code>fatal: authentication failed</code> or
-worse. The solution was to install the latest
-<a href="https://git-for-windows.github.io/">Git for Windows</a> which comes with real auth
-support.</p>
+<span style="color: #a6e22e">    [Required]</span>
+<span style="color: #a6e22e">    [Display(Name = &quot;Log Date&quot;)]</span>
+<span style="color: #a6e22e">    [DataType(DataType.Date)]</span>
+    <span style="color: #66d9ef">public</span> <span style="color: #f8f8f2">DateTime</span> <span style="color: #f8f8f2">LogDate</span> <span style="color: #f8f8f2">{</span> <span style="color: #66d9ef">get</span><span style="color: #f8f8f2">;</span> <span style="color: #66d9ef">set</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">}</span>
 
-<p>As a result though some paths got broken, the Git vim became default and broke
-my vimrc, I then broke Vundle when doing <code>:BundleUpgrade</code>. It was a cluster, but
-everything is working now.</p>
+<span style="color: #a6e22e">    [Required]</span>
+<span style="color: #a6e22e">    [StringLength(256)]</span>
+    <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">string</span> <span style="color: #f8f8f2">Description</span> <span style="color: #f8f8f2">{</span> <span style="color: #66d9ef">get</span><span style="color: #f8f8f2">;</span> <span style="color: #66d9ef">set</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">}</span>
+</pre></div>
 
-<p>On the AdSense front - They did in fact get to my application same day. They
-promptly rejected it because the site wasn't up yet. Which works out really well
-if you were waiting to setup AdSense before going live<span>..</span>.</p>
-
-<p>I did test the site on a few computers, my Note III, and an old Samsung
-tablet. It adapts well enough, but the main div gets crowded on the right margin
-on narrow screens.</p>
 
   </div>
   <footer>
@@ -136,7 +137,15 @@ on narrow screens.</p>
   <ul>
     
     <li>
-      <a href="/tags/meta"><span></span>meta</a>
+      <a href="/tags/csharp"><span></span>CSharp</a>
+    </li>
+    
+    <li>
+      <a href="/tags/aspnetcore"><span></span>AspNetCore</a>
+    </li>
+    
+    <li>
+      <a href="/tags/xunit"><span></span>xUnit</a>
     </li>
     
   </ul>
@@ -177,9 +186,9 @@ on narrow screens.</p>
       <div id="disqus_thread"></div>
 <script type="text/javascript">
     var disqus_shortname = 'SuperfComs';
-    var disqus_identifier = 'http:\/\/kitsu.github.io\/2016\/05\/13\/setting-up\/';
-    var disqus_title = 'Setting Everything Up';
-    var disqus_url = 'http:\/\/kitsu.github.io\/2016\/05\/13\/setting-up\/';
+    var disqus_identifier = 'http:\/\/kitsu.github.io\/2016\/06\/17\/unemployed-project-08\/';
+    var disqus_title = 'Unemployed project - Serialization';
+    var disqus_url = 'http:\/\/kitsu.github.io\/2016\/06\/17\/unemployed-project-08\/';
 
     (function() {
         var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
@@ -194,14 +203,9 @@ on narrow screens.</p>
         
         <div id="pagenavigation-next">
           <span class="pagenav-label">Previous</span>
-          <a href="http://kitsu.github.io/2016/05/12/hello-hugo/">Hello Hugo</a>
+          <a href="http://kitsu.github.io/2016/06/16/unemployed-project-07/">Unemployed project - Progress</a>
         </div>
         
-        
-        <div id="pagenavigation-prev">
-          <span class="pagenav-label">Next</span>
-          <a href="http://kitsu.github.io/2016/05/14/unit-testing-01/">Testing and Thinking About Testing</a>
-        </div>
         
       </div>
       
