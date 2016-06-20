@@ -7,8 +7,18 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© 2015 Ed Blake</copyright>
-    <lastBuildDate>Fri, 17 Jun 2016 17:08:03 -0700</lastBuildDate>
+    <lastBuildDate>Sun, 19 Jun 2016 11:58:12 -0700</lastBuildDate>
     <atom:link href="http://kitsu.github.io/categories/development/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Unemployed project - Knockout Templates</title>
+      <link>http://kitsu.github.io/2016/06/19/unemployed-project-09/</link>
+      <pubDate>Sun, 19 Jun 2016 11:58:12 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/06/19/unemployed-project-09/</guid>
+      <description>&lt;p&gt;Building modular chunks of HTML and reusing them with Knockout.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Unemployed project - Serialization</title>
@@ -147,16 +157,6 @@
       
       <guid>http://kitsu.github.io/2016/05/21/pyqt4_cljs_03/</guid>
       <description>&lt;p&gt;&lt;em&gt;Actually&lt;/em&gt; coding the ClojureScript prototype.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>ClojureScript in PyQt4 QWebView - Success</title>
-      <link>http://kitsu.github.io/2016/05/20/pyqt4_cljs_02/</link>
-      <pubDate>Fri, 20 May 2016 15:51:30 -0700</pubDate>
-      
-      <guid>http://kitsu.github.io/2016/05/20/pyqt4_cljs_02/</guid>
-      <description>&lt;p&gt;Leiningen is the best, and Qt is... challenging.&lt;/p&gt;
 </description>
     </item>
     
