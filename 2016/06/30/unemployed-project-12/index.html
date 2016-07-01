@@ -18,8 +18,8 @@
     <script src="https://yandex.st/highlightjs/8.0/highlight.min.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
     <link rel="stylesheet" type="text/css" href="/css/style.css">
-    <title>Unemployed project - Testing | Superfluous Comments</title>
-    <meta name="Description" content="Getting a test config working, and a Github repo setup.
+    <title>Unemployed project - Published | Superfluous Comments</title>
+    <meta name="Description" content="Primary features finished, app published to Azure!
 ">
   </head>
   <body>
@@ -46,9 +46,9 @@ ga('send', 'pageview');
 <div class="article">
   <header>
     <div class="article-header">
-      <h1>Unemployed project - Testing</h1>
+      <h1>Unemployed project - Published</h1>
       <div class="article-meta">
-        <span class="posttime">2016/06/13</span>
+        <span class="posttime">2016/06/30</span>
         
 <div class="tags">
   <ul>
@@ -62,7 +62,7 @@ ga('send', 'pageview');
     </li>
     
     <li>
-      <a href="/tags/xunit"><span></span>xUnit</a>
+      <a href="/tags/azure"><span></span>Azure</a>
     </li>
     
   </ul>
@@ -88,35 +88,70 @@ ga('send', 'pageview');
       </div>
       
   <div class="content">
-    <p>Getting a test config working, and a Github repo setup.</p>
+    <p>Primary features finished, app published to Azure!</p>
 
 <p><hr/><br/>
-I spent most of the morning getting my data model in shape, which you can read
-about at the end of the previous post. With that piece finally in place I
-decided it was time to setup source control. I found a nice <code>.gitignore</code> file
-<a href="https://github.com/github/gitignore/blob/master/VisualStudio.gitignore">on Github</a>
-that only needed a little tweaking. Then I added a very basic readme and a
-license and pushed everything up to a
-<a href="https://github.com/kitsu/JobLogger">new Github repo</a>.</p>
+I've been working steadily adding features to my app. I added filtering by week,
+interactive search, enabled ssl and added Google &amp; Microsoft Sign in, added
+email log reports, and sharable links. It was a lot of work, and I did run into
+some problems, but nothing seemed interesting enough to write about. After all
+that work, and after a short struggle with Azure itself, my app is now live at
+<a href="https://joblogger.azurewebsites.net">https://joblogger.azurewebsites.net</a>.</p>
 
-<p>Afterward, with my mess now hosted up where anyone can see, I decided to spend
-some more time trying to get unit tests working. Referencing a
-<a href="https://ievangelistblog.wordpress.com/2016/02/12/asp-net-core-1-0-unit-testing/">blog post</a>
-I found (with a
-<a href="https://github.com/IEvangelist/Dnx.Xunit.Testing">Github project link</a>),
-the Xunit docs, and the Asp.net core
-testing docs I was able to piece something together that finally worked. I think
-the key was adding a &quot;Class library (.NET core)&quot; project for my tests, but I
-also have a much better understanding of the <code>project.js</code> file after my previous
-attempts.</p>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>JobLogger is an application for maintaining job search logs per the Washington
+State requirements for receiving unemployment benefits. The logs are not
+submitted with benefits claims, but they are subject to audits and must be
+provided upon request up to a year after benefits are received. My application
+maintains logs in a database, and can share logs either by email or as a hyperlink.
+</pre></div>
 
-<p><a href="https://github.com/kitsu/JobLogger/commit/4b9ba7258277f1eb01215268a8c34f3d28de5a17">Here is a link</a>
-to the change-set where I added Xunit. I also added one fairly trivial
-controller test to confirm everything really worked.</p>
 
-<p>After that I've just been working on adding content and features. I'm sure I'll
-come up with more interesting things to post, but for now it is just so nice to
-finally have things working.</p>
+<p>I decided to load all log data upfront in the client, and to skip pagination and
+demand loading for now. Having all the data in the client made filtering and
+searching really easy thanks to Moment and Knockout. I would still like to use
+local storage, but the current setup works for now.</p>
+
+<p>Enabling ssl was pretty trivial, and adding Google sign in was really easy.
+Adding Microsoft sign in was also easy... eventually. The key is that their sign
+in service is only accessible on one somewhat hidden page:
+<a href="https://apps.dev.microsoft.com">https://apps.dev.microsoft.com</a>. Once there you can get an app id and secret just
+like from Google. I also tried adding LinkedIn sign in, but there is no official
+library. I know just enough about OAuth2 to know I don't want to implement my
+own solution.</p>
+
+<p>Adding email reporting was actually a little interesting. I started by following
+<a href="https://docs.asp.net/en/1.0.0-rc2/security/authentication/accconfirm.html">this tutorial</a>
+on enabling email account verification. About half-way down the page though is a
+little note stating &quot;SendGrid does not yet support .NET Core&quot;. After a little
+research on the SendGrid site it seems they have a new API, and a
+<a href="https://github.com/sendgrid/sendgrid-csharp">C# library on Github</a>. I got it
+working after a little trouble, the key was quote handling per
+<a href="https://github.com/sendgrid/sendgrid-csharp/issues/245">this Github issue</a>.</p>
+
+<p>The sharable link was both really simple, and really complicated. All I needed
+was a user id and some log ids and I could pull the report together with a
+LINQ. It turns out MVC Core controllers don't databind list arguments, so I had
+to parse the log ids myself. I also wanted to put the user's name on the report,
+but accessing user info added some dependencies that made testing hard, mocking
+a <code>ApplicationDbContext : IdentityDbContext&lt;ApplicationUser&gt;</code> is really
+complicated. Repository pattern to the rescue. One extra layer of abstraction
+decouples my controller enough for testing. Also it seems there is no easy way
+to use Razor templates to produce strings, so I had to roll my own templates.</p>
+
+<p>I found Azure's web interface really confusing. At first I wasn't even sure how
+to setup a simple web app. I ended up using my Github repo for deployment, which
+has good and bad points. My first attempt didn't go well though. First my app
+wouldn't build (which was my fault), then when I got it built the deployment
+failed. It seems it always fails the first time, but a retry sorted that
+out. From there I spent hours trying to debug a code 500 - Internal server error.
+Everything checked out fine, the build was good, the server was fine, but I
+couldn't get anything to serve. It turns out to be a common Azure problem, and
+the solution is to just delete the web app instance and rebuild it.</p>
+
+<p>My app is currently just hosted on the free app service tier. I did have to add
+a basic SQL database for $4.99 a month. Thus far I have spent about $2.00 of my
+$200.00 Azure credit just getting things setup. At this burn rate I'll get about
+3 months of hosting. I've added Google AdSense banners in case I get any traffic.</p>
 
   </div>
   <footer>
@@ -134,7 +169,7 @@ finally have things working.</p>
     </li>
     
     <li>
-      <a href="/tags/xunit"><span></span>xUnit</a>
+      <a href="/tags/azure"><span></span>Azure</a>
     </li>
     
   </ul>
@@ -175,9 +210,9 @@ finally have things working.</p>
       <div id="disqus_thread"></div>
 <script type="text/javascript">
     var disqus_shortname = 'SuperfComs';
-    var disqus_identifier = 'http:\/\/kitsu.github.io\/2016\/06\/13\/unemployed-project-06\/';
-    var disqus_title = 'Unemployed project - Testing';
-    var disqus_url = 'http:\/\/kitsu.github.io\/2016\/06\/13\/unemployed-project-06\/';
+    var disqus_identifier = 'http:\/\/kitsu.github.io\/2016\/06\/30\/unemployed-project-12\/';
+    var disqus_title = 'Unemployed project - Published';
+    var disqus_url = 'http:\/\/kitsu.github.io\/2016\/06\/30\/unemployed-project-12\/';
 
     (function() {
         var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
@@ -192,14 +227,9 @@ finally have things working.</p>
         
         <div id="pagenavigation-next">
           <span class="pagenav-label">Previous</span>
-          <a href="http://kitsu.github.io/2016/06/12/unemployed-project-05/">Unemployed Project - Frontend</a>
+          <a href="http://kitsu.github.io/2016/06/22/unemployed-project-11/">Unemployed project - Testing Typescript</a>
         </div>
         
-        
-        <div id="pagenavigation-prev">
-          <span class="pagenav-label">Next</span>
-          <a href="http://kitsu.github.io/2016/06/16/unemployed-project-07/">Unemployed project - Progress</a>
-        </div>
         
       </div>
       
