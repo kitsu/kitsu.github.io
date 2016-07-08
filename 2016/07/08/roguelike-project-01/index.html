@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="Hugo 0.15" />
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    
+    <link href="/index.xml" rel="alternate" type="application/rss+xml" title="Superfluous Comments" />
+    <link href="/index.xml" rel="feed" type="application/rss+xml" title="Superfluous Comments" />
+    
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+    
+    <script src="https://apis.google.com/js/platform.js" async defer>{lang: 'ja'}</script>
+    
+    <link rel="stylesheet" href="https://yandex.st/highlightjs/8.0/styles/default.min.css">
+    <script src="https://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <title>Roguelike Project - Tentative Start | Superfluous Comments</title>
+    <meta name="Description" content="Starting to start a new project.
+">
+  </head>
+  <body>
+    <div id="wrap">
+      
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-77704589-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+      <header class="site-header">
+        <div class="site-header-left">
+          <a class="site-header-title" href="http://kitsu.github.io/">Superfluous Comments</a>
+        </div>
+      </header>
+      <div class="container">
+        <div id="main">
+
+<div class="article">
+  <header>
+    <div class="article-header">
+      <h1>Roguelike Project - Tentative Start</h1>
+      <div class="article-meta">
+        <span class="posttime">2016/07/08</span>
+        
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/c"><span></span>C#</a>
+    </li>
+    
+    <li>
+      <a href="/tags/monogame"><span></span>MonoGame</a>
+    </li>
+    
+    <li>
+      <a href="/tags/roguelike"><span></span>Roguelike</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      </div>
+    </div>
+  </header>
+      
+      <div class="adsense">
+        <span class="sponsor-label">Sponsored link</span>
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="2442045076"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+      </div>
+      
+  <div class="content">
+    <p>Starting to start a new project.</p>
+
+<p><hr/><br/>
+After an extra long fourth of July break I'm am thinking about starting a new
+project. I always feel like I wait to long to start posting about these things,
+so this time I'm getting a head start. I'm thinking about building a 2D tile
+based <a href="http://www.roguebasin.com/index.php?title=Main_Page">roguelike</a>... thing.
+My main interests are playing around with tile based pixel graphics, playing
+around with <a href="http://pcg.wikidot.com/">Procedural Generation</a>, and building some
+kind of interesting simulation.</p>
+
+<p>Over the past couple of days I've been researching and experimenting with game
+frameworks programmable with C#. I really liked <a href="https://github.com/mono/CocosSharp">CocosSharp</a>
+and was going to go with it, but it doesn't provide an easy way to build a
+desktop app. I would like whatever I make to run on Android, but running on
+Windows desktop is my first priority (since that is my dev environment). I have
+settled on <a href="http://www.monogame.net/">MonoGame</a> even though I don't particularly
+like it. It is both a heavy weight framework, and very low level. It also has
+practically no documentation. I thought a number of times that I would rather
+just use the HTML5 canvas but I really want to get some more experience with C#.</p>
+
+<p>I also spent some time looking for assets. I found a really awesome and huge set
+of sprites: <a href="http://opengameart.org/content/dawnlike-16x16-universal-rogue-like-tileset-v181">DawnLike - 16x16</a>.
+It apparently started as a tileset for NetHack, but now contains all kinds of
+things. I actually don't like the wall tiles, but it will be great to get
+started with. I also downloaded <a href="http://www.mapeditor.org/">Tiled</a> the map
+editor. I don't plan on using pre-built maps, but it has been handy for
+experimenting with the tileset, and I used it to reorganize everything into a
+few large sprite sheets.</p>
+
+<p>After installing MonoGame last night and creating a new empty project I spent
+quite a while staring at the default template trying to decide where to start. I
+really wanted to just jump in and get some graphics on the screen, but even that
+will require some infrastructure. The first problem though is where to put
+stuff. I spent a little time this morning at the white board sketching out the
+system I'm going to aim for. Afterward I wrote up a little readme file to record
+and solidify my ideas.</p>
+
+<p>Here is my white board sketch:
+
+<figure >
+    
+        <img src="/images/20160708_123914.jpg" />
+    
+    
+</figure>
+</p>
+
+<p>I want something sort of like MVVM. I changed the names to better reflect the
+intent of each module:</p>
+
+<ul>
+<li>Simulation - This is the model, in charge of game objects and their interactions.</li>
+<li>Display - This is the view, in charge of rendering graphics to the screen.</li>
+<li>Director - This module connects the simulation to the display.</li>
+</ul>
+
+<p>I want the display and simulation to be completely isolated from each other. The
+display will tick at 60hz and manage all the animation and raw input. The
+simulation will be ticked manually by the director. I also want to play around
+with custom events for communicating changes to the director. The structure
+isn't completely clear to me yet, but I at least have a place to start building
+the rendering code.</p>
+
+<p>Here is a neat MVVM graphic I found <a href="https://msdn.microsoft.com/en-us/library/ff798384.aspx">in this Microsoft article</a>
+
+<figure >
+    
+        <img src="/images/IC416621.png" />
+    
+    
+</figure>
+</p>
+
+  </div>
+  <footer>
+    <div class="article-footer">
+      
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/c"><span></span>C#</a>
+    </li>
+    
+    <li>
+      <a href="/tags/monogame"><span></span>MonoGame</a>
+    </li>
+    
+    <li>
+      <a href="/tags/roguelike"><span></span>Roguelike</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      
+      <div class="adsense">
+        <span class="sponsor-label">Sponsored link</span>
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="2442045076"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+      </div>
+      
+      
+<div id="share-buttons">
+  <ul>
+    
+    
+    
+    
+    <li>
+      <div class="g-plusone" data-size="medium"></div>
+    </li>
+    
+    
+  </ul>
+</div>
+
+
+      <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'SuperfComs';
+    var disqus_identifier = 'http:\/\/kitsu.github.io\/2016\/07\/08\/roguelike-project-01\/';
+    var disqus_title = 'Roguelike Project - Tentative Start';
+    var disqus_url = 'http:\/\/kitsu.github.io\/2016\/07\/08\/roguelike-project-01\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+      
+      <div id="pagenavigation-next-prev">
+        
+        <div id="pagenavigation-next">
+          <span class="pagenav-label">Previous</span>
+          <a href="http://kitsu.github.io/2016/06/30/unemployed-project-12/">Unemployed project - Published</a>
+        </div>
+        
+        
+      </div>
+      
+    </div>
+  </footer>
+</div>
+        </div>
+        <div class="sidebar">
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Author</span>
+    </div>
+    <div id="author">
+      <span>Ed Blake</span>
+      <div>
+        
+        
+        <a href="https://plus.google.com/118323029386640613972"><i class="fa fa-google-plus-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://github.com/kitsu"><i class="fa fa-github-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://www.linkedin.com/in/edward-blake-b3601411b"><i class="fa fa-linkedin-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://stackoverflow.com/users/770443"><i class="fa fa-stack-overflow fa-2x" aria-hidden="true"></i></a>
+        
+      </div>
+    </div>
+  </div>
+  
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Categories</span>
+    </div>
+    <div class="categories">
+      <ul>
+        
+        <li>
+          <a href="/categories/blog"><span></span>blog (3)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/development"><span></span>development (24)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/hacks"><span></span>hacks (4)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/personal"><span></span>personal (2)</a>
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>RSS</span>
+    </div>
+    <div id="rss">
+      <a href="/index.xml" type="application/rss+xml" target="_blank">
+        <i class="fa fa-rss-square fa-2x" aria-hidden="true"></i>
+      </a>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Sponsored link</span>
+    </div>
+    <div class="adsense">
+      <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:inline-block;width:300px;height:600px"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="9965311870"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+    </div>
+  </div>
+  
+</div>
+
+      </div>
+      <footer>
+        <div id="site-footer-wrap">
+          <div id="site-footer">
+            <span>Powered by <a href="https://gohugo.io/">Hugo</a>.</span>
+            <span>
+              
+              © 2015 Ed Blake
+              
+           </span>
+           <span id="copyleft">
+              <a rel="license"
+                 href="http://creativecommons.org/licenses/by-sa/4.0/">
+                <img alt="Creative Commons License" style="border-width:0"
+                     src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" />
+              </a>
+            </span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
+

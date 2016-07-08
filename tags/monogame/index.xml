@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Monogame on Superfluous Comments</title>
+    <link>http://kitsu.github.io/tags/monogame/</link>
+    <description>Recent content in Monogame on Superfluous Comments</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>© 2015 Ed Blake</copyright>
+    <lastBuildDate>Fri, 08 Jul 2016 10:10:08 -0700</lastBuildDate>
+    <atom:link href="http://kitsu.github.io/tags/monogame/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Roguelike Project - Tentative Start</title>
+      <link>http://kitsu.github.io/2016/07/08/roguelike-project-01/</link>
+      <pubDate>Fri, 08 Jul 2016 10:10:08 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/07/08/roguelike-project-01/</guid>
+      <description>&lt;p&gt;Starting to start a new project.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

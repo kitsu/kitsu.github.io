@@ -7,8 +7,18 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© 2015 Ed Blake</copyright>
-    <lastBuildDate>Thu, 30 Jun 2016 18:27:41 -0700</lastBuildDate>
+    <lastBuildDate>Fri, 08 Jul 2016 10:10:08 -0700</lastBuildDate>
     <atom:link href="http://kitsu.github.io/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Roguelike Project - Tentative Start</title>
+      <link>http://kitsu.github.io/2016/07/08/roguelike-project-01/</link>
+      <pubDate>Fri, 08 Jul 2016 10:10:08 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/07/08/roguelike-project-01/</guid>
+      <description>&lt;p&gt;Starting to start a new project.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Unemployed project - Published</title>
@@ -147,16 +157,6 @@
       
       <guid>http://kitsu.github.io/2016/06/02/post_pitch_depression/</guid>
       <description>&lt;p&gt;I make a bid to change the job I have into the job I want, with luke-warm result.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Home Grown DOM Animations</title>
-      <link>http://kitsu.github.io/2016/05/31/async_dom_animation/</link>
-      <pubDate>Tue, 31 May 2016 14:11:32 -0700</pubDate>
-      
-      <guid>http://kitsu.github.io/2016/05/31/async_dom_animation/</guid>
-      <description>&lt;p&gt;Using core.async to animate DOM properties.&lt;/p&gt;
 </description>
     </item>
     
