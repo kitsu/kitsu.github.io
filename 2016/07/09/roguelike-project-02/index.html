@@ -189,8 +189,8 @@ sprite map:
     <span style="color: #75715e">// Flipped indicates second frame is shown</span>
     <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">bool</span> <span style="color: #f8f8f2">Animated,</span> <span style="color: #f8f8f2">Flipped;</span>
     <span style="color: #75715e">// How long to show each side in milliseconds</span>
-    <span style="color: #75715e">// and ellapsed time since last flip</span>
-    <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">ForeDuration,</span> <span style="color: #f8f8f2">TotalDuration,</span> <span style="color: #f8f8f2">Ellapsed;</span>
+    <span style="color: #75715e">// and elapsed time since last flip</span>
+    <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">ForeDuration,</span> <span style="color: #f8f8f2">TotalDuration,</span> <span style="color: #f8f8f2">Elapsed;</span>
     <span style="color: #75715e">// Front and back source rects</span>
     <span style="color: #66d9ef">public</span> <span style="color: #f8f8f2">Rectangle</span> <span style="color: #f8f8f2">Fore,</span> <span style="color: #f8f8f2">Back;</span>
 
@@ -200,7 +200,7 @@ sprite map:
         <span style="color: #f8f8f2">Flipped</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">false</span><span style="color: #f8f8f2">;</span>
         <span style="color: #f8f8f2">ForeDuration</span> <span style="color: #f8f8f2">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
         <span style="color: #f8f8f2">TotalDuration</span> <span style="color: #f8f8f2">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
-        <span style="color: #f8f8f2">Ellapsed</span> <span style="color: #f8f8f2">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">Elapsed</span> <span style="color: #f8f8f2">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
         <span style="color: #f8f8f2">Fore</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">fore;</span>
         <span style="color: #f8f8f2">Back</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">fore;</span>
     <span style="color: #f8f8f2">}</span>
@@ -211,7 +211,7 @@ sprite map:
         <span style="color: #f8f8f2">Flipped</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">false</span><span style="color: #f8f8f2">;</span>
         <span style="color: #f8f8f2">ForeDuration</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">foreDuration;</span>
         <span style="color: #f8f8f2">TotalDuration</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">totalDuration;</span>
-        <span style="color: #f8f8f2">Ellapsed</span> <span style="color: #f8f8f2">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">Elapsed</span> <span style="color: #f8f8f2">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
         <span style="color: #f8f8f2">Fore</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">fore;</span>
         <span style="color: #f8f8f2">Back</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">back;</span>
     <span style="color: #f8f8f2">}</span>
@@ -253,12 +253,12 @@ and memoizing the result:
             <span style="color: #f8f8f2">sprite</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">Sprites[key];</span>
             <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(sprite.Animated)</span>
             <span style="color: #f8f8f2">{</span>
-                <span style="color: #f8f8f2">sprite.Ellapsed</span> <span style="color: #f8f8f2">+=</span> <span style="color: #f8f8f2">gameTime.ElapsedGameTime.Milliseconds;</span>
-                <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(sprite.Ellapsed</span> <span style="color: #f8f8f2">&gt;</span> <span style="color: #f8f8f2">sprite.TotalDuration)</span>
+                <span style="color: #f8f8f2">sprite.Elapsed</span> <span style="color: #f8f8f2">+=</span> <span style="color: #f8f8f2">gameTime.ElapsedGameTime.Milliseconds;</span>
+                <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(sprite.Elapsed</span> <span style="color: #f8f8f2">&gt;</span> <span style="color: #f8f8f2">sprite.TotalDuration)</span>
                 <span style="color: #f8f8f2">{</span>
                     <span style="color: #f8f8f2">sprite.Flipped</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">false</span><span style="color: #f8f8f2">;</span>
-                    <span style="color: #f8f8f2">sprite.Ellapsed</span> <span style="color: #f8f8f2">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
-                <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(sprite.Ellapsed</span> <span style="color: #f8f8f2">&gt;</span> <span style="color: #f8f8f2">sprite.ForeDuration)</span>
+                    <span style="color: #f8f8f2">sprite.Elapsed</span> <span style="color: #f8f8f2">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+                <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(sprite.Elapsed</span> <span style="color: #f8f8f2">&gt;</span> <span style="color: #f8f8f2">sprite.ForeDuration)</span>
                 <span style="color: #f8f8f2">{</span>
                     <span style="color: #f8f8f2">sprite.Flipped</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">true</span><span style="color: #f8f8f2">;</span>
                 <span style="color: #f8f8f2">}</span>
