@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="Hugo 0.15" />
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    
+    <link href="/index.xml" rel="alternate" type="application/rss+xml" title="Superfluous Comments" />
+    <link href="/index.xml" rel="feed" type="application/rss+xml" title="Superfluous Comments" />
+    
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+    
+    <script src="https://apis.google.com/js/platform.js" async defer>{lang: 'ja'}</script>
+    
+    <link rel="stylesheet" href="https://yandex.st/highlightjs/8.0/styles/default.min.css">
+    <script src="https://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <title>Roguelike Project - Adding Abstractions | Superfluous Comments</title>
+    <meta name="Description" content="Going from a tile renderer to a map provider.
+">
+  </head>
+  <body>
+    <div id="wrap">
+      
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-77704589-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+      <header class="site-header">
+        <div class="site-header-left">
+          <a class="site-header-title" href="http://kitsu.github.io/">Superfluous Comments</a>
+        </div>
+      </header>
+      <div class="container">
+        <div id="main">
+
+<div class="article">
+  <header>
+    <div class="article-header">
+      <h1>Roguelike Project - Adding Abstractions</h1>
+      <div class="article-meta">
+        <span class="posttime">2016/07/11</span>
+        
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/c"><span></span>C#</a>
+    </li>
+    
+    <li>
+      <a href="/tags/monogame"><span></span>MonoGame</a>
+    </li>
+    
+    <li>
+      <a href="/tags/roguelike"><span></span>Roguelike</a>
+    </li>
+    
+    <li>
+      <a href="/tags/code"><span></span>code</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      </div>
+    </div>
+  </header>
+      
+      <div class="adsense">
+        <span class="sponsor-label">Sponsored link</span>
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="2442045076"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+      </div>
+      
+  <div class="content">
+    <p>Going from a tile renderer to a map provider.</p>
+
+<p><hr/><br/>
+Expanding on what I posted last time I have created a manually encoded map. The
+exercise let me see what the tiles look like assembled (outside of Tiled), and
+also helped me think about how the larger system will work. To create the map I
+built an array of strings where each string is a row and each char is a tile. I
+then created an index from char to tile name for selecting tile sprites:</p>
+
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #66d9ef">class</span> <span style="color: #a6e22e">MapView</span> <span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">IView</span>
+<span style="color: #f8f8f2">{</span>
+<span style="color: #f8f8f2">...</span>
+ <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">void</span> <span style="color: #a6e22e">Draw</span><span style="color: #f8f8f2">(GameTime</span> <span style="color: #f8f8f2">gameTime)</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">key</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">Dictionary&lt;</span><span style="color: #66d9ef">char</span><span style="color: #f8f8f2">,</span> <span style="color: #66d9ef">string</span><span style="color: #f8f8f2">&gt;()</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">{</span> <span style="color: #e6db74">&#39;~&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;BrickPit.CyanWater.Middle&quot;</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span> <span style="color: #e6db74">&#39;0&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;BrickPit.CyanWater.OutTopRight&quot;</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span> <span style="color: #e6db74">&#39;1&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;BrickPit.CyanWater.BottomMiddle&quot;</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span> <span style="color: #e6db74">&#39;2&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;BrickPit.CyanWater.OutTopLeft&quot;</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span> <span style="color: #e6db74">&#39;3&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;BrickPit.CyanWater.MiddleRight&quot;</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span> <span style="color: #e6db74">&#39;4&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;BrickPit.CyanWater.MiddleLeft&quot;</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span> <span style="color: #e6db74">&#39;5&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;BrickPit.CyanWater.OutBottomRight&quot;</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span> <span style="color: #e6db74">&#39;6&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;BrickPit.CyanWater.TopMiddle&quot;</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span> <span style="color: #e6db74">&#39;7&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;BrickPit.CyanWater.OutBottomLeft&quot;</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span> <span style="color: #e6db74">&#39;{&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;BrickPit.CyanWater.TopLeft&quot;</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span> <span style="color: #e6db74">&#39;}&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;BrickPit.CyanWater.TopRight&quot;</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span> <span style="color: #e6db74">&#39;[&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;BrickPit.CyanWater.BottomLeft&quot;</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span> <span style="color: #e6db74">&#39;]&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;BrickPit.CyanWater.BottomRight&quot;</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span> <span style="color: #e6db74">&#39;g&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;BrickFloor.Gray.TopLeft&quot;</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span> <span style="color: #e6db74">&#39;h&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;BrickFloor.Gray.TopMiddle&quot;</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span> <span style="color: #e6db74">&#39;i&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;BrickFloor.Gray.TopRight&quot;</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span> <span style="color: #e6db74">&#39;j&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;BrickFloor.Gray.MiddleLeft&quot;</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span> <span style="color: #e6db74">&#39;k&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;BrickFloor.Gray.MiddleRight&quot;</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span> <span style="color: #e6db74">&#39;l&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;BrickFloor.Gray.BottomLeft&quot;</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span> <span style="color: #e6db74">&#39;m&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;BrickFloor.Gray.BottomMiddle&quot;</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span> <span style="color: #e6db74">&#39;n&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;BrickFloor.Gray.BottomRight&quot;</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span> <span style="color: #e6db74">&#39;.&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;BrickFloor.Gray.Middle&quot;</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span> <span style="color: #e6db74">&#39;#&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;BrickFloor.Gray.Single&quot;</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span> <span style="color: #e6db74">&#39;a&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;BrickWall.LiteBlue.TopLeft&quot;</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span> <span style="color: #e6db74">&#39;b&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;BrickWall.LiteBlue.Horizontal&quot;</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span> <span style="color: #e6db74">&#39;c&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;BrickWall.LiteBlue.TopRight&quot;</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span> <span style="color: #e6db74">&#39;d&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;BrickWall.LiteBlue.Vertical&quot;</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span> <span style="color: #e6db74">&#39;e&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;BrickWall.LiteBlue.BottomLeft&quot;</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span> <span style="color: #e6db74">&#39;f&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;BrickWall.LiteBlue.BottomRight&quot;</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span> <span style="color: #e6db74">&#39;v&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;BrickWall.LiteBlue.BottomCap&quot;</span> <span style="color: #f8f8f2">},</span>
+        <span style="color: #f8f8f2">};</span>
+        <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">map</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">new</span> <span style="color: #66d9ef">string</span><span style="color: #f8f8f2">[]</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #e6db74">&quot;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #e6db74">&quot;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #e6db74">&quot;~~011111111111112~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #e6db74">&quot;~~3ghhhhhhhhhhhi4~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #e6db74">&quot;~~3j.abbbbbc...k4~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #e6db74">&quot;~~3j.dghhhid...k4~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #e6db74">&quot;~~3j.dj...kd...k4~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #e6db74">&quot;~~3j.dlmmmnd...k4~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #e6db74">&quot;~~3j.eb#bbbf...k4~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #e6db74">&quot;~~3j...........k4~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #e6db74">&quot;~~3lmmmmmmmmmmmn4~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #e6db74">&quot;~~566666666666667~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #e6db74">&quot;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #e6db74">&quot;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #e6db74">&quot;~~~~~~~~~~~~~~~~~~~~01111111111111111111111112~~~~&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #e6db74">&quot;~~~~~~~~~~~~~~~~~~~~3ghhhhhhhhhhhhhhhhhhhhhhi4~~~~&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #e6db74">&quot;~~~~~~~~~~~~~~~~~~~~3j......................k4~~~~&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #e6db74">&quot;~~~~~~~~~~~~~~~~~~~~3j.............ebbbc....k4~~~~&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #e6db74">&quot;~~~~~~~~~~~~~~~~~~~~3j..{66666}........d....k4~~~~&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #e6db74">&quot;~~~~~~~~~~~~~~~~~~~~3j..4~~~~~3..abbbbbf....k4~~~~&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #e6db74">&quot;~~~~~~~~~~~~~~~~~~~~3j..4~~~~~3..d..........k4~~~~&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #e6db74">&quot;~~~~~~~~~~~~~~~~~~~~3j..4~~~~~3..d.abbbbbbc.k4~~~~&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #e6db74">&quot;~~~~~~~~~~~~~~~~~~~~3j..4~~~~~3..d.v......d.k4~~~~&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #e6db74">&quot;~~~~~~~~~~~~~~~~~~~~3j..[11111]..d........d.k4~~~~&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #e6db74">&quot;~~~~~~~~~~~~~~~~~~~~3j...........ebbbbbbbbf.k4~~~~&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #e6db74">&quot;~~~~~~~~~~~~~~~~~~~~3lmmmmmmmmmmmmmmmmmmmmmmn4~~~~&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #e6db74">&quot;~~~~~~~~~~~~~~~~~~~~56666666666666666666666667~~~~&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #e6db74">&quot;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #e6db74">&quot;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #e6db74">&quot;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #e6db74">&quot;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #f8f8f2">};</span>
+        <span style="color: #f8f8f2">Rectangle</span> <span style="color: #f8f8f2">dest</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">tileRect;</span>
+        <span style="color: #f8f8f2">spriteBatch.Begin(SpriteSortMode.Immediate,</span> <span style="color: #f8f8f2">BlendState.Opaque);</span>
+        <span style="color: #66d9ef">string</span> <span style="color: #f8f8f2">row;</span>
+        <span style="color: #66d9ef">string</span> <span style="color: #f8f8f2">tile;</span>
+        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">y</span> <span style="color: #f8f8f2">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">y</span> <span style="color: #f8f8f2">&lt;</span> <span style="color: #ae81ff">30</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">y++)</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">row</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">map[y];</span>
+            <span style="color: #f8f8f2">dest.X</span> <span style="color: #f8f8f2">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+            <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">x</span> <span style="color: #f8f8f2">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">x</span> <span style="color: #f8f8f2">&lt;</span> <span style="color: #ae81ff">50</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">x++)</span>
+            <span style="color: #f8f8f2">{</span>
+                <span style="color: #f8f8f2">tile</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">key[row[x]];</span>
+                <span style="color: #f8f8f2">mapSprites.Draw(spriteBatch,</span> <span style="color: #f8f8f2">tile,</span> <span style="color: #f8f8f2">dest);</span>
+                <span style="color: #f8f8f2">dest.X</span> <span style="color: #f8f8f2">+=</span> <span style="color: #ae81ff">16</span><span style="color: #f8f8f2">;</span>
+            <span style="color: #f8f8f2">}</span>
+            <span style="color: #f8f8f2">dest.Y</span> <span style="color: #f8f8f2">+=</span> <span style="color: #ae81ff">16</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">}</span>
+        <span style="color: #f8f8f2">spriteBatch.End();</span>
+    <span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">...</span>
+
+<span style="color: #f8f8f2">}</span>
+</pre></div>
+
+
+<p>
+<figure >
+    
+        <img src="/images/manual_tile_map.jpg" alt="Screen capture" />
+    
+    
+</figure>
+</p>
+
+<p>For the next step I want to add the next layer of abstraction that will then
+provide the map data to the map view. The simplest thing that would work would
+be creating another class that either contains and calls methods on the view, or
+that is contained and provides methods called by the view. That would be a very
+tight coupling though. In the MVVM paradigm my <code>MapView</code> should bind to my
+View-Model, and it will then receive update events when the data changes.</p>
+
+<p>My View-Model for the map will provide a way to register a viewport which
+defines a rectangle in simulation coordinates. The viewport will then generate
+signals when anything within its bounds changes, or when the bounds themselves
+change. The <code>MapView</code> can listen for those signals and update appropriately. The
+<code>MapView</code> will also emit signals based on user input that the View-Model can
+listen to. I'm planning on using events for signaling, which means either the
+View and View-Model need to have handles to each other, or something at a higher
+level needs handles for both and needs to know how to connect them together...</p>
+
+<p>This is where the director comes in. The Director will create both the
+<code>MapViewModel</code> and the <code>MapView</code> instances and wire up the events. The Director
+manages what is created and when. Building things this way lets the Director
+manage the overall game state and its transitions. To do this the Director will
+need a handle for the <code>ViewManager</code> and the Simulation container, but these can
+be provided by constructor injection to reduce coupling.</p>
+
+<p>I've done a lot of whiteboard scribbling thinking about how to structure things.
+Here is my current idea about data flow between modules:</p>
+
+<p>
+<figure >
+    
+        <img src="/images/20160712_104728.jpg" />
+    
+    
+</figure>
+</p>
+
+<p>I'm still working on building the pieces, but the idea is:</p>
+
+<ul>
+<li><p>The Simulation tracks cells that have some properties and optional contents.
+Change events are forwarded to various listeners: player control, simulation
+stats, map viewports, etc.</p></li>
+
+<li><p>The map controller's viewports get cell information from the simulation and
+transform it into arrays of simplified data (i.e. what kind of thing goes
+where). The viewports then forward data to their listeners</p></li>
+
+<li><p>The MapView then preprocesses the map data to determine which specific tile to
+show at each location. For example a floor tile with all tile neighbors to the
+SouthEast and other tiles elsewhere should become a TopLeft corner tile.</p></li>
+</ul>
+
+<p>By building the view module first I've started at the wrong end of the
+dependency graph. As I'm building out I keep finding I need some earlier
+dependency in place before I can proceed. I'm trying hard to build things in the
+smallest working chunks though. I know from experience that starting at the
+other end, where constraints are few, you can rapidly grow the independent systems
+to intractable complexity.</p>
+
+  </div>
+  <footer>
+    <div class="article-footer">
+      
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/c"><span></span>C#</a>
+    </li>
+    
+    <li>
+      <a href="/tags/monogame"><span></span>MonoGame</a>
+    </li>
+    
+    <li>
+      <a href="/tags/roguelike"><span></span>Roguelike</a>
+    </li>
+    
+    <li>
+      <a href="/tags/code"><span></span>code</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      
+      <div class="adsense">
+        <span class="sponsor-label">Sponsored link</span>
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="2442045076"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+      </div>
+      
+      
+<div id="share-buttons">
+  <ul>
+    
+    
+    
+    
+    <li>
+      <div class="g-plusone" data-size="medium"></div>
+    </li>
+    
+    
+  </ul>
+</div>
+
+
+      <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'SuperfComs';
+    var disqus_identifier = 'http:\/\/kitsu.github.io\/2016\/07\/11\/roguelike-project-03\/';
+    var disqus_title = 'Roguelike Project - Adding Abstractions';
+    var disqus_url = 'http:\/\/kitsu.github.io\/2016\/07\/11\/roguelike-project-03\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+      
+      <div id="pagenavigation-next-prev">
+        
+        <div id="pagenavigation-next">
+          <span class="pagenav-label">Previous</span>
+          <a href="http://kitsu.github.io/2016/07/09/roguelike-project-02/">Roguelike Project - Tile Rendering</a>
+        </div>
+        
+        
+      </div>
+      
+    </div>
+  </footer>
+</div>
+        </div>
+        <div class="sidebar">
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Author</span>
+    </div>
+    <div id="author">
+      <span>Ed Blake</span>
+      <div>
+        
+        
+        <a href="https://plus.google.com/118323029386640613972"><i class="fa fa-google-plus-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://github.com/kitsu"><i class="fa fa-github-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://www.linkedin.com/in/edward-blake-b3601411b"><i class="fa fa-linkedin-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://stackoverflow.com/users/770443"><i class="fa fa-stack-overflow fa-2x" aria-hidden="true"></i></a>
+        
+      </div>
+    </div>
+  </div>
+  
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Categories</span>
+    </div>
+    <div class="categories">
+      <ul>
+        
+        <li>
+          <a href="/categories/blog"><span></span>blog (3)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/development"><span></span>development (26)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/hacks"><span></span>hacks (4)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/personal"><span></span>personal (2)</a>
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>RSS</span>
+    </div>
+    <div id="rss">
+      <a href="/index.xml" type="application/rss+xml" target="_blank">
+        <i class="fa fa-rss-square fa-2x" aria-hidden="true"></i>
+      </a>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Sponsored link</span>
+    </div>
+    <div class="adsense">
+      <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:inline-block;width:300px;height:600px"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="9965311870"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+    </div>
+  </div>
+  
+</div>
+
+      </div>
+      <footer>
+        <div id="site-footer-wrap">
+          <div id="site-footer">
+            <span>Powered by <a href="https://gohugo.io/">Hugo</a>.</span>
+            <span>
+              
+              © 2015 Ed Blake
+              
+           </span>
+           <span id="copyleft">
+              <a rel="license"
+                 href="http://creativecommons.org/licenses/by-sa/4.0/">
+                <img alt="Creative Commons License" style="border-width:0"
+                     src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" />
+              </a>
+            </span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
+
