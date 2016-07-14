@@ -7,8 +7,18 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© 2015 Ed Blake</copyright>
-    <lastBuildDate>Mon, 11 Jul 2016 10:37:56 -0700</lastBuildDate>
+    <lastBuildDate>Tue, 12 Jul 2016 17:42:23 -0700</lastBuildDate>
     <atom:link href="http://kitsu.github.io/tags/code/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Roguelike Project - Reactivity</title>
+      <link>http://kitsu.github.io/2016/07/12/roguelike-project-04/</link>
+      <pubDate>Tue, 12 Jul 2016 17:42:23 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/07/12/roguelike-project-04/</guid>
+      <description>&lt;p&gt;Replacing events and delegates with observables.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Roguelike Project - Adding Abstractions</title>
@@ -147,16 +157,6 @@
       
       <guid>http://kitsu.github.io/2016/05/26/devcards_errors/</guid>
       <description>&lt;p&gt;Dependency resolution quirks bring progress to a halt, temporarily.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>ClojureScript in PyQt4 QWebView - More testing</title>
-      <link>http://kitsu.github.io/2016/05/25/pyqt4_cljs_06/</link>
-      <pubDate>Wed, 25 May 2016 17:02:54 -0700</pubDate>
-      
-      <guid>http://kitsu.github.io/2016/05/25/pyqt4_cljs_06/</guid>
-      <description>&lt;p&gt;Because testing is more fun than real work?&lt;/p&gt;
 </description>
     </item>
     
