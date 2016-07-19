@@ -7,8 +7,18 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© 2015 Ed Blake</copyright>
-    <lastBuildDate>Tue, 12 Jul 2016 17:42:23 -0700</lastBuildDate>
+    <lastBuildDate>Mon, 18 Jul 2016 19:49:43 -0700</lastBuildDate>
     <atom:link href="http://kitsu.github.io/tags/code/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Roguelike Project - Tile Selection</title>
+      <link>http://kitsu.github.io/2016/07/18/roguelike-project-05/</link>
+      <pubDate>Mon, 18 Jul 2016 19:49:43 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/07/18/roguelike-project-05/</guid>
+      <description>&lt;p&gt;Automatically selecting graphic tile variation based on neighborhood.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Roguelike Project - Reactivity</title>
@@ -147,16 +157,6 @@
       
       <guid>http://kitsu.github.io/2016/05/27/autolisp_parse_01/</guid>
       <description>&lt;p&gt;Woo, yet another weak parser implementation.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>ClojureScript lows as low as the highs</title>
-      <link>http://kitsu.github.io/2016/05/26/devcards_errors/</link>
-      <pubDate>Thu, 26 May 2016 20:02:47 -0700</pubDate>
-      
-      <guid>http://kitsu.github.io/2016/05/26/devcards_errors/</guid>
-      <description>&lt;p&gt;Dependency resolution quirks bring progress to a halt, temporarily.&lt;/p&gt;
 </description>
     </item>
     

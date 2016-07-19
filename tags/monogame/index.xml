@@ -7,8 +7,18 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© 2015 Ed Blake</copyright>
-    <lastBuildDate>Tue, 12 Jul 2016 17:42:23 -0700</lastBuildDate>
+    <lastBuildDate>Mon, 18 Jul 2016 19:49:43 -0700</lastBuildDate>
     <atom:link href="http://kitsu.github.io/tags/monogame/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Roguelike Project - Tile Selection</title>
+      <link>http://kitsu.github.io/2016/07/18/roguelike-project-05/</link>
+      <pubDate>Mon, 18 Jul 2016 19:49:43 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/07/18/roguelike-project-05/</guid>
+      <description>&lt;p&gt;Automatically selecting graphic tile variation based on neighborhood.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Roguelike Project - Reactivity</title>
