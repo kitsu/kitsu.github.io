@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="Hugo 0.15" />
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    
+    <link href="/index.xml" rel="alternate" type="application/rss+xml" title="Superfluous Comments" />
+    <link href="/index.xml" rel="feed" type="application/rss+xml" title="Superfluous Comments" />
+    
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+    
+    <script src="https://apis.google.com/js/platform.js" async defer>{lang: 'ja'}</script>
+    
+    <link rel="stylesheet" href="https://yandex.st/highlightjs/8.0/styles/default.min.css">
+    <script src="https://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <title>Roguelike Project - Chunks | Superfluous Comments</title>
+    <meta name="Description" content="Building the simulation side and hooking it up to the MapViewController.
+">
+  </head>
+  <body>
+    <div id="wrap">
+      
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-77704589-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+      <header class="site-header">
+        <div class="site-header-left">
+          <a class="site-header-title" href="http://kitsu.github.io/">Superfluous Comments</a>
+        </div>
+      </header>
+      <div class="container">
+        <div id="main">
+
+<div class="article">
+  <header>
+    <div class="article-header">
+      <h1>Roguelike Project - Chunks</h1>
+      <div class="article-meta">
+        <span class="posttime">2016/07/22</span>
+        
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/c"><span></span>C#</a>
+    </li>
+    
+    <li>
+      <a href="/tags/monogame"><span></span>MonoGame</a>
+    </li>
+    
+    <li>
+      <a href="/tags/roguelike"><span></span>Roguelike</a>
+    </li>
+    
+    <li>
+      <a href="/tags/code"><span></span>code</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      </div>
+    </div>
+  </header>
+      
+      <div class="adsense">
+        <span class="sponsor-label">Sponsored link</span>
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="2442045076"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+      </div>
+      
+  <div class="content">
+    <p>Building the simulation side and hooking it up to the MapViewController.</p>
+
+<p><hr/><br/>
+I spent some time setting up unit testing and writing some initial tests. I went
+with the Nunit framework, and added <a href="http://www.fluentassertions.com/">FluentAssertions</a>
+to clean things up a little. I picked Nunit because this project is cross
+platform, and may be built by people without VS, and Nunit seems like the most
+platform agnostic framework for C#.</p>
+
+<p>Next I started working on building the simulation structure and map
+generation. I want to allow arbitrarily large maps, which means the world map
+will be larger than memory. Chunking is the standard approach to handling large
+map data, just pick a width and height for the chunks and use a little modular
+math:</p>
+
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">...</span>
+<span style="color: #66d9ef">public</span> <span style="color: #f8f8f2">Vector</span> <span style="color: #a6e22e">GlobalCoord</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">x,</span> <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">y)</span> <span style="color: #f8f8f2">=&gt;</span> <span style="color: #f8f8f2">GlobalCoord(</span><span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">Vector(x,</span> <span style="color: #f8f8f2">y));</span>
+<span style="color: #66d9ef">public</span> <span style="color: #f8f8f2">Vector</span> <span style="color: #a6e22e">GlobalCoord</span><span style="color: #f8f8f2">(Vector</span> <span style="color: #f8f8f2">loc)</span> <span style="color: #f8f8f2">=&gt;</span> <span style="color: #f8f8f2">(Index</span> <span style="color: #f8f8f2">*</span> <span style="color: #f8f8f2">ChunkSize)</span> <span style="color: #f8f8f2">+</span> <span style="color: #f8f8f2">loc;</span>
+
+<span style="color: #66d9ef">public</span> <span style="color: #66d9ef">static</span> <span style="color: #f8f8f2">Vector</span> <span style="color: #a6e22e">LocalCoord</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">x,</span> <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">y)</span> <span style="color: #f8f8f2">=&gt;</span> <span style="color: #f8f8f2">LocalCoord(</span><span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">Vector(x,</span> <span style="color: #f8f8f2">y));</span>
+<span style="color: #66d9ef">public</span> <span style="color: #66d9ef">static</span> <span style="color: #f8f8f2">Vector</span> <span style="color: #a6e22e">LocalCoord</span><span style="color: #f8f8f2">(Vector</span> <span style="color: #f8f8f2">coord)</span> <span style="color: #f8f8f2">=&gt;</span> <span style="color: #f8f8f2">coord</span> <span style="color: #f8f8f2">%</span> <span style="color: #f8f8f2">ChunkSize;</span>
+
+<span style="color: #66d9ef">public</span> <span style="color: #66d9ef">static</span> <span style="color: #f8f8f2">Vector</span> <span style="color: #a6e22e">Coord2Chunk</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">x,</span> <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">y)</span> <span style="color: #f8f8f2">=&gt;</span> <span style="color: #f8f8f2">Coord2Chunk(</span><span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">Vector(x,</span> <span style="color: #f8f8f2">y));</span>
+<span style="color: #66d9ef">public</span> <span style="color: #66d9ef">static</span> <span style="color: #f8f8f2">Vector</span> <span style="color: #a6e22e">Coord2Chunk</span><span style="color: #f8f8f2">(Vector</span> <span style="color: #f8f8f2">coord)</span> <span style="color: #f8f8f2">=&gt;</span> <span style="color: #f8f8f2">coord</span> <span style="color: #f8f8f2">/</span> <span style="color: #f8f8f2">ChunkSize;</span>
+<span style="color: #f8f8f2">...</span>
+</pre></div>
+
+
+<p>The next key to pseudo-infinite maps is the ability to generate a chunk's
+contents on demand. This can be achieved by using <a href="http://flafla2.github.io/2014/08/09/perlinnoise.html">perlin/simplex noise</a>
+for map generation. Simplex noise can be sampled with a coordinate, and
+generates smooth transition gradients between coordinates. By sampling the noise
+using global coordinates patterns will be consistent across chunk
+boundaries. This is a pretty standard approach,
+<a href="https://spin.atomicobject.com/2015/05/03/infinite-procedurally-generated-world/">here is a nice explanation</a>.</p>
+
+<p>I am using the <a href="https://github.com/rthome/SharpNoise">SharpNoise library</a>,
+mainly because it has a Nuget package. It has a bunch of features I don't need,
+but the noise modules are really neat. You can tweak and combine noise sources
+in chains or trees. I plan to have multiple noise sources controlling generation
+at different scales. One low frequency source could pick biomes, while a
+finer-grained noises could provide view-scale detail, and yet another could
+determine the location of structures. For now I am just using a &quot;water-line&quot; to
+pick between two tiles, and to determine where to place walls:</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">...</span>
+<span style="color: #66d9ef">void</span> <span style="color: #a6e22e">GenerateCells</span><span style="color: #f8f8f2">()</span>
+<span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">double</span> <span style="color: #66d9ef">value</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #f8f8f2">Vector</span> <span style="color: #f8f8f2">local;</span>
+    <span style="color: #f8f8f2">Cell</span> <span style="color: #f8f8f2">cell;</span>
+    <span style="color: #66d9ef">string</span> <span style="color: #f8f8f2">floor,</span> <span style="color: #f8f8f2">fill;</span>
+    <span style="color: #66d9ef">foreach</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">global</span> <span style="color: #66d9ef">in</span> <span style="color: #f8f8f2">Rect.Coordinates())</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">local</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">LocalCoord(global);</span>
+        <span style="color: #66d9ef">value</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">_noise.GetValue(global.X,</span> <span style="color: #f8f8f2">global.Y,</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #f8f8f2">floor</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">value</span> <span style="color: #f8f8f2">&lt;=</span> <span style="color: #ae81ff">0.1</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">?</span> <span style="color: #e6db74">&quot;Water&quot;</span> <span style="color: #f8f8f2">:</span> <span style="color: #e6db74">&quot;Brick&quot;</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">fill</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">(</span><span style="color: #ae81ff">0.5</span> <span style="color: #f8f8f2">&lt;=</span> <span style="color: #66d9ef">value</span> <span style="color: #f8f8f2">&amp;&amp;</span> <span style="color: #66d9ef">value</span> <span style="color: #f8f8f2">&lt;=</span> <span style="color: #ae81ff">0.6</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">?</span> <span style="color: #e6db74">&quot;Wall&quot;</span> <span style="color: #f8f8f2">:</span> <span style="color: #e6db74">&quot;&quot;</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">cell</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">Cell(floor,</span> <span style="color: #f8f8f2">fill);</span>
+        <span style="color: #f8f8f2">Cells[local.X,</span> <span style="color: #f8f8f2">local.Y]</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">cell;</span>
+        <span style="color: #f8f8f2">_cellUpdate.OnNext(</span><span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">KeyValuePair&lt;Vector,</span> <span style="color: #f8f8f2">Cell&gt;(global,</span> <span style="color: #f8f8f2">cell));</span>
+    <span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">...</span>
+</pre></div>
+</p>
+
+<p>I am using a new random seed on every run, here is one generated map (2 chunks):</p>
+
+<p>
+<figure >
+    
+        <img src="/images/Random_Map_01.JPG" alt="Random map screen capture" />
+    
+    
+</figure>
+</p>
+
+<p>The random content helped me fix a few bugs in my data definitions. I may still
+need to specialize tile picking per feature type though. There are some problems
+that are particular to the water pits.</p>
+
+<p>Anyway, the tricky part was connecting the simulation data to the view. Data has
+to flow in two directions, first the visible area needs to trigger chunk-loading,
+then loaded chunks need to signal their contents and any changes. I already had
+a <code>Viewport</code> in the control layer which knows where the view is looking in
+simulation coordinates. I didn't want the viewport to know anything about chunks
+though, so I added a <code>LoadArea</code> method to the <code>SimulationManager</code> that
+determines which chunks to load.</p>
+
+<p>Going the other direct I at first was publishing a <code>WhenChunkUpdates</code> observable,
+but again I didn't want the Controller to know anything about chunks. Also
+sending entire chunks on every update (even if only a single cell changed)
+seemed pretty wasteful. Instead I exposed a <code>WhenCellUpdates</code> observable on the
+<code>SimulationManager</code> that aggregates events from similar observables in each
+loaded chunk. The viewport then filters through the cell updates and processes
+any that overlap with it.</p>
+
+<p>I have the viewport pushing update events every time a change is successfully
+processed. This flow is optimal for single cell updates (i.e. when something
+moves in the simulation) but is really bad for initial loading. Especially since
+I am still pushing the entire viewport map on every update. I was going to do
+by-tile updates to the view, but I'm not storing intermediate tile data so I
+can't do piecewise tile resolution. It isn't that bad though because ReactiveX
+provides a <code>Throttle</code> extension method that ignores observable changes until
+update speed falls below a set frequency:</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">...</span>
+<span style="color: #66d9ef">public</span> <span style="color: #f8f8f2">IView</span> <span style="color: #a6e22e">CreateMapView</span><span style="color: #f8f8f2">(MapViewController</span> <span style="color: #f8f8f2">ctrl)</span>
+<span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">view</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">MapView(_screen,</span> <span style="color: #f8f8f2">Width,</span> <span style="color: #f8f8f2">Height);</span>
+    <span style="color: #f8f8f2">Add(view);</span>
+    <span style="color: #75715e">// Setup controller viewport</span>
+    <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">vp</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">ctrl.AddViewport(</span><span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">Rect(</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">,</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">view.Width,</span> <span style="color: #f8f8f2">view.Height));</span>
+    <span style="color: #75715e">// Bind events</span>
+    <span style="color: #f8f8f2">ctrl.WhenAddTileKey.Subscribe(view.AddTileKey);</span>
+    <span style="color: #f8f8f2">ctrl.Initialize();</span>
+    <span style="color: #f8f8f2">vp.WhenMapChanges</span>
+        <span style="color: #f8f8f2">.Throttle(</span><span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">TimeSpan((</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">/</span><span style="color: #ae81ff">60</span><span style="color: #f8f8f2">)*</span><span style="color: #ae81ff">1000</span><span style="color: #f8f8f2">))</span>
+        <span style="color: #f8f8f2">.Subscribe(view.UpdateMap);</span>
+    <span style="color: #f8f8f2">vp.Initialize();</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">view;</span>
+<span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">...</span>
+</pre></div>
+</p>
+
+<p>The next steps are to elaborate the cell data structure, create chunk generation
+infrastructure, and add simulation entities.</p>
+
+  </div>
+  <footer>
+    <div class="article-footer">
+      
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/c"><span></span>C#</a>
+    </li>
+    
+    <li>
+      <a href="/tags/monogame"><span></span>MonoGame</a>
+    </li>
+    
+    <li>
+      <a href="/tags/roguelike"><span></span>Roguelike</a>
+    </li>
+    
+    <li>
+      <a href="/tags/code"><span></span>code</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      
+      <div class="adsense">
+        <span class="sponsor-label">Sponsored link</span>
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="2442045076"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+      </div>
+      
+      
+<div id="share-buttons">
+  <ul>
+    
+    
+    
+    
+    <li>
+      <div class="g-plusone" data-size="medium"></div>
+    </li>
+    
+    
+  </ul>
+</div>
+
+
+      <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'SuperfComs';
+    var disqus_identifier = 'http:\/\/kitsu.github.io\/2016\/07\/22\/roguelike-project-06\/';
+    var disqus_title = 'Roguelike Project - Chunks';
+    var disqus_url = 'http:\/\/kitsu.github.io\/2016\/07\/22\/roguelike-project-06\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+      
+      <div id="pagenavigation-next-prev">
+        
+        <div id="pagenavigation-next">
+          <span class="pagenav-label">Previous</span>
+          <a href="http://kitsu.github.io/2016/07/18/roguelike-project-05/">Roguelike Project - Tile Selection</a>
+        </div>
+        
+        
+      </div>
+      
+    </div>
+  </footer>
+</div>
+        </div>
+        <div class="sidebar">
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Author</span>
+    </div>
+    <div id="author">
+      <span>Ed Blake</span>
+      <div>
+        
+        
+        <a href="https://plus.google.com/118323029386640613972"><i class="fa fa-google-plus-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://github.com/kitsu"><i class="fa fa-github-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://www.linkedin.com/in/edward-blake-b3601411b"><i class="fa fa-linkedin-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://stackoverflow.com/users/770443"><i class="fa fa-stack-overflow fa-2x" aria-hidden="true"></i></a>
+        
+      </div>
+    </div>
+  </div>
+  
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Categories</span>
+    </div>
+    <div class="categories">
+      <ul>
+        
+        <li>
+          <a href="/categories/blog"><span></span>blog (3)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/development"><span></span>development (29)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/hacks"><span></span>hacks (4)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/personal"><span></span>personal (2)</a>
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>RSS</span>
+    </div>
+    <div id="rss">
+      <a href="/index.xml" type="application/rss+xml" target="_blank">
+        <i class="fa fa-rss-square fa-2x" aria-hidden="true"></i>
+      </a>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Sponsored link</span>
+    </div>
+    <div class="adsense">
+      <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:inline-block;width:300px;height:600px"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="9965311870"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+    </div>
+  </div>
+  
+</div>
+
+      </div>
+      <footer>
+        <div id="site-footer-wrap">
+          <div id="site-footer">
+            <span>Powered by <a href="https://gohugo.io/">Hugo</a>.</span>
+            <span>
+              
+              © 2015 Ed Blake
+              
+           </span>
+           <span id="copyleft">
+              <a rel="license"
+                 href="http://creativecommons.org/licenses/by-sa/4.0/">
+                <img alt="Creative Commons License" style="border-width:0"
+                     src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" />
+              </a>
+            </span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
+

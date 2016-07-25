@@ -7,8 +7,18 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© 2015 Ed Blake</copyright>
-    <lastBuildDate>Mon, 18 Jul 2016 19:49:43 -0700</lastBuildDate>
+    <lastBuildDate>Fri, 22 Jul 2016 12:18:18 -0700</lastBuildDate>
     <atom:link href="http://kitsu.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Roguelike Project - Chunks</title>
+      <link>http://kitsu.github.io/2016/07/22/roguelike-project-06/</link>
+      <pubDate>Fri, 22 Jul 2016 12:18:18 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/07/22/roguelike-project-06/</guid>
+      <description>&lt;p&gt;Building the simulation side and hooking it up to the MapViewController.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Roguelike Project - Tile Selection</title>
@@ -147,16 +157,6 @@
       
       <guid>http://kitsu.github.io/2016/06/10/unemployed-project-04/</guid>
       <description>&lt;p&gt;Even more ecosystem problems, now with working forms.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Unemployment Project - Breakthrough</title>
-      <link>http://kitsu.github.io/2016/06/09/unemployment-project-03/</link>
-      <pubDate>Thu, 09 Jun 2016 12:22:09 -0700</pubDate>
-      
-      <guid>http://kitsu.github.io/2016/06/09/unemployment-project-03/</guid>
-      <description>&lt;p&gt;Surmounting the challenge of API churn in the MS ecosystem.&lt;/p&gt;
 </description>
     </item>
     

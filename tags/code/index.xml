@@ -7,8 +7,18 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© 2015 Ed Blake</copyright>
-    <lastBuildDate>Mon, 18 Jul 2016 19:49:43 -0700</lastBuildDate>
+    <lastBuildDate>Fri, 22 Jul 2016 12:18:18 -0700</lastBuildDate>
     <atom:link href="http://kitsu.github.io/tags/code/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Roguelike Project - Chunks</title>
+      <link>http://kitsu.github.io/2016/07/22/roguelike-project-06/</link>
+      <pubDate>Fri, 22 Jul 2016 12:18:18 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/07/22/roguelike-project-06/</guid>
+      <description>&lt;p&gt;Building the simulation side and hooking it up to the MapViewController.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Roguelike Project - Tile Selection</title>
@@ -147,16 +157,6 @@
       
       <guid>http://kitsu.github.io/2016/05/28/autolisp_parse_02/</guid>
       <description>&lt;p&gt;Woo, yet another weak parser implementation - continued.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Analyzing Autolisp with Python - Setup</title>
-      <link>http://kitsu.github.io/2016/05/27/autolisp_parse_01/</link>
-      <pubDate>Fri, 27 May 2016 18:48:46 -0700</pubDate>
-      
-      <guid>http://kitsu.github.io/2016/05/27/autolisp_parse_01/</guid>
-      <description>&lt;p&gt;Woo, yet another weak parser implementation.&lt;/p&gt;
 </description>
     </item>
     
