@@ -7,8 +7,18 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© 2015 Ed Blake</copyright>
-    <lastBuildDate>Fri, 22 Jul 2016 12:18:18 -0700</lastBuildDate>
+    <lastBuildDate>Sat, 30 Jul 2016 08:04:34 -0700</lastBuildDate>
     <atom:link href="http://kitsu.github.io/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Roguelike Project - Sim Infrastructure</title>
+      <link>http://kitsu.github.io/2016/07/30/roguelike-project-07/</link>
+      <pubDate>Sat, 30 Jul 2016 08:04:34 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/07/30/roguelike-project-07/</guid>
+      <description>&lt;p&gt;Building out map generation, decoupling chunks from generation.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Roguelike Project - Chunks</title>
@@ -147,16 +157,6 @@
       
       <guid>http://kitsu.github.io/2016/06/12/unemployed-project-05/</guid>
       <description>&lt;p&gt;Fun with Bootstrap, JQuery, Knockout, Typescript, and more.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Unemployed Project - Untested</title>
-      <link>http://kitsu.github.io/2016/06/10/unemployed-project-04/</link>
-      <pubDate>Fri, 10 Jun 2016 08:06:25 -0700</pubDate>
-      
-      <guid>http://kitsu.github.io/2016/06/10/unemployed-project-04/</guid>
-      <description>&lt;p&gt;Even more ecosystem problems, now with working forms.&lt;/p&gt;
 </description>
     </item>
     

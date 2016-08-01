@@ -7,8 +7,78 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© 2015 Ed Blake</copyright>
-    <lastBuildDate>Thu, 30 Jun 2016 18:27:41 -0700</lastBuildDate>
+    <lastBuildDate>Sat, 30 Jul 2016 08:04:34 -0700</lastBuildDate>
     <atom:link href="http://kitsu.github.io/tags/csharp/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Roguelike Project - Sim Infrastructure</title>
+      <link>http://kitsu.github.io/2016/07/30/roguelike-project-07/</link>
+      <pubDate>Sat, 30 Jul 2016 08:04:34 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/07/30/roguelike-project-07/</guid>
+      <description>&lt;p&gt;Building out map generation, decoupling chunks from generation.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Roguelike Project - Chunks</title>
+      <link>http://kitsu.github.io/2016/07/22/roguelike-project-06/</link>
+      <pubDate>Fri, 22 Jul 2016 12:18:18 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/07/22/roguelike-project-06/</guid>
+      <description>&lt;p&gt;Building the simulation side and hooking it up to the MapViewController.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Roguelike Project - Tile Selection</title>
+      <link>http://kitsu.github.io/2016/07/18/roguelike-project-05/</link>
+      <pubDate>Mon, 18 Jul 2016 19:49:43 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/07/18/roguelike-project-05/</guid>
+      <description>&lt;p&gt;Automatically selecting graphic tile variation based on neighborhood.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Roguelike Project - Reactivity</title>
+      <link>http://kitsu.github.io/2016/07/12/roguelike-project-04/</link>
+      <pubDate>Tue, 12 Jul 2016 17:42:23 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/07/12/roguelike-project-04/</guid>
+      <description>&lt;p&gt;Replacing events and delegates with observables.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Roguelike Project - Adding Abstractions</title>
+      <link>http://kitsu.github.io/2016/07/11/roguelike-project-03/</link>
+      <pubDate>Mon, 11 Jul 2016 10:37:56 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/07/11/roguelike-project-03/</guid>
+      <description>&lt;p&gt;Going from a tile renderer to a map provider.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Roguelike Project - Tile Rendering</title>
+      <link>http://kitsu.github.io/2016/07/09/roguelike-project-02/</link>
+      <pubDate>Sat, 09 Jul 2016 16:39:32 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/07/09/roguelike-project-02/</guid>
+      <description>&lt;p&gt;Loading sprite maps and rendering animations.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Roguelike Project - Tentative Start</title>
+      <link>http://kitsu.github.io/2016/07/08/roguelike-project-01/</link>
+      <pubDate>Fri, 08 Jul 2016 10:10:08 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/07/08/roguelike-project-01/</guid>
+      <description>&lt;p&gt;Starting to start a new project.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Unemployed project - Published</title>
@@ -87,46 +157,6 @@
       
       <guid>http://kitsu.github.io/2016/06/12/unemployed-project-05/</guid>
       <description>&lt;p&gt;Fun with Bootstrap, JQuery, Knockout, Typescript, and more.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Unemployed Project - Untested</title>
-      <link>http://kitsu.github.io/2016/06/10/unemployed-project-04/</link>
-      <pubDate>Fri, 10 Jun 2016 08:06:25 -0700</pubDate>
-      
-      <guid>http://kitsu.github.io/2016/06/10/unemployed-project-04/</guid>
-      <description>&lt;p&gt;Even more ecosystem problems, now with working forms.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Unemployment Project - Breakthrough</title>
-      <link>http://kitsu.github.io/2016/06/09/unemployment-project-03/</link>
-      <pubDate>Thu, 09 Jun 2016 12:22:09 -0700</pubDate>
-      
-      <guid>http://kitsu.github.io/2016/06/09/unemployment-project-03/</guid>
-      <description>&lt;p&gt;Surmounting the challenge of API churn in the MS ecosystem.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Unemployment Project - Struggle</title>
-      <link>http://kitsu.github.io/2016/06/08/unemployment-project-02/</link>
-      <pubDate>Wed, 08 Jun 2016 19:16:20 -0700</pubDate>
-      
-      <guid>http://kitsu.github.io/2016/06/08/unemployment-project-02/</guid>
-      <description>&lt;p&gt;Trying to formulate a design while reeling under a pile of new technologies.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Unemployment Project - Setup</title>
-      <link>http://kitsu.github.io/2016/06/07/unemployment-project-01/</link>
-      <pubDate>Tue, 07 Jun 2016 18:30:21 -0700</pubDate>
-      
-      <guid>http://kitsu.github.io/2016/06/07/unemployment-project-01/</guid>
-      <description>&lt;p&gt;Picking a project based on desirable qualifications and my current situation.&lt;/p&gt;
 </description>
     </item>
     

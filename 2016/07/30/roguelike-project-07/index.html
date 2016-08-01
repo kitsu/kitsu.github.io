@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="Hugo 0.15" />
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    
+    <link href="/index.xml" rel="alternate" type="application/rss+xml" title="Superfluous Comments" />
+    <link href="/index.xml" rel="feed" type="application/rss+xml" title="Superfluous Comments" />
+    
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+    
+    <script src="https://apis.google.com/js/platform.js" async defer>{lang: 'ja'}</script>
+    
+    <link rel="stylesheet" href="https://yandex.st/highlightjs/8.0/styles/default.min.css">
+    <script src="https://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <title>Roguelike Project - Sim Infrastructure | Superfluous Comments</title>
+    <meta name="Description" content="Building out map generation, decoupling chunks from generation.
+">
+  </head>
+  <body>
+    <div id="wrap">
+      
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-77704589-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+      <header class="site-header">
+        <div class="site-header-left">
+          <a class="site-header-title" href="http://kitsu.github.io/">Superfluous Comments</a>
+        </div>
+      </header>
+      <div class="container">
+        <div id="main">
+
+<div class="article">
+  <header>
+    <div class="article-header">
+      <h1>Roguelike Project - Sim Infrastructure</h1>
+      <div class="article-meta">
+        <span class="posttime">2016/07/30</span>
+        
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/csharp"><span></span>CSharp</a>
+    </li>
+    
+    <li>
+      <a href="/tags/monogame"><span></span>MonoGame</a>
+    </li>
+    
+    <li>
+      <a href="/tags/roguelike"><span></span>Roguelike</a>
+    </li>
+    
+    <li>
+      <a href="/tags/code"><span></span>code</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      </div>
+    </div>
+  </header>
+      
+      <div class="adsense">
+        <span class="sponsor-label">Sponsored link</span>
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="2442045076"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+      </div>
+      
+  <div class="content">
+    <p>Building out map generation, decoupling chunks from generation.</p>
+
+<p><hr/><br/>
+I spent some time building a skeleton for map generation. The basic organization
+is the sim manager has a <code>ChunkSource</code> which it can use to request chunks. The
+<code>ChunkSource</code> holds all the random/noise information and determines which
+cell generator will be used for a given chunk. When a chunk is created it is
+given a generator instance which it calls to generate cells. The generator knows
+how to pick cells given their global coordinates and access to the random/noise
+generators in the <code>ChunkSource</code>.</p>
+
+<p>It is all just minimally mocked up for now, for instance there's currently only
+one generator called <code>Grassland</code> which is used for every chunk. By building
+these parts I discovered additional requirements for the system I have in
+mind. Because of how I am handling generation I would like to have one central
+place where all possible terrain types are enumerated, which is then used by all
+the generators. To do this I created a <code>Materials</code> singleton which can map
+between material names and simulation ids:</p>
+
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #66d9ef">class</span> <span style="color: #a6e22e">Materials</span>
+<span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">public</span> <span style="color: #f8f8f2">Dictionary&lt;</span><span style="color: #66d9ef">string</span><span style="color: #f8f8f2">,</span> <span style="color: #66d9ef">int</span><span style="color: #f8f8f2">&gt;</span> <span style="color: #f8f8f2">AllIds;</span>
+    <span style="color: #66d9ef">public</span> <span style="color: #f8f8f2">Dictionary&lt;</span><span style="color: #66d9ef">int</span><span style="color: #f8f8f2">,</span> <span style="color: #66d9ef">string</span><span style="color: #f8f8f2">&gt;</span> <span style="color: #f8f8f2">AllNames;</span>
+    <span style="color: #f8f8f2">Dictionary&lt;</span><span style="color: #66d9ef">string</span><span style="color: #f8f8f2">,</span> <span style="color: #66d9ef">int</span><span style="color: #f8f8f2">&gt;</span> <span style="color: #f8f8f2">_pitIds;</span>
+    <span style="color: #f8f8f2">Dictionary&lt;</span><span style="color: #66d9ef">int</span><span style="color: #f8f8f2">,</span> <span style="color: #66d9ef">string</span><span style="color: #f8f8f2">&gt;</span> <span style="color: #f8f8f2">_pitNames;</span>
+    <span style="color: #f8f8f2">Dictionary&lt;</span><span style="color: #66d9ef">string</span><span style="color: #f8f8f2">,</span> <span style="color: #66d9ef">int</span><span style="color: #f8f8f2">&gt;</span> <span style="color: #f8f8f2">_floorIds;</span>
+    <span style="color: #f8f8f2">Dictionary&lt;</span><span style="color: #66d9ef">int</span><span style="color: #f8f8f2">,</span> <span style="color: #66d9ef">string</span><span style="color: #f8f8f2">&gt;</span> <span style="color: #f8f8f2">_floorNames;</span>
+    <span style="color: #f8f8f2">Dictionary&lt;</span><span style="color: #66d9ef">string</span><span style="color: #f8f8f2">,</span> <span style="color: #66d9ef">int</span><span style="color: #f8f8f2">&gt;</span> <span style="color: #f8f8f2">_wallIds;</span>
+    <span style="color: #f8f8f2">Dictionary&lt;</span><span style="color: #66d9ef">int</span><span style="color: #f8f8f2">,</span> <span style="color: #66d9ef">string</span><span style="color: #f8f8f2">&gt;</span> <span style="color: #f8f8f2">_wallNames;</span>
+
+    <span style="color: #66d9ef">private</span> <span style="color: #66d9ef">static</span> <span style="color: #66d9ef">readonly</span> <span style="color: #f8f8f2">Materials</span> <span style="color: #f8f8f2">instance</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">Materials();</span>
+
+    <span style="color: #66d9ef">private</span> <span style="color: #a6e22e">Materials</span><span style="color: #f8f8f2">()</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">index</span> <span style="color: #f8f8f2">=</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">index</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">InitOther(index);</span>
+        <span style="color: #f8f8f2">index</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">InitPits(index);</span>
+        <span style="color: #f8f8f2">index</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">InitFloors(index);</span>
+        <span style="color: #f8f8f2">index</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">InitWalls(index);</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #66d9ef">int</span> <span style="color: #a6e22e">InitOther</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">index)</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">AllIds</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">Dictionary&lt;</span><span style="color: #66d9ef">string</span><span style="color: #f8f8f2">,</span> <span style="color: #66d9ef">int</span><span style="color: #f8f8f2">&gt;</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">{</span><span style="color: #e6db74">&quot;Void&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #ae81ff">0</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span><span style="color: #e6db74">&quot;Beach&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">index</span> <span style="color: #f8f8f2">},</span>
+        <span style="color: #f8f8f2">};</span>
+        <span style="color: #f8f8f2">AllNames</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">Dictionary&lt;</span><span style="color: #66d9ef">int</span><span style="color: #f8f8f2">,</span> <span style="color: #66d9ef">string</span><span style="color: #f8f8f2">&gt;();</span>
+        <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">id;</span>
+        <span style="color: #66d9ef">string</span> <span style="color: #f8f8f2">name;</span>
+        <span style="color: #66d9ef">foreach</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">pair</span> <span style="color: #66d9ef">in</span> <span style="color: #f8f8f2">AllIds)</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">name</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">pair.Key;</span>
+            <span style="color: #f8f8f2">id</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">pair.Value;</span>
+            <span style="color: #f8f8f2">AllNames[id]</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">name;</span>
+        <span style="color: #f8f8f2">}</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">index</span> <span style="color: #f8f8f2">+</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #66d9ef">int</span> <span style="color: #a6e22e">InitPits</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">index)</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #75715e">// Increment index for each type, left shift 8+n for each sub-type</span>
+        <span style="color: #f8f8f2">_pitIds</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">Dictionary&lt;</span><span style="color: #66d9ef">string</span><span style="color: #f8f8f2">,</span> <span style="color: #66d9ef">int</span><span style="color: #f8f8f2">&gt;</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">{</span><span style="color: #e6db74">&quot;FreshWater.Brick&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">(index</span> <span style="color: #f8f8f2">+</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span><span style="color: #e6db74">&quot;FreshWater.Rock&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">(index</span> <span style="color: #f8f8f2">+</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">&lt;&lt;</span> <span style="color: #ae81ff">8</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span><span style="color: #e6db74">&quot;FreshWater.Smooth&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">(index</span> <span style="color: #f8f8f2">+</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">&lt;&lt;</span> <span style="color: #ae81ff">9</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span><span style="color: #e6db74">&quot;SaltWater.Brick&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">(index</span> <span style="color: #f8f8f2">+</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span><span style="color: #e6db74">&quot;SaltWater.Rock&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">(index</span> <span style="color: #f8f8f2">+</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">&lt;&lt;</span> <span style="color: #ae81ff">8</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span><span style="color: #e6db74">&quot;SaltWater.Smooth&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">(index</span> <span style="color: #f8f8f2">+</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">&lt;&lt;</span> <span style="color: #ae81ff">9</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span><span style="color: #e6db74">&quot;PoisonWater.Brick&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">(index</span> <span style="color: #f8f8f2">+</span> <span style="color: #ae81ff">2</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span><span style="color: #e6db74">&quot;PoisonWater.Rock&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">(index</span> <span style="color: #f8f8f2">+</span> <span style="color: #ae81ff">2</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">&lt;&lt;</span> <span style="color: #ae81ff">8</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span><span style="color: #e6db74">&quot;PoisonWater.Smooth&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">(index</span> <span style="color: #f8f8f2">+</span> <span style="color: #ae81ff">2</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">&lt;&lt;</span> <span style="color: #ae81ff">9</span> <span style="color: #f8f8f2">},</span>
+            <span style="color: #f8f8f2">{</span><span style="color: #e6db74">&quot;Lava&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">(index</span> <span style="color: #f8f8f2">+</span> <span style="color: #ae81ff">3</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">},</span>
+        <span style="color: #f8f8f2">};</span>
+        <span style="color: #f8f8f2">_pitNames</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">Dictionary&lt;</span><span style="color: #66d9ef">int</span><span style="color: #f8f8f2">,</span> <span style="color: #66d9ef">string</span><span style="color: #f8f8f2">&gt;();</span>
+        <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">id;</span>
+        <span style="color: #66d9ef">string</span> <span style="color: #f8f8f2">name;</span>
+        <span style="color: #66d9ef">foreach</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">pair</span> <span style="color: #66d9ef">in</span> <span style="color: #f8f8f2">_pitIds)</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">name</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">pair.Key;</span>
+            <span style="color: #f8f8f2">id</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">pair.Value;</span>
+            <span style="color: #75715e">// Note each pair is added to the All materials maps here</span>
+            <span style="color: #f8f8f2">AllIds[</span><span style="color: #e6db74">&quot;Pit.&quot;</span> <span style="color: #f8f8f2">+</span> <span style="color: #f8f8f2">name]</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">id;</span>
+            <span style="color: #f8f8f2">AllNames[id]</span> <span style="color: #f8f8f2">=</span> <span style="color: #e6db74">&quot;Pit.&quot;</span> <span style="color: #f8f8f2">+</span> <span style="color: #f8f8f2">name;</span>
+            <span style="color: #f8f8f2">_pitNames[id]</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">name;</span>
+        <span style="color: #f8f8f2">}</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">index</span> <span style="color: #f8f8f2">+</span> <span style="color: #ae81ff">4</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #66d9ef">int</span> <span style="color: #a6e22e">InitFloors</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">index)</span>
+    <span style="color: #f8f8f2">{</span>
+    <span style="color: #f8f8f2">...</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #66d9ef">int</span> <span style="color: #a6e22e">InitWalls</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">index)</span>
+    <span style="color: #f8f8f2">{</span>
+    <span style="color: #f8f8f2">...</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #66d9ef">static</span> <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">int</span> <span style="color: #a6e22e">GetPit</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">string</span> <span style="color: #f8f8f2">name)</span> <span style="color: #f8f8f2">=&gt;</span> 
+        <span style="color: #f8f8f2">instance._pitIds.ContainsKey(name)</span> <span style="color: #f8f8f2">?</span> <span style="color: #f8f8f2">instance._pitIds[name]</span> <span style="color: #f8f8f2">:</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #66d9ef">static</span> <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">string</span> <span style="color: #a6e22e">GetPit</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">id)</span> <span style="color: #f8f8f2">=&gt;</span>
+        <span style="color: #f8f8f2">instance._pitNames.ContainsKey(id)</span> <span style="color: #f8f8f2">?</span> <span style="color: #f8f8f2">instance._pitNames[id]</span> <span style="color: #f8f8f2">:</span> <span style="color: #e6db74">&quot;&quot;</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #66d9ef">static</span> <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">int</span> <span style="color: #a6e22e">GetFloor</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">string</span> <span style="color: #f8f8f2">name)</span> <span style="color: #f8f8f2">=&gt;</span> 
+        <span style="color: #f8f8f2">instance._floorIds.ContainsKey(name)</span> <span style="color: #f8f8f2">?</span> <span style="color: #f8f8f2">instance._floorIds[name]</span> <span style="color: #f8f8f2">:</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #66d9ef">static</span> <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">string</span> <span style="color: #a6e22e">GetFloor</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">id)</span> <span style="color: #f8f8f2">=&gt;</span>
+        <span style="color: #f8f8f2">instance._floorNames.ContainsKey(id)</span> <span style="color: #f8f8f2">?</span> <span style="color: #f8f8f2">instance._floorNames[id]</span> <span style="color: #f8f8f2">:</span> <span style="color: #e6db74">&quot;&quot;</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #66d9ef">static</span> <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">int</span> <span style="color: #a6e22e">GetWall</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">string</span> <span style="color: #f8f8f2">name)</span> <span style="color: #f8f8f2">=&gt;</span> 
+        <span style="color: #f8f8f2">instance._wallIds.ContainsKey(name)</span> <span style="color: #f8f8f2">?</span> <span style="color: #f8f8f2">instance._wallIds[name]</span> <span style="color: #f8f8f2">:</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #66d9ef">static</span> <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">string</span> <span style="color: #a6e22e">GetWall</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">id)</span> <span style="color: #f8f8f2">=&gt;</span>
+        <span style="color: #f8f8f2">instance._wallNames.ContainsKey(id)</span> <span style="color: #f8f8f2">?</span> <span style="color: #f8f8f2">instance._wallNames[id]</span> <span style="color: #f8f8f2">:</span> <span style="color: #e6db74">&quot;&quot;</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #66d9ef">static</span> <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">int</span> <span style="color: #a6e22e">GetId</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">string</span> <span style="color: #f8f8f2">name)</span> <span style="color: #f8f8f2">=&gt;</span> 
+        <span style="color: #f8f8f2">instance.AllIds.ContainsKey(name)</span> <span style="color: #f8f8f2">?</span> <span style="color: #f8f8f2">instance.AllIds[name]</span> <span style="color: #f8f8f2">:</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #66d9ef">static</span> <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">string</span> <span style="color: #a6e22e">GetName</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">id)</span> <span style="color: #f8f8f2">=&gt;</span>
+        <span style="color: #f8f8f2">instance.AllNames.ContainsKey(id)</span> <span style="color: #f8f8f2">?</span> <span style="color: #f8f8f2">instance.AllNames[id]</span> <span style="color: #f8f8f2">:</span> <span style="color: #e6db74">&quot;&quot;</span><span style="color: #f8f8f2">;</span>
+<span style="color: #f8f8f2">}</span>
+</pre></div>
+
+
+<p>It will be pretty trivial to transition these to JSON data files, but for the
+small sample I'm implementing I just hard-coded the material lists. Materials
+can be accessed either by their type (pit/floor/wall) or in the global mapping
+by qualified name. Here is how I am currently using them:</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #66d9ef">class</span> <span style="color: #a6e22e">Grassland</span><span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">AbstractGenerator</span>
+<span style="color: #f8f8f2">{</span>
+    <span style="color: #f8f8f2">Dictionary&lt;</span><span style="color: #66d9ef">int</span><span style="color: #f8f8f2">,</span> <span style="color: #66d9ef">string</span><span style="color: #f8f8f2">&gt;</span> <span style="color: #f8f8f2">_mats;</span>
+
+    <span style="color: #66d9ef">public</span> <span style="color: #a6e22e">Grassland</span><span style="color: #f8f8f2">(ChunkSource</span> <span style="color: #f8f8f2">source):</span> <span style="color: #66d9ef">base</span><span style="color: #f8f8f2">(source)</span>
+    <span style="color: #f8f8f2">{</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #66d9ef">override</span> <span style="color: #66d9ef">public</span> <span style="color: #f8f8f2">IDictionary&lt;</span><span style="color: #66d9ef">int</span><span style="color: #f8f8f2">,</span> <span style="color: #66d9ef">string</span><span style="color: #f8f8f2">&gt;</span> <span style="color: #f8f8f2">UsedMaterials</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">get</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(_mats</span> <span style="color: #f8f8f2">==</span> <span style="color: #66d9ef">null</span><span style="color: #f8f8f2">)</span>
+            <span style="color: #f8f8f2">{</span>
+                <span style="color: #f8f8f2">_mats</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">Dictionary&lt;</span><span style="color: #66d9ef">int</span><span style="color: #f8f8f2">,</span> <span style="color: #66d9ef">string</span><span style="color: #f8f8f2">&gt;</span>
+                <span style="color: #f8f8f2">{</span>
+                    <span style="color: #f8f8f2">{</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;Void&quot;</span> <span style="color: #f8f8f2">}</span>
+                <span style="color: #f8f8f2">};</span>
+                <span style="color: #75715e">// This array may be replaced by a probabilities field</span>
+                <span style="color: #75715e">// if I can figure out a sane way to store probabilities</span>
+                <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">ids</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">new</span> <span style="color: #66d9ef">int</span><span style="color: #f8f8f2">[]</span>
+                    <span style="color: #f8f8f2">{</span>
+                    <span style="color: #f8f8f2">Materials.GetPit(</span><span style="color: #e6db74">&quot;FreshWater.Rock&quot;</span><span style="color: #f8f8f2">),</span>
+                    <span style="color: #f8f8f2">Materials.GetId(</span><span style="color: #e6db74">&quot;Beach&quot;</span><span style="color: #f8f8f2">),</span>
+                    <span style="color: #f8f8f2">Materials.GetFloor(</span><span style="color: #e6db74">&quot;Dirt&quot;</span><span style="color: #f8f8f2">),</span>
+                    <span style="color: #f8f8f2">Materials.GetFloor(</span><span style="color: #e6db74">&quot;Dirt.Grass&quot;</span><span style="color: #f8f8f2">),</span>
+                <span style="color: #f8f8f2">};</span>
+                <span style="color: #66d9ef">foreach</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">id</span> <span style="color: #66d9ef">in</span> <span style="color: #f8f8f2">ids)</span>
+                <span style="color: #f8f8f2">{</span>
+                    <span style="color: #f8f8f2">_mats[id]</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">Materials.GetName(id);</span>
+                <span style="color: #f8f8f2">};</span>
+            <span style="color: #f8f8f2">}</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">_mats;</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">override</span> <span style="color: #f8f8f2">Cell</span> <span style="color: #a6e22e">GetCell</span><span style="color: #f8f8f2">(Vector</span> <span style="color: #f8f8f2">coord)</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">local</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">Chunk.LocalCoord(coord);</span>
+        <span style="color: #66d9ef">var</span> <span style="color: #66d9ef">value</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">_source.SampleCell(coord);</span>
+        <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">floor</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">PickFloor(</span><span style="color: #66d9ef">value</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #75715e">//var fill = (0.5 &lt;= value &amp;&amp; value &lt;= 0.6) ? &quot;wall&quot; : &quot;&quot;;</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #66d9ef">new</span> <span style="color: #a6e22e">Cell</span><span style="color: #f8f8f2">(floor,</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">);</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #66d9ef">int</span> <span style="color: #a6e22e">PickFloor</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">double</span> <span style="color: #66d9ef">value</span><span style="color: #f8f8f2">)</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #75715e">// Given a number [-1.0 1.0] map ranges to floor material</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">value</span> <span style="color: #f8f8f2">&lt;</span> <span style="color: #f8f8f2">-.</span><span style="color: #ae81ff">8</span><span style="color: #f8f8f2">)</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">Materials.GetPit(</span><span style="color: #e6db74">&quot;FreshWater.Rock&quot;</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">value</span> <span style="color: #f8f8f2">&lt;</span> <span style="color: #f8f8f2">-.</span><span style="color: #ae81ff">4</span><span style="color: #f8f8f2">)</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">Materials.GetId(</span><span style="color: #e6db74">&quot;Beach&quot;</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">value</span> <span style="color: #f8f8f2">&lt;</span> <span style="color: #f8f8f2">-.</span><span style="color: #ae81ff">25</span><span style="color: #f8f8f2">)</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">Materials.GetFloor(</span><span style="color: #e6db74">&quot;Dirt&quot;</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">value</span> <span style="color: #f8f8f2">&gt;=</span> <span style="color: #f8f8f2">-.</span><span style="color: #ae81ff">25</span><span style="color: #f8f8f2">)</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">Materials.GetFloor(</span><span style="color: #e6db74">&quot;Dirt.Grass&quot;</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">}</span>
+</pre></div>
+</p>
+
+<p>I think I have an idea how I can encode the ranges used to pick materials, which
+will clean this code up a lot. One challenge I'm going to run into when I expand
+this to additional terrain types is how to transition between regions. If I can
+make the generation a little more data-driven though I can just create
+interpolated terrain types to smooth the transitions. Here is an example of the
+generated terrain:</p>
+
+<p>
+<figure >
+    
+        <img src="/images/Random_Map_02.JPG" alt="Random map screen capture" />
+    
+    
+</figure>
+</p>
+
+<p>One of the first problems revealed by this terrain generator was a deficiency
+in my graphic tile selection. Note all the extra &quot;Beach&quot; borders between the
+dirt and the grass. The dirt's border transitions to sand, but it is used
+anywhere a dirt tile is bordered by a non-dirt tile. The grass border
+transitions to dirt, so it would merge seamlessly if the dirt weren't adding its
+own border. I think I need some kind of affiliate system in the tile selection,
+where dirt will consider grass to be a match, but grass will not match dirt.</p>
+
+<p>The next problem I have is the slope of the noise gradients. I had to tweak both
+the noise frequency and my material bands repeatedly to get the above result,
+and it still isn't satisfactory. My first thought when I discovered the problem
+was to apply a function over the noise, in this instance something that will
+tighten up the areas closer to -1 and gradually flatten everything above
+-0.4. It turns out SharpNoise has a module for just that purpose. Applying a
+function to the entire noise field for each generator will exacerbate the
+problems in transition areas, so I need to allow interpolation of those
+functions in region boundaries too.</p>
+
+<p>I <em>am</em> loosing momentum a little with this project. When I can focus on it again I
+will probably jump back to the display side. Now that I have infinite expanses
+of terrain the ability to move the view would be nice.</p>
+
+  </div>
+  <footer>
+    <div class="article-footer">
+      
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/csharp"><span></span>CSharp</a>
+    </li>
+    
+    <li>
+      <a href="/tags/monogame"><span></span>MonoGame</a>
+    </li>
+    
+    <li>
+      <a href="/tags/roguelike"><span></span>Roguelike</a>
+    </li>
+    
+    <li>
+      <a href="/tags/code"><span></span>code</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      
+      <div class="adsense">
+        <span class="sponsor-label">Sponsored link</span>
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="2442045076"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+      </div>
+      
+      
+<div id="share-buttons">
+  <ul>
+    
+    
+    
+    
+    <li>
+      <div class="g-plusone" data-size="medium"></div>
+    </li>
+    
+    
+  </ul>
+</div>
+
+
+      <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'SuperfComs';
+    var disqus_identifier = 'http:\/\/kitsu.github.io\/2016\/07\/30\/roguelike-project-07\/';
+    var disqus_title = 'Roguelike Project - Sim Infrastructure';
+    var disqus_url = 'http:\/\/kitsu.github.io\/2016\/07\/30\/roguelike-project-07\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+      
+      <div id="pagenavigation-next-prev">
+        
+        <div id="pagenavigation-next">
+          <span class="pagenav-label">Previous</span>
+          <a href="http://kitsu.github.io/2016/07/22/roguelike-project-06/">Roguelike Project - Chunks</a>
+        </div>
+        
+        
+      </div>
+      
+    </div>
+  </footer>
+</div>
+        </div>
+        <div class="sidebar">
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Author</span>
+    </div>
+    <div id="author">
+      <span>Ed Blake</span>
+      <div>
+        
+        
+        <a href="https://plus.google.com/118323029386640613972"><i class="fa fa-google-plus-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://github.com/kitsu"><i class="fa fa-github-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://www.linkedin.com/in/edward-blake-b3601411b"><i class="fa fa-linkedin-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://stackoverflow.com/users/770443"><i class="fa fa-stack-overflow fa-2x" aria-hidden="true"></i></a>
+        
+      </div>
+    </div>
+  </div>
+  
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Categories</span>
+    </div>
+    <div class="categories">
+      <ul>
+        
+        <li>
+          <a href="/categories/blog"><span></span>blog (3)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/development"><span></span>development (30)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/hacks"><span></span>hacks (4)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/personal"><span></span>personal (2)</a>
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>RSS</span>
+    </div>
+    <div id="rss">
+      <a href="/index.xml" type="application/rss+xml" target="_blank">
+        <i class="fa fa-rss-square fa-2x" aria-hidden="true"></i>
+      </a>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Sponsored link</span>
+    </div>
+    <div class="adsense">
+      <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:inline-block;width:300px;height:600px"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="9965311870"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+    </div>
+  </div>
+  
+</div>
+
+      </div>
+      <footer>
+        <div id="site-footer-wrap">
+          <div id="site-footer">
+            <span>Powered by <a href="https://gohugo.io/">Hugo</a>.</span>
+            <span>
+              
+              © 2015 Ed Blake
+              
+           </span>
+           <span id="copyleft">
+              <a rel="license"
+                 href="http://creativecommons.org/licenses/by-sa/4.0/">
+                <img alt="Creative Commons License" style="border-width:0"
+                     src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" />
+              </a>
+            </span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
+
