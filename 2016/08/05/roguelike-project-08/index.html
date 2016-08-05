@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="Hugo 0.15" />
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    
+    <link href="/index.xml" rel="alternate" type="application/rss+xml" title="Superfluous Comments" />
+    <link href="/index.xml" rel="feed" type="application/rss+xml" title="Superfluous Comments" />
+    
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+    
+    <script src="https://apis.google.com/js/platform.js" async defer>{lang: 'ja'}</script>
+    
+    <link rel="stylesheet" href="https://yandex.st/highlightjs/8.0/styles/default.min.css">
+    <script src="https://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <title>Roguelike Project - Off By One | Superfluous Comments</title>
+    <meta name="Description" content="Fixing a discrete mathematics bug and fixing scrolling responsivity.
+">
+  </head>
+  <body>
+    <div id="wrap">
+      
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-77704589-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+      <header class="site-header">
+        <div class="site-header-left">
+          <a class="site-header-title" href="http://kitsu.github.io/">Superfluous Comments</a>
+        </div>
+      </header>
+      <div class="container">
+        <div id="main">
+
+<div class="article">
+  <header>
+    <div class="article-header">
+      <h1>Roguelike Project - Off By One</h1>
+      <div class="article-meta">
+        <span class="posttime">2016/08/05</span>
+        
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/csharp"><span></span>CSharp</a>
+    </li>
+    
+    <li>
+      <a href="/tags/monogame"><span></span>MonoGame</a>
+    </li>
+    
+    <li>
+      <a href="/tags/roguelike"><span></span>Roguelike</a>
+    </li>
+    
+    <li>
+      <a href="/tags/code"><span></span>code</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      </div>
+    </div>
+  </header>
+      
+      <div class="adsense">
+        <span class="sponsor-label">Sponsored link</span>
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="2442045076"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+      </div>
+      
+  <div class="content">
+    <p>Fixing a discrete mathematics bug and fixing scrolling responsivity.</p>
+
+<p><hr/><br/>
+Per my closing comment last post I switched over to the display module and tried
+to implement view scrolling. I had to add keyboard input first which was painful
+because of how simplistic MonoGame's input API is. My first implementation had a
+problem, but it wasn't immediately obvious:</p>
+
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #66d9ef">class</span> <span style="color: #a6e22e">EventProvider</span>
+<span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">private</span> <span style="color: #66d9ef">readonly</span> <span style="color: #f8f8f2">Subject&lt;Point&gt;</span> <span style="color: #f8f8f2">_click;</span>
+    <span style="color: #66d9ef">public</span> <span style="color: #f8f8f2">IObservable&lt;Point&gt;</span> <span style="color: #f8f8f2">WhenClick;</span>
+    <span style="color: #66d9ef">private</span> <span style="color: #66d9ef">readonly</span> <span style="color: #f8f8f2">Subject&lt;Keys[]&gt;</span> <span style="color: #f8f8f2">_keys;</span>
+    <span style="color: #66d9ef">public</span> <span style="color: #f8f8f2">IObservable&lt;Keys[]&gt;</span> <span style="color: #f8f8f2">WhenKeyPressed;</span>
+    <span style="color: #66d9ef">bool</span> <span style="color: #f8f8f2">_down;</span>
+
+    <span style="color: #66d9ef">public</span> <span style="color: #a6e22e">EventProvider</span><span style="color: #f8f8f2">()</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">_click</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">Subject&lt;Point&gt;();</span>
+        <span style="color: #f8f8f2">WhenClick</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">_click.AsObservable();</span>
+        <span style="color: #f8f8f2">_keys</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">Subject&lt;Keys[]&gt;();</span>
+        <span style="color: #f8f8f2">WhenKeyPressed</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">_keys.AsObservable();</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">void</span> <span style="color: #a6e22e">Update</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">elapsed)</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">ms</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">Mouse.GetState();</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(ms.LeftButton</span> <span style="color: #f8f8f2">==</span> <span style="color: #f8f8f2">ButtonState.Pressed)</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">_down</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">true</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(ms.LeftButton</span> <span style="color: #f8f8f2">==</span> <span style="color: #f8f8f2">ButtonState.Released</span> <span style="color: #f8f8f2">&amp;&amp;</span> <span style="color: #f8f8f2">_down)</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">_down</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">false</span><span style="color: #f8f8f2">;</span>
+            <span style="color: #f8f8f2">_click.OnNext(ms.Position);</span>
+        <span style="color: #f8f8f2">}</span>
+        <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">ks</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">Keyboard.GetState().GetPressedKeys();</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(ks.Count()</span> <span style="color: #f8f8f2">&gt;</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">)</span>
+            <span style="color: #f8f8f2">_keys.OnNext(ks);</span>
+    <span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">}</span>
+</pre></div>
+
+
+<p>From there I just just subscribed the map's viewport to key events, watched for
+Vi keys, updated the viewport rect location, and signal the simulation to
+provide updated data. I tweaked view/control setup in anticipation of multiple
+overlapping views:</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #66d9ef">class</span> <span style="color: #a6e22e">ViewManager</span><span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">IViewManager</span>
+<span style="color: #f8f8f2">{</span>
+    <span style="color: #f8f8f2">...</span>
+    <span style="color: #66d9ef">public</span> <span style="color: #f8f8f2">IView</span> <span style="color: #a6e22e">CreateMapView</span><span style="color: #f8f8f2">(MapViewController</span> <span style="color: #f8f8f2">ctrl)</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">view</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">MapView(_screen,</span> <span style="color: #f8f8f2">Width,</span> <span style="color: #f8f8f2">Height);</span>
+        <span style="color: #f8f8f2">Add(view);</span>
+        <span style="color: #75715e">// Setup controller viewport</span>
+        <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">vp</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">ctrl.AddViewport(</span><span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">Rect(</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">,</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">view.Width,</span> <span style="color: #f8f8f2">view.Height));</span>
+        <span style="color: #75715e">// Bind input events</span>
+        <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">dispose</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">_events.WhenKeyPressed.Subscribe(view.HandleInput);</span>
+        <span style="color: #f8f8f2">_handlers[view]</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">dispose;</span>
+        <span style="color: #75715e">// Bind controller events</span>
+        <span style="color: #f8f8f2">ctrl.WhenAddTileKey.Subscribe(view.AddTileKey);</span>
+        <span style="color: #f8f8f2">vp.WhenMapChanges</span>
+            <span style="color: #f8f8f2">.Throttle(</span><span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">TimeSpan((</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">/</span><span style="color: #ae81ff">60</span><span style="color: #f8f8f2">)*</span><span style="color: #ae81ff">1000</span><span style="color: #f8f8f2">))</span>
+            <span style="color: #f8f8f2">.Subscribe(view.UpdateMap);</span>
+        <span style="color: #75715e">// Let controller initialize</span>
+        <span style="color: #f8f8f2">vp.Initialize(view);</span>
+        <span style="color: #f8f8f2">ctrl.Initialize(view);</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">view;</span>
+    <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">...</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #66d9ef">class</span> <span style="color: #a6e22e">MapView</span><span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">BaseView,</span> <span style="color: #f8f8f2">IMapView</span>
+<span style="color: #f8f8f2">{</span>
+    <span style="color: #f8f8f2">...</span>
+    <span style="color: #66d9ef">private</span> <span style="color: #66d9ef">readonly</span> <span style="color: #f8f8f2">Subject&lt;</span><span style="color: #66d9ef">char</span><span style="color: #f8f8f2">&gt;</span> <span style="color: #f8f8f2">_move;</span>
+    <span style="color: #66d9ef">public</span> <span style="color: #f8f8f2">IObservable&lt;</span><span style="color: #66d9ef">char</span><span style="color: #f8f8f2">&gt;</span> <span style="color: #f8f8f2">WhenMove</span> <span style="color: #f8f8f2">=&gt;</span> <span style="color: #f8f8f2">_move.AsObservable();</span>
+    <span style="color: #f8f8f2">...</span>
+
+    <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">void</span> <span style="color: #a6e22e">HandleInput</span><span style="color: #f8f8f2">(Keys[]</span> <span style="color: #f8f8f2">pressed)</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #75715e">// Note this ordering incidentally imposes a direction preference</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(pressed.Contains(Keys.K))</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">_move.OnNext(</span><span style="color: #e6db74">&#39;N&#39;</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(pressed.Contains(Keys.J))</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">_move.OnNext(</span><span style="color: #e6db74">&#39;S&#39;</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(pressed.Contains(Keys.H))</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">_move.OnNext(</span><span style="color: #e6db74">&#39;W&#39;</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(pressed.Contains(Keys.L))</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">_move.OnNext(</span><span style="color: #e6db74">&#39;E&#39;</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">...</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #66d9ef">public</span> <span style="color: #66d9ef">class</span> <span style="color: #a6e22e">Viewport</span><span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">IDisposable</span>
+<span style="color: #f8f8f2">{</span>
+    <span style="color: #f8f8f2">...</span>
+    <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">void</span> <span style="color: #a6e22e">Initialize</span><span style="color: #f8f8f2">(IMapView</span> <span style="color: #f8f8f2">view)</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #75715e">//FIXME Bind view move observable directly to move viewport rect</span>
+        <span style="color: #f8f8f2">view.WhenMove.Subscribe(MoveView);</span>
+        <span style="color: #75715e">// Trigger chunk load/touch</span>
+        <span style="color: #f8f8f2">_sim.LoadArea(Bounds);</span>
+    <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">...</span>
+
+    <span style="color: #66d9ef">void</span> <span style="color: #a6e22e">MoveView</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">char</span> <span style="color: #f8f8f2">dir)</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #75715e">// Given one of NESW move the rect Up, Right, Down, or Left</span>
+        <span style="color: #66d9ef">switch</span> <span style="color: #f8f8f2">(dir)</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">case</span> <span style="color: #e6db74">&#39;N&#39;</span><span style="color: #f8f8f2">:</span>
+                <span style="color: #f8f8f2">Bounds.Y</span> <span style="color: #f8f8f2">-=</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">;</span>
+                <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+            <span style="color: #66d9ef">case</span> <span style="color: #e6db74">&#39;S&#39;</span><span style="color: #f8f8f2">:</span>
+                <span style="color: #f8f8f2">Bounds.Y</span> <span style="color: #f8f8f2">+=</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">;</span>
+                <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+            <span style="color: #66d9ef">case</span> <span style="color: #e6db74">&#39;E&#39;</span><span style="color: #f8f8f2">:</span>
+                <span style="color: #f8f8f2">Bounds.X</span> <span style="color: #f8f8f2">+=</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">;</span>
+                <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+            <span style="color: #66d9ef">case</span> <span style="color: #e6db74">&#39;W&#39;</span><span style="color: #f8f8f2">:</span>
+                <span style="color: #f8f8f2">Bounds.X</span> <span style="color: #f8f8f2">-=</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">;</span>
+                <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">}</span>
+        <span style="color: #f8f8f2">_sim.LoadArea(Bounds);</span>
+    <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">...</span>
+<span style="color: #f8f8f2">}</span>
+</pre></div>
+</p>
+
+<p>It sort of worked too. I was getting some weird delays and visual bugs when
+scrolling beyond the initial view though. I wasn't entirely sure how to debug
+the problem, but I knew my lagging test coverage wasn't helping. I started by
+adding tests for the chunk math from a couple posts back. While writing those
+tests though I discovered a logical inconsistency with my rect
+implementation. It is a little hard to explain, but the problem has to do with
+the difference between indices and areas, and how area is counted. Basically if
+I had a rect that started at x = 0 with a size of 5 it would enumerate x
+coordinates [0, 1, 2, 3, 4, 5], which would be six squares instead of 5. Fixing
+that bug broke some tests and chunk creation. Once I cleaned up the mess though
+scrolling behaved a little better.</p>
+
+<p>The next obvious problem was a delay between when a new chunk moves into view
+and when the chunk loads. It seemed like my area-&gt;chunk logic was a little off,
+but I already knew of one change needed to that code. The area loading code only
+loaded chunks that overlap with the provided area. In order to amortize chunk
+loading wait times I wanted to pre-load neighboring chunks too. By expanding the
+provided area by one chunk all around I made loading take longer per operation,
+but reduced the frequency chunks need to be generated. It also fixed the visible
+loading error.</p>
+
+<p>The last remaining problem was when loading occurred it seemed like multiple key
+presses were registered. The view would freeze because of the loading, then
+scroll multiple tiles all at once. In order to solve this I decided to try
+moving loading into a separate thread. My plan all along was to move all sim
+processing to a separate thread, and this seemed like a good place to start. I
+want to develop a much more rigorous framework for separating and managing sim
+computation, but at this stage just adding a couple of <code>Task.Run</code> calls achieved
+the goal:</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #66d9ef">public</span> <span style="color: #66d9ef">class</span> <span style="color: #a6e22e">Chunk</span>
+<span style="color: #f8f8f2">{</span>
+<span style="color: #f8f8f2">...</span>
+<span style="color: #66d9ef">public</span> <span style="color: #66d9ef">void</span> <span style="color: #a6e22e">Initialize</span><span style="color: #f8f8f2">()</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">Task.Run(()</span> <span style="color: #f8f8f2">=&gt;</span> <span style="color: #f8f8f2">GenerateCells());</span>
+    <span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">...</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #66d9ef">public</span> <span style="color: #66d9ef">class</span> <span style="color: #a6e22e">Viewport</span><span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">IDisposable</span>
+<span style="color: #f8f8f2">{</span>
+    <span style="color: #f8f8f2">...</span>
+    <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">void</span> <span style="color: #a6e22e">Initialize</span><span style="color: #f8f8f2">(IMapView</span> <span style="color: #f8f8f2">view)</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #75715e">//FIXME Bind view move observable directly to move viewport rect</span>
+        <span style="color: #f8f8f2">view.WhenMove.Subscribe(MoveView);</span>
+        <span style="color: #75715e">// Trigger chunk load/touch</span>
+        <span style="color: #75715e">//_sim.LoadArea(Bounds);</span>
+        <span style="color: #f8f8f2">Task.Run(()</span> <span style="color: #f8f8f2">=&gt;</span> <span style="color: #f8f8f2">_sim.LoadArea(Bounds));</span>
+    <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">...</span>
+
+    <span style="color: #66d9ef">void</span> <span style="color: #a6e22e">MoveView</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">char</span> <span style="color: #f8f8f2">dir)</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #75715e">// Given one of NESW move the rect Up, Right, Down, or Left</span>
+        <span style="color: #66d9ef">switch</span> <span style="color: #f8f8f2">(dir)</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">case</span> <span style="color: #e6db74">&#39;N&#39;</span><span style="color: #f8f8f2">:</span>
+                <span style="color: #f8f8f2">Bounds.Y</span> <span style="color: #f8f8f2">-=</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">;</span>
+                <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+            <span style="color: #66d9ef">case</span> <span style="color: #e6db74">&#39;S&#39;</span><span style="color: #f8f8f2">:</span>
+                <span style="color: #f8f8f2">Bounds.Y</span> <span style="color: #f8f8f2">+=</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">;</span>
+                <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+            <span style="color: #66d9ef">case</span> <span style="color: #e6db74">&#39;E&#39;</span><span style="color: #f8f8f2">:</span>
+                <span style="color: #f8f8f2">Bounds.X</span> <span style="color: #f8f8f2">+=</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">;</span>
+                <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+            <span style="color: #66d9ef">case</span> <span style="color: #e6db74">&#39;W&#39;</span><span style="color: #f8f8f2">:</span>
+                <span style="color: #f8f8f2">Bounds.X</span> <span style="color: #f8f8f2">-=</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">;</span>
+                <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">}</span>
+        <span style="color: #75715e">//_sim.LoadArea(Bounds);</span>
+        <span style="color: #f8f8f2">Task.Run(()</span> <span style="color: #f8f8f2">=&gt;</span> <span style="color: #f8f8f2">_sim.LoadArea(Bounds));</span>
+   <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">...</span>
+<span style="color: #f8f8f2">}</span>
+</pre></div>
+</p>
+
+<p>With those changes I could suddenly zip around the map with no perceptible lag!
+It was really neat to play with, but was a little hard to control. Once the lag
+was gone I found I couldn't move a single tile at a time, which would make
+playing very punishing. Finally I came back to the actual problem that caused
+the jumping: my input handling generating key events on every update, 60 times a
+second! What I really wanted was one event on initial key press, and no
+additional events until the key was released and re-pressed. Here are my
+changes to the event provider:</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #66d9ef">class</span> <span style="color: #a6e22e">EventProvider</span>
+<span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">private</span> <span style="color: #66d9ef">readonly</span> <span style="color: #f8f8f2">Subject&lt;Point&gt;</span> <span style="color: #f8f8f2">_click;</span>
+    <span style="color: #66d9ef">public</span> <span style="color: #f8f8f2">IObservable&lt;Point&gt;</span> <span style="color: #f8f8f2">WhenClick;</span>
+    <span style="color: #66d9ef">private</span> <span style="color: #66d9ef">readonly</span> <span style="color: #f8f8f2">Subject&lt;Keys[]&gt;</span> <span style="color: #f8f8f2">_keys;</span>
+    <span style="color: #66d9ef">public</span> <span style="color: #f8f8f2">IObservable&lt;Keys[]&gt;</span> <span style="color: #f8f8f2">WhenKeyPressed;</span>
+    <span style="color: #66d9ef">bool</span> <span style="color: #f8f8f2">_down;</span>
+    <span style="color: #75715e">// Set of keys currently pressed</span>
+    <span style="color: #f8f8f2">HashSet&lt;Keys&gt;</span> <span style="color: #f8f8f2">_pressed;</span>
+
+    <span style="color: #66d9ef">public</span> <span style="color: #a6e22e">EventProvider</span><span style="color: #f8f8f2">()</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">_click</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">Subject&lt;Point&gt;();</span>
+        <span style="color: #f8f8f2">WhenClick</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">_click.AsObservable();</span>
+        <span style="color: #f8f8f2">_keys</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">Subject&lt;Keys[]&gt;();</span>
+        <span style="color: #f8f8f2">WhenKeyPressed</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">_keys.AsObservable();</span>
+        <span style="color: #f8f8f2">_pressed</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">HashSet&lt;Keys&gt;();</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">void</span> <span style="color: #a6e22e">Update</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">elapsed)</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">ms</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">Mouse.GetState();</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(ms.LeftButton</span> <span style="color: #f8f8f2">==</span> <span style="color: #f8f8f2">ButtonState.Pressed)</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">_down</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">true</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(ms.LeftButton</span> <span style="color: #f8f8f2">==</span> <span style="color: #f8f8f2">ButtonState.Released</span> <span style="color: #f8f8f2">&amp;&amp;</span> <span style="color: #f8f8f2">_down)</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">_down</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">false</span><span style="color: #f8f8f2">;</span>
+            <span style="color: #f8f8f2">_click.OnNext(ms.Position);</span>
+        <span style="color: #f8f8f2">}</span>
+        <span style="color: #75715e">// Preproccess keys to remove continuing presses</span>
+        <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">ks</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">UpdateKeys(Keyboard.GetState().GetPressedKeys());</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(ks.Count()</span> <span style="color: #f8f8f2">&gt;</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">)</span>
+            <span style="color: #f8f8f2">_keys.OnNext(ks);</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #f8f8f2">Keys[]</span> <span style="color: #a6e22e">UpdateKeys</span><span style="color: #f8f8f2">(Keys[]</span> <span style="color: #f8f8f2">keys)</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">pressed</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">HashSet&lt;Keys&gt;(keys);</span>
+        <span style="color: #75715e">// set.except produces the difference between sets</span>
+        <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">novel</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">pressed.Except(_pressed);</span>
+        <span style="color: #f8f8f2">_pressed</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">pressed;</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">novel.ToArray();</span>
+    <span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">}</span>
+</pre></div>
+</p>
+
+<p>It might be better to produce an enumerable of new presses, or to stream the
+events one at a time. I haven't decided yet.</p>
+
+<p>There is one remaining visual bug. Tiles along the bottom and right sides of the
+view are being processed incorrectly by the <code>TileSolver</code>. I guess next I will
+look into fixing that and the other problems I've found with the solver.</p>
+
+  </div>
+  <footer>
+    <div class="article-footer">
+      
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/csharp"><span></span>CSharp</a>
+    </li>
+    
+    <li>
+      <a href="/tags/monogame"><span></span>MonoGame</a>
+    </li>
+    
+    <li>
+      <a href="/tags/roguelike"><span></span>Roguelike</a>
+    </li>
+    
+    <li>
+      <a href="/tags/code"><span></span>code</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      
+      <div class="adsense">
+        <span class="sponsor-label">Sponsored link</span>
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="2442045076"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+      </div>
+      
+      
+<div id="share-buttons">
+  <ul>
+    
+    
+    
+    
+    <li>
+      <div class="g-plusone" data-size="medium"></div>
+    </li>
+    
+    
+  </ul>
+</div>
+
+
+      <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'SuperfComs';
+    var disqus_identifier = 'http:\/\/kitsu.github.io\/2016\/08\/05\/roguelike-project-08\/';
+    var disqus_title = 'Roguelike Project - Off By One';
+    var disqus_url = 'http:\/\/kitsu.github.io\/2016\/08\/05\/roguelike-project-08\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+      
+      <div id="pagenavigation-next-prev">
+        
+        <div id="pagenavigation-next">
+          <span class="pagenav-label">Previous</span>
+          <a href="http://kitsu.github.io/2016/07/30/roguelike-project-07/">Roguelike Project - Sim Infrastructure</a>
+        </div>
+        
+        
+      </div>
+      
+    </div>
+  </footer>
+</div>
+        </div>
+        <div class="sidebar">
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Author</span>
+    </div>
+    <div id="author">
+      <span>Ed Blake</span>
+      <div>
+        
+        
+        <a href="https://plus.google.com/118323029386640613972"><i class="fa fa-google-plus-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://github.com/kitsu"><i class="fa fa-github-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://www.linkedin.com/in/edward-blake-b3601411b"><i class="fa fa-linkedin-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://stackoverflow.com/users/770443"><i class="fa fa-stack-overflow fa-2x" aria-hidden="true"></i></a>
+        
+      </div>
+    </div>
+  </div>
+  
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Categories</span>
+    </div>
+    <div class="categories">
+      <ul>
+        
+        <li>
+          <a href="/categories/blog"><span></span>blog (3)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/development"><span></span>development (31)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/hacks"><span></span>hacks (4)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/personal"><span></span>personal (2)</a>
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>RSS</span>
+    </div>
+    <div id="rss">
+      <a href="/index.xml" type="application/rss+xml" target="_blank">
+        <i class="fa fa-rss-square fa-2x" aria-hidden="true"></i>
+      </a>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Sponsored link</span>
+    </div>
+    <div class="adsense">
+      <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:inline-block;width:300px;height:600px"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="9965311870"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+    </div>
+  </div>
+  
+</div>
+
+      </div>
+      <footer>
+        <div id="site-footer-wrap">
+          <div id="site-footer">
+            <span>Powered by <a href="https://gohugo.io/">Hugo</a>.</span>
+            <span>
+              
+              © 2015 Ed Blake
+              
+           </span>
+           <span id="copyleft">
+              <a rel="license"
+                 href="http://creativecommons.org/licenses/by-sa/4.0/">
+                <img alt="Creative Commons License" style="border-width:0"
+                     src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" />
+              </a>
+            </span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
+

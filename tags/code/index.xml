@@ -7,8 +7,18 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© 2015 Ed Blake</copyright>
-    <lastBuildDate>Sat, 30 Jul 2016 08:04:34 -0700</lastBuildDate>
+    <lastBuildDate>Fri, 05 Aug 2016 11:10:55 -0700</lastBuildDate>
     <atom:link href="http://kitsu.github.io/tags/code/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Roguelike Project - Off By One</title>
+      <link>http://kitsu.github.io/2016/08/05/roguelike-project-08/</link>
+      <pubDate>Fri, 05 Aug 2016 11:10:55 -0700</pubDate>
+      
+      <guid>http://kitsu.github.io/2016/08/05/roguelike-project-08/</guid>
+      <description>&lt;p&gt;Fixing a discrete mathematics bug and fixing scrolling responsivity.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Roguelike Project - Sim Infrastructure</title>
@@ -147,16 +157,6 @@
       
       <guid>http://kitsu.github.io/2016/05/31/async_dom_animation/</guid>
       <description>&lt;p&gt;Using core.async to animate DOM properties.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Analyzing Autolisp with Python - Analyze</title>
-      <link>http://kitsu.github.io/2016/05/29/autolisp_parse_03/</link>
-      <pubDate>Sun, 29 May 2016 07:41:30 -0700</pubDate>
-      
-      <guid>http://kitsu.github.io/2016/05/29/autolisp_parse_03/</guid>
-      <description>&lt;p&gt;Woo, yet another weak parser implementation - conclusion.&lt;/p&gt;
 </description>
     </item>
     
