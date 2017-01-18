@@ -104,7 +104,7 @@ Javascript VM I need to be able to call js functions. In advanced compilation
 mode though all the functions and var names are mangled. There are two ways to
 expose ClojureScript symbols in the js runtime:</p>
 
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #75715e">;; Export interop symbols on js global object (window)</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #75715e">;; Export interop symbols on js global object (window)</span>
 <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">set!</span> <span style="color: #f8f8f2">js/set_history</span> <span style="color: #f8f8f2">set-history)</span>
 
 <span style="color: #75715e">;; Add the :export metadata to the functions you want to access</span>
@@ -155,7 +155,7 @@ project-wide dependencies map the offending code was loaded into every build. In
 the end the final solution was so simple, but so painful to come up with -
 Remove Devcards from the project deps and add it only to the testcards build:</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">{</span><span style="color: #e6db74">:id</span> <span style="color: #e6db74">&quot;test&quot;</span>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">{</span><span style="color: #e6db74">:id</span> <span style="color: #e6db74">&quot;test&quot;</span>
  <span style="color: #e6db74">:source-paths</span> <span style="color: #f8f8f2">[</span><span style="color: #e6db74">&quot;src&quot;</span> <span style="color: #e6db74">&quot;test&quot;</span><span style="color: #f8f8f2">]</span>
  <span style="color: #e6db74">:dependencies</span> <span style="color: #f8f8f2">[[devcards</span> <span style="color: #e6db74">&quot;0.2.1-7&quot;</span><span style="color: #f8f8f2">]]</span> <span style="color: #75715e">;&lt;-- This Here!</span>
  <span style="color: #e6db74">:figwheel</span> <span style="color: #f8f8f2">{</span><span style="color: #e6db74">:devcards</span> <span style="color: #f8f8f2">true}</span>
@@ -178,7 +178,7 @@ my config. Which I do.</p>
 with dependencies, Lein does. To make Devcards an optional dependency I need
 that code under the project.clj <code>:profiles</code> key:</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #e6db74">:profiles</span> <span style="color: #f8f8f2">{</span><span style="color: #e6db74">:test</span> <span style="color: #f8f8f2">{</span><span style="color: #e6db74">:dependencies</span> <span style="color: #f8f8f2">[[devcards</span> <span style="color: #e6db74">&quot;0.2.1-7&quot;</span><span style="color: #f8f8f2">]]}}</span>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #e6db74">:profiles</span> <span style="color: #f8f8f2">{</span><span style="color: #e6db74">:test</span> <span style="color: #f8f8f2">{</span><span style="color: #e6db74">:dependencies</span> <span style="color: #f8f8f2">[[devcards</span> <span style="color: #e6db74">&quot;0.2.1-7&quot;</span><span style="color: #f8f8f2">]]}}</span>
 
 <span style="color: #e6db74">:cljsbuild</span> <span style="color: #f8f8f2">{</span><span style="color: #e6db74">:builds</span>
             <span style="color: #f8f8f2">[{</span><span style="color: #e6db74">:id</span> <span style="color: #e6db74">&quot;test&quot;</span> <span style="color: #f8f8f2">...</span>
@@ -324,7 +324,7 @@ profile and have the Devcards jar added to my classpath.</p>
         </li>
         
         <li>
-          <a href="/categories/personal"><span></span>personal (2)</a>
+          <a href="/categories/personal"><span></span>personal (3)</a>
         </li>
         
       </ul>

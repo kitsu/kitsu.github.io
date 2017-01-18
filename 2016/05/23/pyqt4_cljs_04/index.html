@@ -108,7 +108,7 @@ mouse up, so I decided to add another channel for mouseleave events. To cut down
 on the clutter I used async/merge to create an <code>end-chan</code> that combined up and
 leave events:</p>
 
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">...</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">...</span>
   <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">let </span><span style="color: #f8f8f2">[target</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">sel1</span> <span style="color: #e6db74">:#doclist</span><span style="color: #f8f8f2">)</span>
         <span style="color: #f8f8f2">lmb-down-chan</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">evt-chan</span> <span style="color: #f8f8f2">target</span> <span style="color: #e6db74">:mousedown</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">)</span>
         <span style="color: #f8f8f2">lmb-move-chan</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">evt-chan</span> <span style="color: #f8f8f2">target</span> <span style="color: #e6db74">:mousemove</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">)</span>
@@ -141,7 +141,7 @@ decided that it was overkill for my application.</p>
 together and consume all events, ignoring some based on current state. First I
 had to modify the event channelizer to tag the events:</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">evt-chan</span> <span style="color: #f8f8f2">[target</span> <span style="color: #f8f8f2">kind</span> <span style="color: #f8f8f2">btn]</span>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">evt-chan</span> <span style="color: #f8f8f2">[target</span> <span style="color: #f8f8f2">kind</span> <span style="color: #f8f8f2">btn]</span>
   <span style="color: #75715e">;; The sliding buffer probably isn&#39;t needed anymore?</span>
   <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">let </span><span style="color: #f8f8f2">[out</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">chan</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">sliding-buffer</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">))]</span>
     <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">dommy/listen!</span> <span style="color: #f8f8f2">target</span> <span style="color: #f8f8f2">kind</span>
@@ -156,7 +156,7 @@ had to modify the event channelizer to tag the events:</p>
 <p>Next I created a function that provides a channel of drag events, where a drag
 event is every mouse event from <code>down</code> until either an <code>up</code> or <code>leave</code> event:</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">build-drag-chan</span> <span style="color: #f8f8f2">[target]</span>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">build-drag-chan</span> <span style="color: #f8f8f2">[target]</span>
   <span style="color: #75715e">;; Setup event source channels and start producing drag sub-channels</span>
   <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">let </span><span style="color: #f8f8f2">[output-chan</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">chan</span><span style="color: #f8f8f2">)</span>
         <span style="color: #f8f8f2">input-chan</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">async/merge</span> <span style="color: #f8f8f2">[(</span><span style="color: #a6e22e">evt-chan</span> <span style="color: #f8f8f2">target</span> <span style="color: #e6db74">:mousedown</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">)</span>
@@ -186,7 +186,7 @@ event is every mouse event from <code>down</code> until either an <code>up</code
 
 <p>Finally I rewrote main to consume drag events:</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">main</span> <span style="color: #f8f8f2">[]</span>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">main</span> <span style="color: #f8f8f2">[]</span>
   <span style="color: #75715e">;; Get handle of target element and create drag channel</span>
   <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">let </span><span style="color: #f8f8f2">[target</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">sel1</span> <span style="color: #e6db74">:#doclist</span><span style="color: #f8f8f2">)</span>
         <span style="color: #f8f8f2">drag-chan</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">build-drag-chan</span> <span style="color: #f8f8f2">target)]</span>
@@ -361,7 +361,7 @@ Commit:
         </li>
         
         <li>
-          <a href="/categories/personal"><span></span>personal (2)</a>
+          <a href="/categories/personal"><span></span>personal (3)</a>
         </li>
         
       </ul>

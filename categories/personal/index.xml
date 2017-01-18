@@ -7,8 +7,18 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© 2015 Ed Blake</copyright>
-    <lastBuildDate>Mon, 06 Jun 2016 15:29:20 -0700</lastBuildDate>
+    <lastBuildDate>Wed, 18 Jan 2017 08:30:05 -0800</lastBuildDate>
     <atom:link href="http://kitsu.github.io/categories/personal/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>New year, new job, new tech</title>
+      <link>http://kitsu.github.io/2017/01/18/new-start/</link>
+      <pubDate>Wed, 18 Jan 2017 08:30:05 -0800</pubDate>
+      
+      <guid>http://kitsu.github.io/2017/01/18/new-start/</guid>
+      <description>&lt;p&gt;After a long search I finally found my first dev position.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>First Weekend Off</title>

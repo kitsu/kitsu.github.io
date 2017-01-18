@@ -134,7 +134,7 @@ Clojure. While I'm not going to say what I came up with is idiomatic, but I did
 have some fun figuring things out. The first testable function is <code>get-row-num</code>,
 which is pretty straight forward:</p>
 
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #75715e">;; Build some fake evt-&gt;target-&gt;id hierarchies on random input</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #75715e">;; Build some fake evt-&gt;target-&gt;id hierarchies on random input</span>
 <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">row</span> <span style="color: #f8f8f2">[r]</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">clj-&gt;js</span> <span style="color: #f8f8f2">{</span><span style="color: #e6db74">:id</span> <span style="color: #f8f8f2">(str </span><span style="color: #e6db74">&quot;row&quot;</span> <span style="color: #f8f8f2">r)}))</span>
 <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">col</span> <span style="color: #f8f8f2">[r]</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">clj-&gt;js</span> <span style="color: #f8f8f2">{</span><span style="color: #e6db74">:id</span> <span style="color: #e6db74">&quot;col1&quot;</span> <span style="color: #e6db74">:parentElement</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">row</span> <span style="color: #f8f8f2">r)}))</span>
 <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">row-evt</span> <span style="color: #f8f8f2">[r]</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">clj-&gt;js</span> <span style="color: #f8f8f2">{</span><span style="color: #e6db74">:target</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">row</span> <span style="color: #f8f8f2">r)}))</span>
@@ -158,7 +158,7 @@ where items on a channel come from, so if you can mock the input you can
 verify the external behavior of a channel-&gt;channel function. Once I factored out
 the input-chan creation I was able to test the <code>build-drag-chan</code> function:</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">get-input-chan</span>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">get-input-chan</span>
   <span style="color: #e6db74">&quot;Build fake mouse event stream channel.&quot;</span>
   <span style="color: #f8f8f2">[]</span>
   <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">let </span><span style="color: #f8f8f2">[input-chan</span>  <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">chan</span> <span style="color: #ae81ff">12</span><span style="color: #f8f8f2">)</span>
@@ -367,7 +367,7 @@ Commit:
         </li>
         
         <li>
-          <a href="/categories/personal"><span></span>personal (2)</a>
+          <a href="/categories/personal"><span></span>personal (3)</a>
         </li>
         
       </ul>

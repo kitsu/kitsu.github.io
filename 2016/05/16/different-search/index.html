@@ -118,7 +118,7 @@ which leads me to the content portion of this post.</p>
 times trying to get it right. The idea is to add a tag to the html head tag of
 the form:</p>
 
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">&lt;</span><span style="color: #a6e22e">meta</span> <span style="color: #a6e22e">name</span><span style="color: #f8f8f2">=</span><span style="color: #e6db74">&quot;Description&quot;</span> <span style="color: #a6e22e">content</span><span style="color: #f8f8f2">=</span><span style="color: #e6db74">&quot;Something descriptive about *this page*&quot;</span><span style="color: #f8f8f2">&gt;</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">&lt;</span><span style="color: #a6e22e">meta</span> <span style="color: #a6e22e">name</span><span style="color: #f8f8f2">=</span><span style="color: #e6db74">&quot;Description&quot;</span> <span style="color: #a6e22e">content</span><span style="color: #f8f8f2">=</span><span style="color: #e6db74">&quot;Something descriptive about *this page*&quot;</span><span style="color: #f8f8f2">&gt;</span>
 </pre></div>
 
 
@@ -128,14 +128,14 @@ getting something relevant into the content string. For the landing page I
 wanted a generic description of the blog, but for posts I wanted the post
 summary. I tried using the trick the theme's author used in the title tag:</p>
 
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">&lt;</span><span style="color: #a6e22e">title</span><span style="color: #f8f8f2">&gt;{{</span> <span style="color: #66d9ef">if</span> <span style="color: #a6e22e">not</span> <span style="color: #f8f8f2">.</span><span style="color: #a6e22e">IsHome</span> <span style="color: #f8f8f2">}}{{</span> <span style="color: #f8f8f2">.</span><span style="color: #a6e22e">Title</span> <span style="color: #f8f8f2">}}</span> <span style="color: #f8f8f2">|</span> <span style="color: #f8f8f2">{{</span> <span style="color: #a6e22e">end</span> <span style="color: #f8f8f2">}}{{</span> <span style="color: #f8f8f2">.</span><span style="color: #a6e22e">Site</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">Title</span> <span style="color: #f8f8f2">}}&lt;</span><span style="color: #f92672">/</span><span style="color: #a6e22e">title</span><span style="color: #f8f8f2">&gt;</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">&lt;</span><span style="color: #a6e22e">title</span><span style="color: #f8f8f2">&gt;{{</span> <span style="color: #66d9ef">if</span> <span style="color: #a6e22e">not</span> <span style="color: #f8f8f2">.</span><span style="color: #a6e22e">IsHome</span> <span style="color: #f8f8f2">}}{{</span> <span style="color: #f8f8f2">.</span><span style="color: #a6e22e">Title</span> <span style="color: #f8f8f2">}}</span> <span style="color: #f8f8f2">|</span> <span style="color: #f8f8f2">{{</span> <span style="color: #a6e22e">end</span> <span style="color: #f8f8f2">}}{{</span> <span style="color: #f8f8f2">.</span><span style="color: #a6e22e">Site</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">Title</span> <span style="color: #f8f8f2">}}&lt;</span><span style="color: #f92672">/</span><span style="color: #a6e22e">title</span><span style="color: #f8f8f2">&gt;</span>
 </pre></div>
 
 
 <p>I had trouble figuring out how to put the result in quotes though. To debug I
 tried the substitutions with static strings. This is what ended up working:</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">&lt;</span><span style="color: #a6e22e">meta</span> <span style="color: #a6e22e">name</span><span style="color: #f8f8f2">=</span><span style="color: #e6db74">&quot;Description&quot;</span> <span style="color: #a6e22e">content</span><span style="color: #f8f8f2">={{</span> <span style="color: #66d9ef">if</span> <span style="color: #a6e22e">not</span> <span style="color: #f8f8f2">.</span><span style="color: #a6e22e">IsHome</span> <span style="color: #f8f8f2">}}</span><span style="color: #e6db74">&quot;Away&quot;</span><span style="color: #f8f8f2">{{</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">}}</span><span style="color: #e6db74">&quot;Home&quot;</span><span style="color: #f8f8f2">{{</span> <span style="color: #a6e22e">end</span> <span style="color: #f8f8f2">}}&gt;</span>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">&lt;</span><span style="color: #a6e22e">meta</span> <span style="color: #a6e22e">name</span><span style="color: #f8f8f2">=</span><span style="color: #e6db74">&quot;Description&quot;</span> <span style="color: #a6e22e">content</span><span style="color: #f8f8f2">={{</span> <span style="color: #66d9ef">if</span> <span style="color: #a6e22e">not</span> <span style="color: #f8f8f2">.</span><span style="color: #a6e22e">IsHome</span> <span style="color: #f8f8f2">}}</span><span style="color: #e6db74">&quot;Away&quot;</span><span style="color: #f8f8f2">{{</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">}}</span><span style="color: #e6db74">&quot;Home&quot;</span><span style="color: #f8f8f2">{{</span> <span style="color: #a6e22e">end</span> <span style="color: #f8f8f2">}}&gt;</span>
 </pre></div>
 </p>
 
@@ -147,7 +147,7 @@ can't put custom vars in the top-level site definitions? lastly it seems that
 Go/Hugo up-cases the first letter in identifiers, so the section <code>[params]</code>
 could only be accessed as <code>.Params</code>. Heres how the working config looks:</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #960050; background-color: #1e0010">...</span>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #960050; background-color: #1e0010">...</span>
 <span style="color: #66d9ef">[params]</span>
     <span style="color: #a6e22e">Desc</span> <span style="color: #f92672">=</span> <span style="color: #e6db74">&quot;My site-wide description here.&quot;</span>
 <span style="color: #960050; background-color: #1e0010">...</span>
@@ -163,7 +163,7 @@ that when one is true the other is false. My guess is that the RSS, sitemap.xml,
 and anything else non-html is classified as a node. A little more funky syntax
 and it all works:</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">&lt;</span><span style="color: #a6e22e">meta</span> <span style="color: #a6e22e">name</span><span style="color: #f8f8f2">=</span><span style="color: #e6db74">&quot;Description&quot;</span> <span style="color: #a6e22e">content</span><span style="color: #f8f8f2">={{</span> <span style="color: #66d9ef">if</span> <span style="color: #a6e22e">and</span> <span style="color: #f8f8f2">(.</span><span style="color: #a6e22e">IsPage</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">not</span> <span style="color: #f8f8f2">.</span><span style="color: #a6e22e">IsHome</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">}}</span><span style="color: #e6db74">&quot;{{ .Summary }}&quot;</span><span style="color: #f8f8f2">{{</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">}}</span><span style="color: #e6db74">&quot;{{ .Site.Params.Desc }}&quot;</span><span style="color: #f8f8f2">{{</span> <span style="color: #a6e22e">end</span> <span style="color: #f8f8f2">}}&gt;</span>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">&lt;</span><span style="color: #a6e22e">meta</span> <span style="color: #a6e22e">name</span><span style="color: #f8f8f2">=</span><span style="color: #e6db74">&quot;Description&quot;</span> <span style="color: #a6e22e">content</span><span style="color: #f8f8f2">={{</span> <span style="color: #66d9ef">if</span> <span style="color: #a6e22e">and</span> <span style="color: #f8f8f2">(.</span><span style="color: #a6e22e">IsPage</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">not</span> <span style="color: #f8f8f2">.</span><span style="color: #a6e22e">IsHome</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">}}</span><span style="color: #e6db74">&quot;{{ .Summary }}&quot;</span><span style="color: #f8f8f2">{{</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">}}</span><span style="color: #e6db74">&quot;{{ .Site.Params.Desc }}&quot;</span><span style="color: #f8f8f2">{{</span> <span style="color: #a6e22e">end</span> <span style="color: #f8f8f2">}}&gt;</span>
 </pre></div>
 </p>
 
@@ -302,7 +302,7 @@ better looking search results.</p>
         </li>
         
         <li>
-          <a href="/categories/personal"><span></span>personal (2)</a>
+          <a href="/categories/personal"><span></span>personal (3)</a>
         </li>
         
       </ul>

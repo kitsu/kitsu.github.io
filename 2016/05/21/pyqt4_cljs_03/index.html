@@ -110,7 +110,7 @@ hook an event callback up to a channel. I've made it overly complicated in the
 past, but it is really simple: You just need a channel accessible in the scope
 of a lambda that is the event handler.</p>
 
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">get-click-chan</span> <span style="color: #f8f8f2">[target]</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">get-click-chan</span> <span style="color: #f8f8f2">[target]</span>
   <span style="color: #75715e">;; Connect an event stream to a channel, return channel</span>
   <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">let </span><span style="color: #f8f8f2">[out</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">chan</span><span style="color: #f8f8f2">)]</span>
     <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">dommy/listen!</span> <span style="color: #f8f8f2">target</span> <span style="color: #e6db74">:mousedown</span>
@@ -143,7 +143,7 @@ when generating the HTML. I think you could use nth-child or
 <p>I'll start at the end and work toward the specific. First the document needs to
 be ready before event listers can be attached:</p>
 
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">dommy/listen!</span> <span style="color: #f8f8f2">js/window</span> <span style="color: #e6db74">:load</span> <span style="color: #f8f8f2">main)</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">dommy/listen!</span> <span style="color: #f8f8f2">js/window</span> <span style="color: #e6db74">:load</span> <span style="color: #f8f8f2">main)</span>
 </pre></div>
 
 
@@ -152,7 +152,7 @@ setup I start a loop waiting for Left Mouse Button (LMB) down events. When I get
 one I start a nested loop to update the highlight range that exits on the first
 LMB up event.</p>
 
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">main</span> <span style="color: #f8f8f2">[]</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">main</span> <span style="color: #f8f8f2">[]</span>
   <span style="color: #75715e">;; Setup some event input channels and start a process to watch them.</span>
   <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">let </span><span style="color: #f8f8f2">[target</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">sel1</span> <span style="color: #e6db74">:#doclist</span><span style="color: #f8f8f2">)</span>
         <span style="color: #f8f8f2">lmb-down-chan</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">evt-chan</span> <span style="color: #f8f8f2">target</span> <span style="color: #e6db74">:mousedown</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">)</span>
@@ -179,7 +179,7 @@ separate constructor functions into one. I played around with producing tagged
 events or preprocessed event data, but in the end I just had it filter on mouse
 button.</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">evt-chan</span> <span style="color: #f8f8f2">[target</span> <span style="color: #f8f8f2">kind</span> <span style="color: #f8f8f2">btn]</span>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">evt-chan</span> <span style="color: #f8f8f2">[target</span> <span style="color: #f8f8f2">kind</span> <span style="color: #f8f8f2">btn]</span>
   <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">let </span><span style="color: #f8f8f2">[out</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">chan</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">sliding-buffer</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">))]</span>
     <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">dommy/listen!</span> <span style="color: #f8f8f2">target</span> <span style="color: #f8f8f2">kind</span>
                   <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">fn </span><span style="color: #f8f8f2">[evt]</span>
@@ -192,7 +192,7 @@ button.</p>
 <p>The <code>get-row-num</code> function just gets the number part of the row id. It also
 handles the case when the event target is a child of the containing row.</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">get-row-num</span> <span style="color: #f8f8f2">[evt]</span>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">get-row-num</span> <span style="color: #f8f8f2">[evt]</span>
   <span style="color: #75715e">;; Extract the row number from a mouse event</span>
   <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">let </span><span style="color: #f8f8f2">[target</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">.-target</span> <span style="color: #f8f8f2">evt)</span>
         <span style="color: #f8f8f2">id</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">.-id</span> <span style="color: #f8f8f2">target)</span>
@@ -207,7 +207,7 @@ handles the case when the event target is a child of the containing row.</p>
 <p>On mouse down I store the row number of the initial event target, and generate a
 vector of the highlight state of all rows using <code>get-highlight</code>.</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">get-highlight</span> <span style="color: #f8f8f2">[target]</span>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">get-highlight</span> <span style="color: #f8f8f2">[target]</span>
   <span style="color: #75715e">;; Return vector of bools where true means highlighted</span>
   <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">mapv</span> <span style="color: #f92672">#</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">dommy/has-class?</span> <span style="color: #f8f8f2">%</span> <span style="color: #e6db74">&quot;marked&quot;</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">sel</span> <span style="color: #f8f8f2">target</span> <span style="color: #e6db74">&quot;div.row&quot;</span><span style="color: #f8f8f2">)))</span>
 </pre></div>
@@ -221,7 +221,7 @@ list I have to ensure start is before end. From there I map over <code>[index bo
 pairs for <em>all</em> rows. I need to ensure that rows outside the selected range
 still have their initial value, and rows inside have the opposite.</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">toggle-highlight</span> <span style="color: #f8f8f2">[initial</span> <span style="color: #f8f8f2">start</span> <span style="color: #f8f8f2">end]</span>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">toggle-highlight</span> <span style="color: #f8f8f2">[initial</span> <span style="color: #f8f8f2">start</span> <span style="color: #f8f8f2">end]</span>
   <span style="color: #75715e">;; Ensure all rows have correct highlight.</span>
   <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">let </span><span style="color: #f8f8f2">[[start</span> <span style="color: #f8f8f2">end]</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">if </span><span style="color: #f8f8f2">(&gt; start</span> <span style="color: #f8f8f2">end)</span> <span style="color: #f8f8f2">[end</span> <span style="color: #f8f8f2">start]</span> <span style="color: #f8f8f2">[start</span> <span style="color: #f8f8f2">end])]</span>
     <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">dorun</span>
@@ -402,7 +402,7 @@ Commit:
         </li>
         
         <li>
-          <a href="/categories/personal"><span></span>personal (2)</a>
+          <a href="/categories/personal"><span></span>personal (3)</a>
         </li>
         
       </ul>

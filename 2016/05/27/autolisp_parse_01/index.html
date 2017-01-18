@@ -145,7 +145,7 @@ this post) ran a bit long.</p>
 <p>I started out &quot;tokenizing&quot; just by reading a line at a time, doing some text
 replacements, then splitting on whitespace:</p>
 
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">substitutions</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">(</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">substitutions</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">(</span>
         <span style="color: #75715e"># Expand quote literal to quote fn</span>
         <span style="color: #f8f8f2">(</span><span style="color: #e6db74">&quot;&#39;(&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;(quote &quot;</span><span style="color: #f8f8f2">),</span>
         <span style="color: #75715e"># Expand parens with white-space for splitting</span>
@@ -205,7 +205,7 @@ matched. The trick is given an example line:
 the first part, then add two in the second giving 3 (which is not even). As soon
 as the number of quotes does become even whatever is left is the comment.</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #66d9ef">def</span> <span style="color: #a6e22e">scrub_comment</span><span style="color: #f8f8f2">(line):</span>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #66d9ef">def</span> <span style="color: #a6e22e">scrub_comment</span><span style="color: #f8f8f2">(line):</span>
     <span style="color: #e6db74">&quot;&quot;&quot;Carefully clean comments from line.&quot;&quot;&quot;</span>
     <span style="color: #66d9ef">if</span> <span style="color: #f92672">not</span> <span style="color: #f8f8f2">line</span> <span style="color: #f92672">or</span> <span style="color: #f8f8f2">line[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">==</span> <span style="color: #e6db74">&#39;;&#39;</span><span style="color: #f8f8f2">:</span>
         <span style="color: #75715e"># Just skip blank lines and comments</span>
@@ -393,7 +393,7 @@ as the number of quotes does become even whatever is left is the comment.</p>
         </li>
         
         <li>
-          <a href="/categories/personal"><span></span>personal (2)</a>
+          <a href="/categories/personal"><span></span>personal (3)</a>
         </li>
         
       </ul>

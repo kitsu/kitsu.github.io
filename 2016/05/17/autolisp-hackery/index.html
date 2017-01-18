@@ -115,7 +115,7 @@ use. Since it is short here is all the code, I'll break down some of the what
 and why next:</p>
 
 <p><code>File saved at &quot;d:\pown_wrap.scr&quot;</code>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #75715e">;; Preamble</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #75715e">;; Preamble</span>
 <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">defun</span> <span style="color: #f8f8f2">c:pown_block</span> <span style="color: #f8f8f2">(</span> <span style="color: #f8f8f2">/</span> <span style="color: #f8f8f2">dummy)</span>
    <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">setq</span> <span style="color: #f8f8f2">title</span> <span style="color: #f8f8f2">(car (</span><span style="color: #a6e22e">entsel</span>  <span style="color: #e6db74">&quot;Select title text&quot;</span><span style="color: #f8f8f2">))</span>
          <span style="color: #f8f8f2">name</span> <span style="color: #f8f8f2">(cdr (assoc </span><span style="color: #ae81ff">1</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">entget</span> <span style="color: #f8f8f2">title)))</span>
@@ -165,7 +165,7 @@ must be a file on disk, <em>and</em> they don't allow any user interaction. So I
 need the user to run a lisp command so I can gather their input to use in the
 script...</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #75715e">;; Preamble</span>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #75715e">;; Preamble</span>
 <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">defun</span> <span style="color: #f8f8f2">c:pown_block</span> <span style="color: #f8f8f2">(</span> <span style="color: #f8f8f2">/</span> <span style="color: #f8f8f2">dummy)</span>
    <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">setq</span> <span style="color: #f8f8f2">title</span> <span style="color: #f8f8f2">(car (</span><span style="color: #a6e22e">entsel</span>  <span style="color: #e6db74">&quot;Select title text&quot;</span><span style="color: #f8f8f2">))</span>
          <span style="color: #f8f8f2">name</span> <span style="color: #f8f8f2">(cdr (assoc </span><span style="color: #ae81ff">1</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">entget</span> <span style="color: #f8f8f2">title)))</span>
@@ -182,7 +182,7 @@ command. Since no AutoCAD command starts with <code>pow</code> those three lette
 auto-complete to this command. After collecting the DB entities the command then
 runs the same script file it is defined in...</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #75715e">;; Conditional break</span>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #75715e">;; Conditional break</span>
 <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">if </span><span style="color: #f8f8f2">(not title)</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">command</span> <span style="color: #e6db74">&quot;invalid&quot;</span><span style="color: #f8f8f2">))</span>
 </pre></div>
 </p>
@@ -196,7 +196,7 @@ command is defined, and if the lisp var <code>title</code> is not defined then e
 stops. The user then runs the <code>pow</code> command which initializes <code>title</code> and
 executes the same script, which is now able to reach the &quot;Modifications&quot; section.</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #75715e">;; Modifications (note: bg is a custom lisp command)</span>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #75715e">;; Modifications (note: bg is a custom lisp command)</span>
 <span style="color: #f8f8f2">select</span> <span style="color: #f8f8f2">!note</span> <span style="color: #75715e">;</span>
 <span style="color: #f8f8f2">justifytext</span> <span style="color: #f8f8f2">p</span> <span style="color: #75715e">;</span>
 <span style="color: #f8f8f2">tc</span><span style="color: #75715e">;</span>
@@ -374,7 +374,7 @@ I have no affiliation with them except the use of their products.
         </li>
         
         <li>
-          <a href="/categories/personal"><span></span>personal (2)</a>
+          <a href="/categories/personal"><span></span>personal (3)</a>
         </li>
         
       </ul>

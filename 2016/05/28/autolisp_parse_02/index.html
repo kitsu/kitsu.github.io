@@ -105,7 +105,7 @@ namedtuple.</p>
 
 <p>In the end though the only namedtuples were these:</p>
 
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">Number</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">namedtuple(</span><span style="color: #e6db74">&#39;Number&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;value&#39;</span><span style="color: #f8f8f2">)</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">Number</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">namedtuple(</span><span style="color: #e6db74">&#39;Number&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;value&#39;</span><span style="color: #f8f8f2">)</span>
 <span style="color: #f8f8f2">String</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">namedtuple(</span><span style="color: #e6db74">&#39;String&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;value&#39;</span><span style="color: #f8f8f2">)</span>
 <span style="color: #f8f8f2">Symbol</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">namedtuple(</span><span style="color: #e6db74">&#39;Symbol&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39;value&#39;</span><span style="color: #f8f8f2">)</span>
 </pre></div>
@@ -115,7 +115,7 @@ namedtuple.</p>
 different sub-parsers. I eventually pulled the body of the parse function into a
 <code>Program</code> class that represents an entire lisp file:</p>
 
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #66d9ef">class</span> <span style="color: #a6e22e">Program</span><span style="color: #f8f8f2">(object):</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #66d9ef">class</span> <span style="color: #a6e22e">Program</span><span style="color: #f8f8f2">(object):</span>
     <span style="color: #e6db74">&quot;&quot;&quot;Base matcher.&quot;&quot;&quot;</span>
     <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">__init__</span><span style="color: #f8f8f2">(self,</span> <span style="color: #f8f8f2">tokens):</span>
         <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">children</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">list()</span>
@@ -137,7 +137,7 @@ different sub-parsers. I eventually pulled the body of the parse function into a
 <code>consume_body</code>. Its job is to grab and parse everything inside a pair of
 parens. It returns the fully parsed tree of children and the un-consumed tokens:</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #66d9ef">def</span> <span style="color: #a6e22e">consume_body</span><span style="color: #f8f8f2">(tokens):</span>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #66d9ef">def</span> <span style="color: #a6e22e">consume_body</span><span style="color: #f8f8f2">(tokens):</span>
     <span style="color: #e6db74">&quot;&quot;&quot;Consume all expressions until unpaired closing bracket &#39;)&#39; found.&quot;&quot;&quot;</span>
     <span style="color: #f8f8f2">children</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">list()</span>
     <span style="color: #66d9ef">while</span> <span style="color: #f8f8f2">tokens</span> <span style="color: #f92672">and</span> <span style="color: #f92672">not</span> <span style="color: #f8f8f2">tokens[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">==</span> <span style="color: #e6db74">&#39;)&#39;</span><span style="color: #f8f8f2">:</span>
@@ -168,7 +168,7 @@ looks at the head of the token list and decides if it can consume that
 input. If none of the compound expressions match then a catchall function
 handles data literals:</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #66d9ef">def</span> <span style="color: #a6e22e">consume_other</span><span style="color: #f8f8f2">(tokens):</span>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #66d9ef">def</span> <span style="color: #a6e22e">consume_other</span><span style="color: #f8f8f2">(tokens):</span>
     <span style="color: #e6db74">&quot;&quot;&quot;Handle Symbol, String, and Number tokens.&quot;&quot;&quot;</span>
     <span style="color: #f8f8f2">first</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">tokens[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span>
     <span style="color: #66d9ef">try</span><span style="color: #f8f8f2">:</span>
@@ -187,7 +187,7 @@ loosing all the case and whitespace information in the strings, but that's
 fine. I may also still mis-interpret a few special cases, but it didn't cause
 problems in the output I was looking for:</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #66d9ef">def</span> <span style="color: #a6e22e">consume_string</span><span style="color: #f8f8f2">(tokens):</span>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #66d9ef">def</span> <span style="color: #a6e22e">consume_string</span><span style="color: #f8f8f2">(tokens):</span>
     <span style="color: #e6db74">&quot;&quot;&quot;Consume tokens between double-quotes.&quot;&quot;&quot;</span>
     <span style="color: #f8f8f2">first,</span> <span style="color: #f8f8f2">rest</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">tokens[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">],</span> <span style="color: #f8f8f2">tokens[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">:]</span>
     <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">first</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">count(</span><span style="color: #e6db74">&#39;&quot;&#39;</span><span style="color: #f8f8f2">)</span><span style="color: #f92672">%</span><span style="color: #ae81ff">2</span> <span style="color: #f92672">==</span> <span style="color: #ae81ff">0</span> <span style="color: #f92672">and</span> <span style="color: #e6db74">&#39;</span><span style="color: #ae81ff">\\</span><span style="color: #e6db74">&quot;&#39;</span> <span style="color: #f92672">not</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">first:</span>
@@ -211,7 +211,7 @@ problems in the output I was looking for:</p>
 representative. An Apply represents a function call, and contains only the
 function name and a body:</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #66d9ef">class</span> <span style="color: #a6e22e">Apply</span><span style="color: #f8f8f2">(object):</span>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #66d9ef">class</span> <span style="color: #a6e22e">Apply</span><span style="color: #f8f8f2">(object):</span>
     <span style="color: #e6db74">&quot;&quot;&quot;Match function application.&quot;&quot;&quot;</span>
     <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">__init__</span><span style="color: #f8f8f2">(self):</span>
         <span style="color: #f8f8f2">func</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">None</span>
@@ -376,7 +376,7 @@ result of my survey.</p>
         </li>
         
         <li>
-          <a href="/categories/personal"><span></span>personal (2)</a>
+          <a href="/categories/personal"><span></span>personal (3)</a>
         </li>
         
       </ul>

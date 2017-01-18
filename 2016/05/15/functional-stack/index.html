@@ -133,7 +133,7 @@ each new input and the item on top of the stack you perform some action. My
 actual code is a little messy (and gives away the next part of the story) so
 here is a straight forward calculator example:</p>
 
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #e6db74">&quot;&quot;&quot;PushDown Automata based arithmetic calculator.&quot;&quot;&quot;</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #e6db74">&quot;&quot;&quot;PushDown Automata based arithmetic calculator.&quot;&quot;&quot;</span>
 <span style="color: #f92672">from</span> <span style="color: #f8f8f2">operator</span> <span style="color: #f92672">import</span> <span style="color: #f8f8f2">add,</span> <span style="color: #f8f8f2">sub,</span> <span style="color: #f8f8f2">mul,</span> <span style="color: #f8f8f2">div</span>
 <span style="color: #f92672">from</span> <span style="color: #f8f8f2">functools</span> <span style="color: #f92672">import</span> <span style="color: #f8f8f2">partial</span>
 
@@ -214,7 +214,7 @@ until I have a row in hand. Instead of calculating a value what I really want is
 the resulting expression tree. To accomplish that I used function composition
 and Python's <code>functools.partial</code>. Here are my operators and base operand:</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #75715e"># Operators</span>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #75715e"># Operators</span>
 <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">NOT</span><span style="color: #f8f8f2">(matcher,</span> <span style="color: #f8f8f2">row):</span>
     <span style="color: #66d9ef">return</span> <span style="color: #f92672">not</span> <span style="color: #f8f8f2">matcher(row)</span>
 
@@ -240,7 +240,7 @@ to the bottom level of matchers. Now every item on the stack is either one of
 <code>(NOT, AND, OR)</code> or a partial function waiting for a row. Here is how the
 matchers and OP expressions are built:</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #75715e"># Matcher leaf node</span>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #75715e"># Matcher leaf node</span>
 <span style="color: #f8f8f2">column,</span> <span style="color: #f8f8f2">pat</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">part</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">strip(</span><span style="color: #e6db74">&#39;&lt;&gt;&#39;</span><span style="color: #f8f8f2">)</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">split(</span><span style="color: #e6db74">&#39;:&#39;</span><span style="color: #f8f8f2">)[:</span><span style="color: #ae81ff">2</span><span style="color: #f8f8f2">]</span>
 <span style="color: #f8f8f2">pattern</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">re</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">compile(pat,</span> <span style="color: #f8f8f2">re</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">IGNORECASE)</span>
 <span style="color: #f8f8f2">match</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">partial(matcher,</span> <span style="color: #f8f8f2">column,</span> <span style="color: #f8f8f2">pattern)</span>
@@ -421,7 +421,7 @@ covering another interesting class of Automata and some applications.</p>
         </li>
         
         <li>
-          <a href="/categories/personal"><span></span>personal (2)</a>
+          <a href="/categories/personal"><span></span>personal (3)</a>
         </li>
         
       </ul>

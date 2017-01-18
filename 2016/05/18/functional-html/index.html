@@ -125,7 +125,7 @@ and takes advantage of the Python syntax to do most of the heavy lifting.</p>
 <p>The key function is <code>tag</code>, which produces an arbitrary tag containing its args
 as its innerHTML and kwargs as attributes:</p>
 
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f92672">from</span> <span style="color: #f8f8f2">functools</span> <span style="color: #f92672">import</span> <span style="color: #f8f8f2">partial</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f92672">from</span> <span style="color: #f8f8f2">functools</span> <span style="color: #f92672">import</span> <span style="color: #f8f8f2">partial</span>
 <span style="color: #f92672">from</span> <span style="color: #f8f8f2">itertools</span> <span style="color: #f92672">import</span> <span style="color: #f8f8f2">chain</span>
 
 <span style="color: #f8f8f2">self_closing</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">[</span><span style="color: #e6db74">&quot;area&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;base&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;br&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;col&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;command&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;embed&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;hr&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;img&quot;</span><span style="color: #f8f8f2">,</span>
@@ -156,7 +156,7 @@ as its innerHTML and kwargs as attributes:</p>
 <p>I then use that to build some basic tags as partial functions, and some
 specific convenience functions:</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #75715e"># Misc simple tags</span>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #75715e"># Misc simple tags</span>
 <span style="color: #f8f8f2">style</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">partial(tag,</span> <span style="color: #e6db74">&#39;style&#39;</span><span style="color: #f8f8f2">)</span>
 <span style="color: #f8f8f2">div</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">partial(tag,</span> <span style="color: #e6db74">&#39;div&#39;</span><span style="color: #f8f8f2">)</span>
 <span style="color: #f8f8f2">span</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">partial(tag,</span> <span style="color: #e6db74">&#39;span&#39;</span><span style="color: #f8f8f2">)</span>
@@ -187,7 +187,7 @@ specific convenience functions:</p>
 
 <p>From there I build some application specific template functions:</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #75715e"># Doclist filter input controls</span>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #75715e"># Doclist filter input controls</span>
 <span style="color: #f8f8f2">docfilter</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">div(</span><span style="color: #e6db74">&quot; &quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">label(</span><span style="color: #e6db74">&#39;Filter:&#39;</span><span style="color: #f8f8f2">),</span> <span style="color: #e6db74">&quot; &quot;</span><span style="color: #f8f8f2">,</span>
                 <span style="color: #f8f8f2">textbox(id</span><span style="color: #f92672">=</span><span style="color: #e6db74">&#39;filter_input&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">autofocus</span><span style="color: #f92672">=</span><span style="color: #e6db74">&#39;autofocus&#39;</span><span style="color: #f8f8f2">),</span>
                 <span style="color: #f8f8f2">button(</span><span style="color: #e6db74">&quot;Clear&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">id</span><span style="color: #f92672">=</span><span style="color: #e6db74">&#39;filter_clear&#39;</span><span style="color: #f8f8f2">),</span>
@@ -375,7 +375,7 @@ but since it is hidden inside a desktop application I did what was expedient.</p
         </li>
         
         <li>
-          <a href="/categories/personal"><span></span>personal (2)</a>
+          <a href="/categories/personal"><span></span>personal (3)</a>
         </li>
         
       </ul>

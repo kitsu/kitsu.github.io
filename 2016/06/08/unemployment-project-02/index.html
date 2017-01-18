@@ -115,7 +115,7 @@ of all instance properties.</p>
 
 <p>Here is what I've come up with so far (BTW I don't know if this actually works):</p>
 
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #66d9ef">namespace</span> <span style="color: #f8f8f2">JobLogger.Models</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #66d9ef">namespace</span> <span style="color: #f8f8f2">JobLogger.Models</span>
 <span style="color: #f8f8f2">{</span>
     <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">enum</span> <span style="color: #f8f8f2">LogType</span> <span style="color: #f8f8f2">{</span> <span style="color: #f8f8f2">Activity,</span> <span style="color: #f8f8f2">Contact</span> <span style="color: #f8f8f2">}</span>
     <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">enum</span> <span style="color: #f8f8f2">MethodType</span> <span style="color: #f8f8f2">{</span> <span style="color: #f8f8f2">Application,</span> <span style="color: #f8f8f2">Interview,</span> <span style="color: #f8f8f2">Inquery</span> <span style="color: #f8f8f2">}</span>
@@ -197,7 +197,7 @@ could probably just add the UserId as a foreign key and mix all the user logs
 together that isn't my intension. Here is a Clojure sketch of how I would like
 the data model to work:</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defrecord </span><span style="color: #f8f8f2">User</span> <span style="color: #f8f8f2">[ID</span> <span style="color: #f8f8f2">Name</span> <span style="color: #f8f8f2">Password</span> <span style="color: #f8f8f2">Logs])</span>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defrecord </span><span style="color: #f8f8f2">User</span> <span style="color: #f8f8f2">[ID</span> <span style="color: #f8f8f2">Name</span> <span style="color: #f8f8f2">Password</span> <span style="color: #f8f8f2">Logs])</span>
 
 <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defrecord </span><span style="color: #f8f8f2">ActivityLog</span> <span style="color: #f8f8f2">[ID</span> <span style="color: #f8f8f2">Date</span> <span style="color: #f8f8f2">Description</span> <span style="color: #f8f8f2">Location])</span>
 
@@ -215,7 +215,7 @@ associated with their account. In a database I would map that to each user
 getting their own logs table. In Element Framework though I'm not sure I need to
 care. I am using the auto-populated user model and just defining a collection:</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #66d9ef">namespace</span> <span style="color: #f8f8f2">JobLogger.Models</span>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #66d9ef">namespace</span> <span style="color: #f8f8f2">JobLogger.Models</span>
 <span style="color: #f8f8f2">{</span>
     <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">class</span> <span style="color: #a6e22e">ApplicationUser</span> <span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">IdentityUser</span>
     <span style="color: #f8f8f2">{</span>
@@ -372,7 +372,7 @@ how I can map UI elements to data (without using the canned auto-gen stuff I mea
         </li>
         
         <li>
-          <a href="/categories/personal"><span></span>personal (2)</a>
+          <a href="/categories/personal"><span></span>personal (3)</a>
         </li>
         
       </ul>

@@ -123,7 +123,7 @@ to start testing things in file order, and instead thought about what the
 module's interface was. Since only a single function was ever used outside the
 module I started with that.</p>
 
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #66d9ef">class</span> <span style="color: #a6e22e">Test_Filter</span><span style="color: #f8f8f2">(unittest</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">TestCase):</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #66d9ef">class</span> <span style="color: #a6e22e">Test_Filter</span><span style="color: #f8f8f2">(unittest</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">TestCase):</span>
     <span style="color: #e6db74">&quot;&quot;&quot;Test filter functions.&quot;&quot;&quot;</span>
 
     <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">test_filter_rows</span><span style="color: #f8f8f2">(self):</span>
@@ -161,7 +161,7 @@ where he made some good points about test naming and organization. He recommends
 grouping tests into self contained methods which are actually named for what
 they are testing. I was at an obvious conceptual break, so I refactored a little:</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #75715e"># Details elided...</span>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #75715e"># Details elided...</span>
 <span style="color: #66d9ef">class</span> <span style="color: #a6e22e">Test_Filter</span><span style="color: #f8f8f2">(unittest</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">TestCase):</span>
     <span style="color: #e6db74">&quot;&quot;&quot;Test filter functions.&quot;&quot;&quot;</span>
 
@@ -209,7 +209,7 @@ interface?</p>
   normal quotes with <em>smart</em> quotes, which cause problems and weren't rendering
   correctly for me. Here is the code to disable them:</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #75715e"># In config.toml</span>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #75715e"># In config.toml</span>
 <span style="color: #66d9ef">[blackfriday]</span>
     <span style="color: #a6e22e">smartypants</span> <span style="color: #f92672">=</span> <span style="color: #e6db74">false</span>
 </pre></div>
@@ -355,7 +355,7 @@ interface?</p>
         </li>
         
         <li>
-          <a href="/categories/personal"><span></span>personal (2)</a>
+          <a href="/categories/personal"><span></span>personal (3)</a>
         </li>
         
       </ul>

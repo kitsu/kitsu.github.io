@@ -7,8 +7,18 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© 2015 Ed Blake</copyright>
-    <lastBuildDate>Fri, 05 Aug 2016 11:10:55 -0700</lastBuildDate>
+    <lastBuildDate>Wed, 18 Jan 2017 08:30:05 -0800</lastBuildDate>
     <atom:link href="http://kitsu.github.io/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>New year, new job, new tech</title>
+      <link>http://kitsu.github.io/2017/01/18/new-start/</link>
+      <pubDate>Wed, 18 Jan 2017 08:30:05 -0800</pubDate>
+      
+      <guid>http://kitsu.github.io/2017/01/18/new-start/</guid>
+      <description>&lt;p&gt;After a long search I finally found my first dev position.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Roguelike Project - Off By One</title>
@@ -147,16 +157,6 @@
       
       <guid>http://kitsu.github.io/2016/06/16/unemployed-project-07/</guid>
       <description>&lt;p&gt;Slow but steady progress toward a usable application.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Unemployed project - Testing</title>
-      <link>http://kitsu.github.io/2016/06/13/unemployed-project-06/</link>
-      <pubDate>Mon, 13 Jun 2016 20:49:22 -0700</pubDate>
-      
-      <guid>http://kitsu.github.io/2016/06/13/unemployed-project-06/</guid>
-      <description>&lt;p&gt;Getting a test config working, and a Github repo setup.&lt;/p&gt;
 </description>
     </item>
     

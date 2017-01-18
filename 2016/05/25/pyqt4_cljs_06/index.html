@@ -129,7 +129,7 @@ something working I'm not sure how I would have structured the tests...</p>
 complexity of my test machinery approached the complexity of my actual code, I
 threw in some test tests:</p>
 
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">input-filler</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">input-filler</span>
   <span style="color: #e6db74">&quot;Generate some number of pre-events chosen from #{move leave up}.&quot;</span>
   <span style="color: #f8f8f2">[size</span> <span style="color: #f8f8f2">init]</span>
   <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">loop </span><span style="color: #f8f8f2">[cnt</span> <span style="color: #ae81ff">0</span> <span style="color: #f8f8f2">acc</span> <span style="color: #f8f8f2">[]]</span>
@@ -177,7 +177,7 @@ threw in some test tests:</p>
 I exercise them a little to validate the output. I did catch a number of
 problems too:</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">dc/deftest</span> <span style="color: #f8f8f2">build-test-data</span>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">dc/deftest</span> <span style="color: #f8f8f2">build-test-data</span>
   <span style="color: #e6db74">&quot;###Testing random test data generation</span>
 <span style="color: #e6db74">   These are *meta-tests*, test to confirm the testing apparatus</span>
 <span style="color: #e6db74">   are working correctly.&quot;</span>
@@ -233,7 +233,7 @@ problems too:</p>
 
 <p>Then I modified the old test code to use the new random generation:</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">get-input-chan</span>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">get-input-chan</span>
   <span style="color: #e6db74">&quot;Build fake mouse event stream channel.&quot;</span>
   <span style="color: #f8f8f2">[data]</span>
   <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">let </span><span style="color: #f8f8f2">[input-chan</span>  <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">chan</span> <span style="color: #ae81ff">12</span><span style="color: #f8f8f2">)]</span>
@@ -411,7 +411,7 @@ Commit:
         </li>
         
         <li>
-          <a href="/categories/personal"><span></span>personal (2)</a>
+          <a href="/categories/personal"><span></span>personal (3)</a>
         </li>
         
       </ul>

@@ -112,7 +112,7 @@ versions still proliferates.</p>
 official docs were a much better source of information that what I found
 yesterday, but in the end I only had to make a few changes:</p>
 
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%">    <span style="color: #75715e">// First make the base class abstract</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>    <span style="color: #75715e">// First make the base class abstract</span>
     <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">abstract</span> <span style="color: #66d9ef">class</span> <span style="color: #a6e22e">BaseLog</span>
     <span style="color: #f8f8f2">{</span>
         <span style="color: #75715e">// Drop the manual descriptor, EF will create one automatically</span>
@@ -167,7 +167,7 @@ caught while reading through the
 <em>Built-in dependency injection</em>.</p>
 
 <p>Here is the example that got me excited:
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%">    <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">class</span> <span style="color: #a6e22e">ManageController</span> <span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">Controller</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>    <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">class</span> <span style="color: #a6e22e">ManageController</span> <span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">Controller</span>
     <span style="color: #f8f8f2">{</span>
         <span style="color: #66d9ef">private</span> <span style="color: #66d9ef">readonly</span> <span style="color: #f8f8f2">UserManager&lt;ApplicationUser&gt;</span> <span style="color: #f8f8f2">_userManager;</span>
         <span style="color: #f8f8f2">...</span>
@@ -204,7 +204,7 @@ caught while reading through the
 </p>
 
 <p>Here is what my controller looked like before:
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%">    <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">class</span> <span style="color: #a6e22e">HomeController</span> <span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">Controller</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>    <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">class</span> <span style="color: #a6e22e">HomeController</span> <span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">Controller</span>
     <span style="color: #f8f8f2">{</span>
         <span style="color: #66d9ef">private</span> <span style="color: #66d9ef">readonly</span> <span style="color: #f8f8f2">ApplicationDbContext</span> <span style="color: #f8f8f2">_context;</span>
 
@@ -220,7 +220,7 @@ caught while reading through the
 <p>Despite the difference in shape between the example and my code I decided to try
 patching in what I needed:</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%">    <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">class</span> <span style="color: #a6e22e">HomeController</span> <span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">Controller</span>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>    <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">class</span> <span style="color: #a6e22e">HomeController</span> <span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">Controller</span>
     <span style="color: #f8f8f2">{</span>
         <span style="color: #66d9ef">private</span> <span style="color: #66d9ef">readonly</span> <span style="color: #f8f8f2">ApplicationDbContext</span> <span style="color: #f8f8f2">_context;</span>
         <span style="color: #66d9ef">private</span> <span style="color: #66d9ef">readonly</span> <span style="color: #f8f8f2">UserManager&lt;ApplicationUser&gt;</span> <span style="color: #f8f8f2">_userManager;</span>
@@ -380,7 +380,7 @@ exercise the page a little. Now to see if I can build the UI on it.</p>
         </li>
         
         <li>
-          <a href="/categories/personal"><span></span>personal (2)</a>
+          <a href="/categories/personal"><span></span>personal (3)</a>
         </li>
         
       </ul>

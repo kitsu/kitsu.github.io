@@ -122,7 +122,7 @@ is actually pretty tricky - registered callbacks are only called once, so they
 must re-register themselves in the body of the callback.
 Here is what I came up with:</p>
 
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">anim-source</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">anim-source</span>
   <span style="color: #e6db74">&quot;A continually renewing requestAnimationFrame callback.&quot;</span>
   <span style="color: #f8f8f2">[ch</span> <span style="color: #f8f8f2">time]</span>
   <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">put!</span> <span style="color: #f8f8f2">ch</span> <span style="color: #f8f8f2">time)</span>
@@ -143,7 +143,7 @@ frame rate you can sort of simulate <code>requestAnimationFrame</code>. You don'
 guaranty that your event will fire before a screen paint, but you can hope the
 browser figures out what you want. Here is the revised code:</p>
 
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">def </span><span style="color: #f8f8f2">fps</span> <span style="color: #f8f8f2">(/ </span><span style="color: #ae81ff">1000</span> <span style="color: #ae81ff">60</span><span style="color: #f8f8f2">))</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">def </span><span style="color: #f8f8f2">fps</span> <span style="color: #f8f8f2">(/ </span><span style="color: #ae81ff">1000</span> <span style="color: #ae81ff">60</span><span style="color: #f8f8f2">))</span>
 
 <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">anim-source</span>
   <span style="color: #e6db74">&quot;A continually renewing timer simulating requestAnimationFrame callback.&quot;</span>
@@ -168,7 +168,7 @@ animation. So far though this code has worked well enough.</p>
 <p>Next I started writing the actual effect functions. Starting with <code>slide-up!</code> I
 implemented the animation in a straight-forward way in a go-loop:</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">slide-up!</span>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">slide-up!</span>
   <span style="color: #e6db74">&quot;Animated hide.&quot;</span>
   <span style="color: #f8f8f2">[elem</span> <span style="color: #f8f8f2">duration]</span>
   <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">let </span><span style="color: #f8f8f2">[height</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">dommy/px</span> <span style="color: #f8f8f2">elem</span> <span style="color: #e6db74">:height</span><span style="color: #f8f8f2">)</span>
@@ -189,7 +189,7 @@ implemented the animation in a straight-forward way in a go-loop:</p>
 common elements. I went through several passes factoring out the common code,
 and I think I came up with something pretty neat:</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">def </span><span style="color: #f8f8f2">anim-time</span> <span style="color: #ae81ff">250</span><span style="color: #f8f8f2">)</span>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">def </span><span style="color: #f8f8f2">anim-time</span> <span style="color: #ae81ff">250</span><span style="color: #f8f8f2">)</span>
 
 <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">animate</span>
   <span style="color: #e6db74">&quot;Generic animation go-loop.&quot;</span>
@@ -257,7 +257,7 @@ the number of blocking takes on one <code>async/chan</code> (1024 BTW). My first
 convert to a <code>mult</code> caused my app to hang inescapably. The animations bothered
 me more and more though, so I took another shot at it. Here is the revised code:</p>
 
-<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">anim-source</span>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">defn </span><span style="color: #f8f8f2">anim-source</span>
   <span style="color: #e6db74">&quot;A continually renewing timer simulating requestAnimationFrame callback.&quot;</span>
   <span style="color: #f8f8f2">[ch]</span>
   <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">put!</span> <span style="color: #f8f8f2">ch</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">.now</span> <span style="color: #f8f8f2">js/Date))</span>
@@ -436,7 +436,7 @@ than 100 else <code>dommy/hide!</code>/<code>dommy/show!</code>.</p>
         </li>
         
         <li>
-          <a href="/categories/personal"><span></span>personal (2)</a>
+          <a href="/categories/personal"><span></span>personal (3)</a>
         </li>
         
       </ul>
