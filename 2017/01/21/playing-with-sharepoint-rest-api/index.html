@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="Hugo 0.15" />
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    
+    <link href="/index.xml" rel="alternate" type="application/rss+xml" title="Superfluous Comments" />
+    <link href="/index.xml" rel="feed" type="application/rss+xml" title="Superfluous Comments" />
+    
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+    
+    <script src="https://apis.google.com/js/platform.js" async defer>{lang: 'ja'}</script>
+    
+    <link rel="stylesheet" href="https://yandex.st/highlightjs/8.0/styles/default.min.css">
+    <script src="https://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <title>Playing with the SharePoint Rest APIs | Superfluous Comments</title>
+    <meta name="Description" content="By way of starting from the outside I try talking to SharePoint via Rest.
+">
+  </head>
+  <body>
+    <div id="wrap">
+      
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-77704589-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+      <header class="site-header">
+        <div class="site-header-left">
+          <a class="site-header-title" href="http://kitsu.github.io/">Superfluous Comments</a>
+        </div>
+      </header>
+      <div class="container">
+        <div id="main">
+
+<div class="article">
+  <header>
+    <div class="article-header">
+      <h1>Playing with the SharePoint Rest APIs</h1>
+      <div class="article-meta">
+        <span class="posttime">2017/01/21</span>
+        
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/csharp"><span></span>CSharp</a>
+    </li>
+    
+    <li>
+      <a href="/tags/sharepoint"><span></span>SharePoint</a>
+    </li>
+    
+    <li>
+      <a href="/tags/rest"><span></span>Rest</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      </div>
+    </div>
+  </header>
+      
+      <div class="adsense">
+        <span class="sponsor-label">Sponsored link</span>
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="2442045076"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+      </div>
+      
+  <div class="content">
+    <p>By way of starting from the outside I try talking to SharePoint via Rest.</p>
+
+<p><hr/><br/>
+So one good thing about my new job is that they have an expectation that you
+will be pursuing training as part of your regular duties. In my case in
+particular, with my being new and unfamiliar with much of their tech, I have a
+large amount of time allocated to training.</p>
+
+<p>After going through some more general SharePoint training on PluralSight I
+started digging into how I can interact with SharePoint programmatically. There
+are actually a number of ways available: the old Server-side Object Model
+(SSOM), the newer Client-side Object Model (CSOM) and it's JavaScript
+counterpart (JSOM), and the very new Rest API. There are some trade-offs picking
+any one of these: the SSOM is effectivly depreciated, JSOM requires running in a
+served page due to cross origin issues, CSOM is a dotnet assembly that simulates
+the SSOM in many ways, and the Rest API doesn't yet have complete feature coverage.</p>
+
+<p>For my first experiments I chose the Rest API, mainly because I like the Rest
+idea, and have written some Rest-like code before. I also feel like it is a
+little lower-level and puts you in more direct contact with SharePoint's inner
+workings. Also knowledge of the Rest API is reusable in deployed JavaScript code
+and AFAIK the CSOM/JSOM are primarily hitting the Rest endpoints internally too.</p>
+
+<p>My first attempt didn't go well. I tried at first to create a plain HTML page
+and use JQuery to access an internal data source. I expected IE to handle the
+auth, and hoped being on the domain would exempt me from cross-origin issues,
+but it didn't. Interestingly renaming my HTML to an HTA (Hyper Text Application)
+allowed me to circumvent the same-origin rule, but MicroSoft has depreciated
+HTAs.</p>
+
+<p>Here is the complete HTML and Javascript:
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #75715e">&lt;!DOCTYPE html&gt;</span>
+<span style="color: #f8f8f2">&lt;</span><span style="color: #f92672">html</span><span style="color: #f8f8f2">&gt;</span>
+    <span style="color: #f8f8f2">&lt;</span><span style="color: #f92672">head</span><span style="color: #f8f8f2">&gt;</span>
+        <span style="color: #f8f8f2">&lt;</span><span style="color: #f92672">meta</span> <span style="color: #a6e22e">http-equiv</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;X-UA-Compatible&quot;</span> <span style="color: #a6e22e">content</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;IE=edge&quot;</span><span style="color: #f8f8f2">&gt;</span>
+        <span style="color: #f8f8f2">&lt;</span><span style="color: #f92672">meta</span> <span style="color: #a6e22e">http-equiv</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;content-type&quot;</span> <span style="color: #a6e22e">content</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;text/html;charset=UTF-8&quot;</span> <span style="color: #f8f8f2">/&gt;</span>
+        <span style="color: #f8f8f2">&lt;</span><span style="color: #f92672">title</span><span style="color: #f8f8f2">&gt;</span>Company Search<span style="color: #f8f8f2">&lt;/</span><span style="color: #f92672">title</span><span style="color: #f8f8f2">&gt;</span>
+        <span style="color: #f8f8f2">&lt;</span><span style="color: #f92672">script</span> <span style="color: #a6e22e">src</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js&quot;</span><span style="color: #f8f8f2">&gt;&lt;/</span><span style="color: #f92672">script</span><span style="color: #f8f8f2">&gt;</span>
+        <span style="color: #f8f8f2">&lt;</span><span style="color: #f92672">script</span> <span style="color: #a6e22e">src</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.1/knockout-min.js&quot;</span><span style="color: #f8f8f2">&gt;&lt;/</span><span style="color: #f92672">script</span><span style="color: #f8f8f2">&gt;</span>
+        <span style="color: #f8f8f2">&lt;</span><span style="color: #f92672">script</span> <span style="color: #a6e22e">src</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;CompanySearch.js&quot;</span><span style="color: #f8f8f2">&gt;&lt;/</span><span style="color: #f92672">script</span><span style="color: #f8f8f2">&gt;</span>
+    <span style="color: #f8f8f2">&lt;/</span><span style="color: #f92672">head</span><span style="color: #f8f8f2">&gt;</span>
+    <span style="color: #f8f8f2">&lt;</span><span style="color: #f92672">body</span><span style="color: #f8f8f2">&gt;</span>
+        <span style="color: #f8f8f2">&lt;</span><span style="color: #f92672">h1</span><span style="color: #f8f8f2">&gt;</span>Company Search<span style="color: #f8f8f2">&lt;/</span><span style="color: #f92672">h1</span><span style="color: #f8f8f2">&gt;</span>
+        <span style="color: #f8f8f2">&lt;</span><span style="color: #f92672">div</span> <span style="color: #a6e22e">id</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;Content&quot;</span><span style="color: #f8f8f2">&gt;</span>
+            <span style="color: #f8f8f2">&lt;</span><span style="color: #f92672">ol</span> <span style="color: #a6e22e">data-bind</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;foreach: items&quot;</span><span style="color: #f8f8f2">&gt;</span>
+               <span style="color: #f8f8f2">&lt;</span><span style="color: #f92672">li</span> <span style="color: #a6e22e">data-bind</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;text: $data&quot;</span><span style="color: #f8f8f2">&gt;&lt;/</span><span style="color: #f92672">li</span><span style="color: #f8f8f2">&gt;</span> 
+            <span style="color: #f8f8f2">&lt;/</span><span style="color: #f92672">ol</span><span style="color: #f8f8f2">&gt;</span>
+        <span style="color: #f8f8f2">&lt;/</span><span style="color: #f92672">div</span><span style="color: #f8f8f2">&gt;</span>
+    <span style="color: #f8f8f2">&lt;/</span><span style="color: #f92672">body</span><span style="color: #f8f8f2">&gt;</span>
+<span style="color: #f8f8f2">&lt;/</span><span style="color: #f92672">html</span><span style="color: #f8f8f2">&gt;</span>
+</pre></div>
+</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #75715e">// IIFE wrapper</span>
+<span style="color: #f8f8f2">(</span><span style="color: #66d9ef">function</span><span style="color: #f8f8f2">()</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">var</span> <span style="color: #a6e22e">baseUrl</span> <span style="color: #f92672">=</span> <span style="color: #e6db74">&quot;http://--omitted--/companies/_api/web&quot;</span>
+
+    <span style="color: #66d9ef">var</span> <span style="color: #a6e22e">ViewModel</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">function</span><span style="color: #f8f8f2">()</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">this</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">items</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">ko</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">observableArray</span><span style="color: #f8f8f2">([]);</span>
+        <span style="color: #66d9ef">this</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">addItem</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">function</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">item</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">this</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">items</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">push</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">item</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #f8f8f2">}.</span><span style="color: #a6e22e">bind</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">this</span><span style="color: #f8f8f2">);</span>
+    <span style="color: #f8f8f2">};</span>
+
+    <span style="color: #a6e22e">$</span><span style="color: #f8f8f2">(document).</span><span style="color: #a6e22e">ready</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">function</span><span style="color: #f8f8f2">()</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #75715e">// Grab the page content container and build a new ViewModel and bind them.</span>
+        <span style="color: #66d9ef">var</span> <span style="color: #a6e22e">container</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">$</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&quot;#Content&quot;</span><span style="color: #f8f8f2">)[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span>
+        <span style="color: #66d9ef">var</span> <span style="color: #a6e22e">vm</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">new</span> <span style="color: #a6e22e">ViewModel</span><span style="color: #f8f8f2">();</span>
+        <span style="color: #a6e22e">ko</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">applyBindings</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">vm</span><span style="color: #f8f8f2">,</span> <span style="color: #a6e22e">container</span><span style="color: #f8f8f2">);</span>
+
+        <span style="color: #75715e">// Kick-off a ajax request to populate the ViewModel.</span>
+        <span style="color: #a6e22e">$</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">ajax</span><span style="color: #f8f8f2">({</span>
+        <span style="color: #a6e22e">url</span><span style="color: #f92672">:</span> <span style="color: #a6e22e">baseUrl</span> <span style="color: #f92672">+</span> <span style="color: #e6db74">&quot;/lists/getByTitle(&#39;companies&#39;)/items&quot;</span>
+                     <span style="color: #f92672">+</span> <span style="color: #e6db74">&quot;?$select=Title&amp;$top=20&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #a6e22e">method</span><span style="color: #f92672">:</span> <span style="color: #e6db74">&quot;GET&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #a6e22e">headers</span><span style="color: #f92672">:</span> <span style="color: #f8f8f2">{</span><span style="color: #e6db74">&quot;Accept&quot;</span><span style="color: #f92672">:</span> <span style="color: #e6db74">&quot;application/json;odata=verbose&quot;</span><span style="color: #f8f8f2">}</span>
+        <span style="color: #f8f8f2">})</span>
+        <span style="color: #f8f8f2">.</span><span style="color: #a6e22e">done</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">function</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">data</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">var</span> <span style="color: #a6e22e">res</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">data</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">d</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">results</span><span style="color: #f8f8f2">;</span>
+            <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">var</span> <span style="color: #a6e22e">i</span><span style="color: #f92672">=</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span><span style="color: #a6e22e">i</span> <span style="color: #f92672">&lt;</span> <span style="color: #a6e22e">res</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">length</span><span style="color: #f8f8f2">;</span> <span style="color: #a6e22e">i</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #a6e22e">vm</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">addItem</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">res</span><span style="color: #f8f8f2">[</span><span style="color: #a6e22e">i</span><span style="color: #f8f8f2">].</span><span style="color: #a6e22e">Title</span><span style="color: #f8f8f2">);</span>
+            <span style="color: #f8f8f2">}</span>
+        <span style="color: #f8f8f2">})</span>
+        <span style="color: #f8f8f2">.</span><span style="color: #a6e22e">fail</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">function</span><span style="color: #f8f8f2">()</span> <span style="color: #f8f8f2">{</span><span style="color: #a6e22e">vm</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">addItem</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&quot;REST request failed!&quot;</span><span style="color: #f8f8f2">)});</span>
+    <span style="color: #f8f8f2">})</span>
+<span style="color: #f8f8f2">})();</span>
+</pre></div>
+</p>
+
+<p>I was really looking forward to making some nice interactive graphical UIs for
+results view. As a fallback though I moved to a C# console application, mainly
+for ease of development. It seems there is some disagreement about which Dotnet
+library is best for consuming Rest services. In the end I went with <code>System.Net</code>
+with <code>HttpWebRequest</code>s, which are a little awkward but seemed to work well enough.</p>
+
+<p>After my first successful tests I started factoring out some common code, and
+also created a couple of little applications for different things. Without Git
+on my work machine though I lost my initial work as it evolved into other
+things.</p>
+
+<p>One thing I did play with was using async/await for all the network code, Which
+is sort of interesting since console apps don't have a mainloop/UI thread. There
+are two places where asynchrony is meaningful in this context: First the ability
+to cancel pending requests (i.e. on ctrl-c break), second when starting multiple
+blocking requests. It takes a little machinery to setup an async-cancelable
+console app. You need to create a cancellation token, and you need a separate
+async method since you can't make the entry-point async.</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #66d9ef">private</span> <span style="color: #66d9ef">static</span> <span style="color: #66d9ef">int</span> <span style="color: #a6e22e">Main</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">string</span><span style="color: #f8f8f2">[]</span> <span style="color: #f8f8f2">args)</span>
+<span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">source</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">CancellationTokenSource();</span>
+    <span style="color: #75715e">// This binds to the break event (ctrl-c)</span>
+    <span style="color: #f8f8f2">Console.CancelKeyPress</span> <span style="color: #f8f8f2">+=</span> <span style="color: #f8f8f2">(s,</span> <span style="color: #f8f8f2">e)</span> <span style="color: #f8f8f2">=&gt;</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">e.Cancel</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">true</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">source.Cancel();</span>
+    <span style="color: #f8f8f2">};</span>
+
+    <span style="color: #66d9ef">try</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #a6e22e">MainAsync</span><span style="color: #f8f8f2">(args,</span> <span style="color: #f8f8f2">source.Token).GetAwaiter().GetResult();</span>
+    <span style="color: #f8f8f2">}</span>
+    <span style="color: #66d9ef">catch</span> <span style="color: #f8f8f2">(OperationCanceledException)</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #ae81ff">1223</span><span style="color: #f8f8f2">;</span> <span style="color: #75715e">// Cancelled</span>
+    <span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #66d9ef">private</span> <span style="color: #66d9ef">static</span> <span style="color: #66d9ef">async</span> <span style="color: #f8f8f2">Task&lt;</span><span style="color: #66d9ef">int</span><span style="color: #f8f8f2">&gt;</span> <span style="color: #f8f8f2">MainAsync(</span><span style="color: #66d9ef">string</span><span style="color: #f8f8f2">[]</span> <span style="color: #f8f8f2">args,</span> <span style="color: #f8f8f2">CancellationToken</span> <span style="color: #f8f8f2">token)</span>
+<span style="color: #f8f8f2">{</span>
+    <span style="color: #75715e">// Make async calls...</span>
+    <span style="color: #f8f8f2">Console.ReadLine();</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #75715e">// Success</span>
+<span style="color: #f8f8f2">}</span>
+</pre></div>
+</p>
+
+<p>The next issue was that unlike most FooAsync methods
+<code>HttpWebResponse.GetResponseAsync</code> doesn't have an overload that accepts a
+cancellation token. That is fixed easily enough with an extension method (a
+helper method would be fine too):</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #75715e">// HttpWebResponse.GetResponseAsync with cancellation support</span>
+<span style="color: #66d9ef">public</span> <span style="color: #66d9ef">static</span> <span style="color: #66d9ef">class</span> <span style="color: #a6e22e">ExtensionMethods</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">static</span> <span style="color: #66d9ef">async</span> <span style="color: #f8f8f2">Task&lt;HttpWebResponse&gt;</span> <span style="color: #f8f8f2">GetResponseAsync(</span><span style="color: #66d9ef">this</span> <span style="color: #f8f8f2">HttpWebRequest</span> <span style="color: #f8f8f2">request,</span> <span style="color: #f8f8f2">CancellationToken</span> <span style="color: #f8f8f2">token)</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">using</span> <span style="color: #f8f8f2">(token.Register(()</span> <span style="color: #f8f8f2">=&gt;</span> <span style="color: #f8f8f2">request.Abort(),</span> <span style="color: #f8f8f2">useSynchronizationContext:</span> <span style="color: #66d9ef">false</span><span style="color: #f8f8f2">))</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">try</span>
+            <span style="color: #f8f8f2">{</span>
+                <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">response</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">await</span> <span style="color: #f8f8f2">request.GetResponseAsync();</span>
+                <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">(HttpWebResponse)response;</span>
+            <span style="color: #f8f8f2">}</span>
+            <span style="color: #66d9ef">catch</span> <span style="color: #f8f8f2">(WebException</span> <span style="color: #f8f8f2">ex)</span>
+            <span style="color: #f8f8f2">{</span>
+                <span style="color: #75715e">// WebException is thrown when request.Abort() is called,</span>
+                <span style="color: #75715e">// but there may be many other reasons,</span>
+                <span style="color: #75715e">// propagate the WebException to the caller correctly</span>
+                <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(token.IsCancellationRequested)</span>
+                <span style="color: #f8f8f2">{</span>
+                    <span style="color: #75715e">// the WebException will be available as Exception.InnerException</span>
+                    <span style="color: #66d9ef">throw</span> <span style="color: #66d9ef">new</span> <span style="color: #a6e22e">OperationCanceledException</span><span style="color: #f8f8f2">(ex.Message,</span> <span style="color: #f8f8f2">ex,</span> <span style="color: #f8f8f2">token);</span>
+                <span style="color: #f8f8f2">}</span>
+
+                <span style="color: #75715e">// cancellation hasn&#39;t been requested, rethrow the original WebException</span>
+                <span style="color: #66d9ef">throw</span><span style="color: #f8f8f2">;</span>
+            <span style="color: #f8f8f2">}</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">}</span>
+</pre></div>
+</p>
+
+<p>I started out with just a method making GET requests along-side the main method,
+but as things evolved I ended up with a little collection of request helper
+methods. These aren't super reusable, they mainly reflect what I needed at the
+time. Also the error handling is not very helpful, and response handling could
+be factored out into its own method too:</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #66d9ef">public</span> <span style="color: #66d9ef">static</span> <span style="color: #66d9ef">class</span> <span style="color: #a6e22e">RestHelpers</span>
+<span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">static</span> <span style="color: #66d9ef">async</span> <span style="color: #f8f8f2">Task&lt;</span><span style="color: #66d9ef">string</span><span style="color: #f8f8f2">&gt;</span> <span style="color: #f8f8f2">GetJsonResponseAsync(Uri</span> <span style="color: #f8f8f2">target,</span> <span style="color: #f8f8f2">CancellationToken</span> <span style="color: #f8f8f2">token)</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">req</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">WebRequest.Create(target)</span> <span style="color: #66d9ef">as</span> <span style="color: #f8f8f2">HttpWebRequest;</span>
+        <span style="color: #f8f8f2">req.Credentials</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">CredentialCache.DefaultCredentials;</span>
+        <span style="color: #f8f8f2">req.Accept</span> <span style="color: #f8f8f2">=</span> <span style="color: #e6db74">&quot;application/json;odata=verbose&quot;</span><span style="color: #f8f8f2">;</span>
+
+        <span style="color: #66d9ef">try</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">resp</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">await</span> <span style="color: #f8f8f2">req.GetResponseAsync(token);</span>
+            <span style="color: #66d9ef">using</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">reader</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">StreamReader(resp.GetResponseStream()))</span>
+            <span style="color: #f8f8f2">{</span>
+                <span style="color: #66d9ef">return</span> <span style="color: #66d9ef">await</span> <span style="color: #f8f8f2">reader.ReadToEndAsync();</span>
+            <span style="color: #f8f8f2">}</span>
+        <span style="color: #f8f8f2">}</span>
+        <span style="color: #66d9ef">catch</span> <span style="color: #f8f8f2">(WebException)</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #e6db74">&quot;&quot;</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #75715e">// Post with no body (used to get bearer token)</span>
+    <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">static</span> <span style="color: #66d9ef">async</span> <span style="color: #f8f8f2">Task&lt;</span><span style="color: #66d9ef">string</span><span style="color: #f8f8f2">&gt;</span> <span style="color: #f8f8f2">PostJsonResponseAsync(Uri</span> <span style="color: #f8f8f2">target,</span> <span style="color: #f8f8f2">CancellationToken</span> <span style="color: #f8f8f2">token)</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">req</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">WebRequest.Create(target)</span> <span style="color: #66d9ef">as</span> <span style="color: #f8f8f2">HttpWebRequest;</span>
+        <span style="color: #f8f8f2">req.Method</span> <span style="color: #f8f8f2">=</span> <span style="color: #e6db74">&quot;POST&quot;</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">req.ContentLength</span> <span style="color: #f8f8f2">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">req.Credentials</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">CredentialCache.DefaultCredentials;</span>
+        <span style="color: #f8f8f2">req.Accept</span> <span style="color: #f8f8f2">=</span> <span style="color: #e6db74">&quot;application/json;odata=verbose&quot;</span><span style="color: #f8f8f2">;</span>
+
+        <span style="color: #66d9ef">try</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">resp</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">await</span> <span style="color: #f8f8f2">req.GetResponseAsync(token);</span>
+            <span style="color: #66d9ef">using</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">reader</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">StreamReader(resp.GetResponseStream()))</span>
+            <span style="color: #f8f8f2">{</span>
+                <span style="color: #66d9ef">return</span> <span style="color: #66d9ef">await</span> <span style="color: #f8f8f2">reader.ReadToEndAsync();</span>
+            <span style="color: #f8f8f2">}</span>
+        <span style="color: #f8f8f2">}</span>
+        <span style="color: #66d9ef">catch</span> <span style="color: #f8f8f2">(WebException)</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #e6db74">&quot;&quot;</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #75715e">// Post with body</span>
+    <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">static</span> <span style="color: #66d9ef">async</span> <span style="color: #f8f8f2">Task&lt;</span><span style="color: #66d9ef">string</span><span style="color: #f8f8f2">&gt;</span> <span style="color: #f8f8f2">PostJsonResponseAsync(Uri</span> <span style="color: #f8f8f2">target,</span> <span style="color: #66d9ef">string</span> <span style="color: #f8f8f2">contentType,</span> <span style="color: #66d9ef">string</span> <span style="color: #f8f8f2">content,</span> <span style="color: #66d9ef">string</span> <span style="color: #f8f8f2">bearer,</span> <span style="color: #f8f8f2">CancellationToken</span> <span style="color: #f8f8f2">token)</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">data</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">Encoding.ASCII.GetBytes(content);</span>
+        <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">req</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">WebRequest.Create(target)</span> <span style="color: #66d9ef">as</span> <span style="color: #f8f8f2">HttpWebRequest;</span>
+        <span style="color: #f8f8f2">req.Method</span> <span style="color: #f8f8f2">=</span> <span style="color: #e6db74">&quot;POST&quot;</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">req.ContentType</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">contentType;</span>
+        <span style="color: #f8f8f2">req.ContentLength</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">data.Length;</span>
+        <span style="color: #f8f8f2">req.Headers.Add(</span><span style="color: #e6db74">&quot;X-RequestDigest&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">bearer);</span>
+        <span style="color: #f8f8f2">req.Credentials</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">CredentialCache.DefaultCredentials;</span>
+        <span style="color: #f8f8f2">req.Accept</span> <span style="color: #f8f8f2">=</span> <span style="color: #e6db74">&quot;application/json;odata=verbose&quot;</span><span style="color: #f8f8f2">;</span>
+
+        <span style="color: #66d9ef">using</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">stream</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">req.GetRequestStream())</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">stream.Write(data,</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">data.Length);</span>
+        <span style="color: #f8f8f2">}</span>
+
+        <span style="color: #66d9ef">try</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">resp</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">await</span> <span style="color: #f8f8f2">req.GetResponseAsync(token);</span>
+            <span style="color: #66d9ef">using</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">reader</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">StreamReader(resp.GetResponseStream()))</span>
+            <span style="color: #f8f8f2">{</span>
+                <span style="color: #66d9ef">return</span> <span style="color: #66d9ef">await</span> <span style="color: #f8f8f2">reader.ReadToEndAsync();</span>
+            <span style="color: #f8f8f2">}</span>
+        <span style="color: #f8f8f2">}</span>
+        <span style="color: #66d9ef">catch</span> <span style="color: #f8f8f2">(WebException)</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #e6db74">&quot;&quot;</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #75715e">// Post/Patch</span>
+    <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">static</span> <span style="color: #66d9ef">async</span> <span style="color: #f8f8f2">Task&lt;</span><span style="color: #66d9ef">string</span><span style="color: #f8f8f2">&gt;</span> <span style="color: #f8f8f2">PatchJsonResponseAsync(Uri</span> <span style="color: #f8f8f2">target,</span> <span style="color: #66d9ef">string</span> <span style="color: #f8f8f2">contentType,</span> <span style="color: #66d9ef">string</span> <span style="color: #f8f8f2">content,</span> <span style="color: #66d9ef">string</span> <span style="color: #f8f8f2">bearer,</span> <span style="color: #f8f8f2">CancellationToken</span> <span style="color: #f8f8f2">token)</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">data</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">Encoding.ASCII.GetBytes(content);</span>
+        <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">req</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">WebRequest.Create(target)</span> <span style="color: #66d9ef">as</span> <span style="color: #f8f8f2">HttpWebRequest;</span>
+        <span style="color: #f8f8f2">req.Method</span> <span style="color: #f8f8f2">=</span> <span style="color: #e6db74">&quot;POST&quot;</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">req.ContentType</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">contentType;</span>
+        <span style="color: #f8f8f2">req.ContentLength</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">data.Length;</span>
+        <span style="color: #f8f8f2">req.Headers.Add(</span><span style="color: #e6db74">&quot;X-RequestDigest&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">bearer);</span>
+        <span style="color: #f8f8f2">req.Headers.Add(</span><span style="color: #e6db74">&quot;X-HTTP-Method&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;PATCH&quot;</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #f8f8f2">req.Headers.Add(</span><span style="color: #e6db74">&quot;If-Match&quot;</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&quot;*&quot;</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #f8f8f2">req.Credentials</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">CredentialCache.DefaultCredentials;</span>
+        <span style="color: #f8f8f2">req.Accept</span> <span style="color: #f8f8f2">=</span> <span style="color: #e6db74">&quot;application/json;odata=verbose&quot;</span><span style="color: #f8f8f2">;</span>
+
+        <span style="color: #66d9ef">using</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">stream</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">req.GetRequestStream())</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">stream.Write(data,</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">data.Length);</span>
+        <span style="color: #f8f8f2">}</span>
+
+        <span style="color: #66d9ef">try</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">resp</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">await</span> <span style="color: #f8f8f2">req.GetResponseAsync(token);</span>
+            <span style="color: #66d9ef">using</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">reader</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">StreamReader(resp.GetResponseStream()))</span>
+            <span style="color: #f8f8f2">{</span>
+                <span style="color: #66d9ef">return</span> <span style="color: #66d9ef">await</span> <span style="color: #f8f8f2">reader.ReadToEndAsync();</span>
+            <span style="color: #f8f8f2">}</span>
+        <span style="color: #f8f8f2">}</span>
+        <span style="color: #66d9ef">catch</span> <span style="color: #f8f8f2">(WebException)</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #e6db74">&quot;&quot;</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">static</span> <span style="color: #66d9ef">async</span> <span style="color: #f8f8f2">Task&lt;</span><span style="color: #66d9ef">string</span><span style="color: #f8f8f2">&gt;</span> <span style="color: #f8f8f2">GetBearerTokenAsync(</span><span style="color: #66d9ef">string</span> <span style="color: #f8f8f2">target,</span> <span style="color: #f8f8f2">CancellationToken</span> <span style="color: #f8f8f2">token)</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">uri</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">Uri(target</span> <span style="color: #f8f8f2">+</span> <span style="color: #e6db74">&quot;_api/contextinfo&quot;</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">json</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">await</span> <span style="color: #f8f8f2">PostJsonResponseAsync(uri,</span> <span style="color: #f8f8f2">token);</span>
+        <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">data</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">JObject.Parse(json);</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">string</span><span style="color: #f8f8f2">)data.SelectToken(</span><span style="color: #e6db74">&quot;$.d.GetContextWebInformation.FormDigestValue&quot;</span><span style="color: #f8f8f2">);</span>
+    <span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">}</span>
+</pre></div>
+</p>
+
+<p>I am unsurprisingly using Json.Net for json processing. I've played with both
+XPath style data access and object mapping style, but haven't developed a
+preference. Here is an example of pulling paged data from a large list:</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #66d9ef">private</span> <span style="color: #66d9ef">static</span> <span style="color: #66d9ef">string</span> <span style="color: #f8f8f2">apiUri</span> <span style="color: #f8f8f2">=</span> <span style="color: #e6db74">&quot;_api/lists/getbytitle(&#39;companies&#39;)/items&quot;</span><span style="color: #f8f8f2">;</span>
+
+<span style="color: #75715e">// Yes that is an awkward method signature</span>
+<span style="color: #66d9ef">private</span> <span style="color: #66d9ef">static</span> <span style="color: #66d9ef">async</span> <span style="color: #f8f8f2">Task&lt;List&lt;KeyValuePair&lt;</span><span style="color: #66d9ef">string</span><span style="color: #f8f8f2">,</span> <span style="color: #66d9ef">bool</span><span style="color: #f8f8f2">&gt;&gt;&gt;</span> <span style="color: #f8f8f2">GetStatusListAsync(CancellationToken</span> <span style="color: #f8f8f2">token)</span>
+<span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">queryUri</span> <span style="color: #f8f8f2">=</span> <span style="color: #e6db74">&quot;?$select=Title,RegulatoryStatus&quot;</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">uri</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">Uri(Endpoints.PreCompanies</span> <span style="color: #f8f8f2">+</span> <span style="color: #f8f8f2">apiUri</span> <span style="color: #f8f8f2">+</span> <span style="color: #f8f8f2">queryUri);</span>
+
+    <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">nameAndStatus</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">List&lt;KeyValuePair&lt;</span><span style="color: #66d9ef">string</span><span style="color: #f8f8f2">,</span> <span style="color: #66d9ef">bool</span><span style="color: #f8f8f2">&gt;&gt;();</span>
+    <span style="color: #66d9ef">string</span> <span style="color: #f8f8f2">title,</span> <span style="color: #f8f8f2">stat;</span>
+    <span style="color: #f8f8f2">JObject</span> <span style="color: #f8f8f2">data;</span>
+    <span style="color: #66d9ef">string</span> <span style="color: #f8f8f2">next;</span>
+    <span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">json</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">await</span> <span style="color: #f8f8f2">RestHelpers.GetJsonResponseAsync(uri,</span> <span style="color: #f8f8f2">token);</span>
+    <span style="color: #66d9ef">while</span> <span style="color: #f8f8f2">(!</span><span style="color: #66d9ef">string</span><span style="color: #f8f8f2">.IsNullOrWhiteSpace(json))</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">data</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">JObject.Parse(json);</span>
+        <span style="color: #66d9ef">foreach</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">var</span> <span style="color: #f8f8f2">d</span> <span style="color: #66d9ef">in</span> <span style="color: #f8f8f2">data.SelectToken(</span><span style="color: #e6db74">&quot;$.d.results&quot;</span><span style="color: #f8f8f2">))</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">Console.Write(</span><span style="color: #e6db74">&quot;.&quot;</span><span style="color: #f8f8f2">);</span>
+            <span style="color: #f8f8f2">title</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">string</span><span style="color: #f8f8f2">)d[</span><span style="color: #e6db74">&quot;Title&quot;</span><span style="color: #f8f8f2">];</span>
+            <span style="color: #f8f8f2">stat</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">string</span><span style="color: #f8f8f2">)d[</span><span style="color: #e6db74">&quot;RegulatoryStatus&quot;</span><span style="color: #f8f8f2">];</span>
+            <span style="color: #f8f8f2">nameAndStatus.Add(</span><span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">KeyValuePair&lt;</span><span style="color: #66d9ef">string</span><span style="color: #f8f8f2">,</span> <span style="color: #66d9ef">bool</span><span style="color: #f8f8f2">&gt;(</span>
+                <span style="color: #f8f8f2">title.ToLower(),</span>
+                <span style="color: #f8f8f2">stat.ToLower()</span> <span style="color: #f8f8f2">==</span> <span style="color: #e6db74">&quot;active&quot;</span><span style="color: #f8f8f2">));</span>
+        <span style="color: #f8f8f2">}</span>
+        <span style="color: #f8f8f2">next</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">string</span><span style="color: #f8f8f2">)data[</span><span style="color: #e6db74">&quot;d&quot;</span><span style="color: #f8f8f2">][</span><span style="color: #e6db74">&quot;__next&quot;</span><span style="color: #f8f8f2">];</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">string</span><span style="color: #f8f8f2">.IsNullOrWhiteSpace(next))</span>
+            <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">uri</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">Uri(next);</span>
+        <span style="color: #f8f8f2">json</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">await</span> <span style="color: #f8f8f2">RestHelpers.GetJsonResponseAsync(uri,</span> <span style="color: #f8f8f2">token);</span>
+    <span style="color: #f8f8f2">}</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">nameAndStatus;</span>
+<span style="color: #f8f8f2">}</span>
+</pre></div>
+</p>
+
+<p>I needed an ordered list of pairs for subsequent processing steps, and
+<code>KeyValuePair</code> IMO has a nicer interface than generic <code>Tuple</code>s, at least in
+C#. The items endpoint provides records a hundred at a time by default with an
+href pointing to the next page of results. Although it does require extra
+processing the paging is convenient for accessing lists that would otherwise be
+throttled by SharePoint due to result size.</p>
+
+<p>At this point I've written several of these little utilities for misc tasks I've
+been working on, including posting files and modifying existing items. They have
+worked well, but at this point I would recommend the CSOM if you are writing
+C#. It was a fun experiment though, and gave good practical experience with
+SharePoint's Rest implementation.</p>
+
+<p>Due to a requirement of my next task I had to use the SSOM, and I decided to
+finally dig into PowerShell, but I'll cover that next time.</p>
+
+  </div>
+  <footer>
+    <div class="article-footer">
+      
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/csharp"><span></span>CSharp</a>
+    </li>
+    
+    <li>
+      <a href="/tags/sharepoint"><span></span>SharePoint</a>
+    </li>
+    
+    <li>
+      <a href="/tags/rest"><span></span>Rest</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      
+      <div class="adsense">
+        <span class="sponsor-label">Sponsored link</span>
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="2442045076"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+      </div>
+      
+      
+<div id="share-buttons">
+  <ul>
+    
+    
+    
+    
+    <li>
+      <div class="g-plusone" data-size="medium"></div>
+    </li>
+    
+    
+  </ul>
+</div>
+
+
+      <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'SuperfComs';
+    var disqus_identifier = 'http:\/\/kitsu.github.io\/2017\/01\/21\/playing-with-sharepoint-rest-api\/';
+    var disqus_title = 'Playing with the SharePoint Rest APIs';
+    var disqus_url = 'http:\/\/kitsu.github.io\/2017\/01\/21\/playing-with-sharepoint-rest-api\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+      
+      <div id="pagenavigation-next-prev">
+        
+        <div id="pagenavigation-next">
+          <span class="pagenav-label">Previous</span>
+          <a href="http://kitsu.github.io/2017/01/18/new-start/">New year, new job, new tech</a>
+        </div>
+        
+        
+      </div>
+      
+    </div>
+  </footer>
+</div>
+        </div>
+        <div class="sidebar">
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Author</span>
+    </div>
+    <div id="author">
+      <span>Ed Blake</span>
+      <div>
+        
+        
+        <a href="https://plus.google.com/118323029386640613972"><i class="fa fa-google-plus-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://github.com/kitsu"><i class="fa fa-github-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://www.linkedin.com/in/edward-blake-b3601411b"><i class="fa fa-linkedin-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://stackoverflow.com/users/770443"><i class="fa fa-stack-overflow fa-2x" aria-hidden="true"></i></a>
+        
+      </div>
+    </div>
+  </div>
+  
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Categories</span>
+    </div>
+    <div class="categories">
+      <ul>
+        
+        <li>
+          <a href="/categories/blog"><span></span>blog (3)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/development"><span></span>development (32)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/hacks"><span></span>hacks (4)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/personal"><span></span>personal (3)</a>
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>RSS</span>
+    </div>
+    <div id="rss">
+      <a href="/index.xml" type="application/rss+xml" target="_blank">
+        <i class="fa fa-rss-square fa-2x" aria-hidden="true"></i>
+      </a>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Sponsored link</span>
+    </div>
+    <div class="adsense">
+      <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:inline-block;width:300px;height:600px"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="9965311870"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+    </div>
+  </div>
+  
+</div>
+
+      </div>
+      <footer>
+        <div id="site-footer-wrap">
+          <div id="site-footer">
+            <span>Powered by <a href="https://gohugo.io/">Hugo</a>.</span>
+            <span>
+              
+              © 2015 Ed Blake
+              
+           </span>
+           <span id="copyleft">
+              <a rel="license"
+                 href="http://creativecommons.org/licenses/by-sa/4.0/">
+                <img alt="Creative Commons License" style="border-width:0"
+                     src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" />
+              </a>
+            </span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
+

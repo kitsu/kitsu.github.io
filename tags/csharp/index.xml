@@ -7,8 +7,18 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© 2015 Ed Blake</copyright>
-    <lastBuildDate>Fri, 05 Aug 2016 11:10:55 -0700</lastBuildDate>
+    <lastBuildDate>Sat, 21 Jan 2017 12:16:09 -0800</lastBuildDate>
     <atom:link href="http://kitsu.github.io/tags/csharp/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Playing with the SharePoint Rest APIs</title>
+      <link>http://kitsu.github.io/2017/01/21/playing-with-sharepoint-rest-api/</link>
+      <pubDate>Sat, 21 Jan 2017 12:16:09 -0800</pubDate>
+      
+      <guid>http://kitsu.github.io/2017/01/21/playing-with-sharepoint-rest-api/</guid>
+      <description>&lt;p&gt;By way of starting from the outside I try talking to SharePoint via Rest.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Roguelike Project - Off By One</title>
@@ -147,16 +157,6 @@
       
       <guid>http://kitsu.github.io/2016/06/16/unemployed-project-07/</guid>
       <description>&lt;p&gt;Slow but steady progress toward a usable application.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Unemployed project - Testing</title>
-      <link>http://kitsu.github.io/2016/06/13/unemployed-project-06/</link>
-      <pubDate>Mon, 13 Jun 2016 20:49:22 -0700</pubDate>
-      
-      <guid>http://kitsu.github.io/2016/06/13/unemployed-project-06/</guid>
-      <description>&lt;p&gt;Getting a test config working, and a Github repo setup.&lt;/p&gt;
 </description>
     </item>
     
