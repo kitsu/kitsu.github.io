@@ -3,8 +3,13 @@
   
   <url>
     <loc>http://kitsu.github.io/</loc>
-    <lastmod>2017-01-21T12:16:09-08:00</lastmod>
+    <lastmod>2017-01-23T10:54:32-08:00</lastmod>
     <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://kitsu.github.io/2017/01/23/sharepoint-powershell-update-script/</loc>
+    <lastmod>2017-01-23T10:54:32-08:00</lastmod>
   </url>
   
   <url>

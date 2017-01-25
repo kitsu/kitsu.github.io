@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="Hugo 0.15" />
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    
+    <link href="/index.xml" rel="alternate" type="application/rss+xml" title="Superfluous Comments" />
+    <link href="/index.xml" rel="feed" type="application/rss+xml" title="Superfluous Comments" />
+    
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+    
+    <script src="https://apis.google.com/js/platform.js" async defer>{lang: 'ja'}</script>
+    
+    <link rel="stylesheet" href="https://yandex.st/highlightjs/8.0/styles/default.min.css">
+    <script src="https://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <title>SharePoint PowerShell Update Script | Superfluous Comments</title>
+    <meta name="Description" content="Using PowerShell to make silent updates to a list.
+">
+  </head>
+  <body>
+    <div id="wrap">
+      
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-77704589-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+      <header class="site-header">
+        <div class="site-header-left">
+          <a class="site-header-title" href="http://kitsu.github.io/">Superfluous Comments</a>
+        </div>
+      </header>
+      <div class="container">
+        <div id="main">
+
+<div class="article">
+  <header>
+    <div class="article-header">
+      <h1>SharePoint PowerShell Update Script</h1>
+      <div class="article-meta">
+        <span class="posttime">2017/01/23</span>
+        
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/powershell"><span></span>PowerShell</a>
+    </li>
+    
+    <li>
+      <a href="/tags/sharepoint"><span></span>SharePoint</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      </div>
+    </div>
+  </header>
+      
+      <div class="adsense">
+        <span class="sponsor-label">Sponsored link</span>
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="2442045076"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+      </div>
+      
+  <div class="content">
+    <p>Using PowerShell to make silent updates to a list.</p>
+
+<p><hr/><br/>
+<a href="/2017/01/21/playing-with-sharepoint-rest-api/">Last time</a> I wrote about
+using SharePoint's Rest API from a C# console app to interact with SP
+lists. About the same time as I was experimenting with that I also started a new
+assignment: to circumvent the SharePoint
+<a href="https://support.office.com/en-us/article/Manage-large-lists-and-libraries-in-SharePoint-b8588dae-9387-48c2-9248-c24122f07c59">list view threshold</a>
+in an older application where the users had started bumping up against the
+limit.</p>
+
+<p>My solution after some debugging was to add an additional column to the document
+library that was causing the problem. The column would be indexed, and would
+mirror the value of a lookup (since even indexed lookups still break the limit).
+I had to make a few code changes to maintain this internal field where documents
+are added/copied, but it was pretty simple. I also needed a way to maintain the
+existing data, i.e. a way to populate the new column for all existing items.</p>
+
+<p>My first draft of the column migration was another console Rest app which walked
+the rows copying IDs to the new column. There were some issues getting that all
+to work, but in the end I had something that would copy the necessary
+data. When I was checking the updated documents though I noticed a problem: all
+the documents now had their modified data set to me and now, and they all had a
+new version added. Not the end of the world, in production the user doing the
+update would be something like <code>system</code>, and future documents would be fine. It
+<em>would</em> have made existing document metadata useless though.</p>
+
+<p>As I proceeded through testing and deployment to the dev server I was also doing
+research on the side on this issue. There is actually a Rest method with a flag
+for disable version creation, but I'm not sure it would have worked in this
+case. I was mostly resigned to the solution I had when I found a
+<a href="http://www.sharepointsapiens.com/blog/update-item-document-properties-without-changing-modified-modified-fields-using-sharepoint-powershell/">blog post</a>
+that demonstrated how to disable meta/version update using SSOM through
+PowerShell.</p>
+
+<p>Through all the years it has been available I have never used PowerShell. Years
+ago I read about it and thought it was an interesting idea: lifting the
+string-oriented process communications in Unix/Posix to the object level. I
+always had Python or Batch script available though for problems big and
+small. I never found a reason for an intermediate-level (Windows specific)
+scripting language. Also PowerShell is not a very lovely language IMO. I seem to
+have developed a strong dislike for languages that require variable prefixes
+somewhere.</p>
+
+<p>This fix was just too good to miss though, so I spent some time going through
+video training and messing about, and then adapted the above to my problem:</p>
+
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #75715e"># Script to setup the new internal ID column on existing Foo Documents</span>
+
+<span style="color: #75715e"># Valid lookups look like &quot;5066;#6332.00000000000&quot;</span>
+<span style="color: #75715e"># Invalid lookups look like &quot;5066;#&quot;</span>
+<span style="color: #75715e"># This regex extracts the part between the (#) and the (.)</span>
+<span style="color: #f8f8f2">$matcher</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">[regex]</span> <span style="color: #e6db74">&quot;(.*\#)([0-9]+)&quot;</span>
+
+<span style="color: #75715e"># Open web</span>
+<span style="color: #f8f8f2">$url</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">$Env:appUrl;</span>
+<span style="color: #f8f8f2">$web</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">Get-SPWeb</span> <span style="color: #f8f8f2">$url</span>
+<span style="color: #75715e"># Get list</span>
+<span style="color: #f8f8f2">$list</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">$web.Lists[</span><span style="color: #e6db74">&quot;Foo Documents&quot;</span><span style="color: #f8f8f2">]</span>
+
+<span style="color: #75715e"># Disable event firing </span>
+<span style="color: #f8f8f2">$myAss</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">[Reflection.Assembly]</span><span style="color: #f8f8f2">::LoadWithPartialName(</span><span style="color: #e6db74">&quot;Microsoft.SharePoint&quot;</span><span style="color: #f8f8f2">);</span>
+<span style="color: #f8f8f2">$type</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">$myAss.GetType(</span><span style="color: #e6db74">&quot;Microsoft.SharePoint.SPEventManager&quot;</span><span style="color: #f8f8f2">);</span>
+<span style="color: #f8f8f2">$prop</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">$type.GetProperty(</span><span style="color: #66d9ef">[string]</span><span style="color: #e6db74">&quot;EventFiringDisabled&quot;</span><span style="color: #f8f8f2">,</span><span style="color: #66d9ef">[System.Reflection.BindingFlags]</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">[System.Reflection.BindingFlags]</span><span style="color: #f8f8f2">::NonPublic</span> <span style="color: #f92672">-bor</span> <span style="color: #66d9ef">[System.Reflection.BindingFlags]</span><span style="color: #f8f8f2">::Static));</span>
+<span style="color: #f8f8f2">$prop.SetValue($null,</span> <span style="color: #f8f8f2">$true,</span> <span style="color: #f8f8f2">$null);</span>
+
+<span style="color: #75715e"># Disable list threshold</span>
+<span style="color: #f8f8f2">$list.EnableThrottling</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">$false;</span>
+ 
+<span style="color: #f8f8f2">$success</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">$false;</span>
+<span style="color: #f8f8f2">Clear-Host</span>
+<span style="color: #66d9ef">try</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #f8f8f2">$counters</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">@{};</span>
+    <span style="color: #f8f8f2">$count</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">$list.ItemCount;</span>
+    <span style="color: #f8f8f2">$progress</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">0;</span>
+    <span style="color: #75715e"># For each list item if it has a lookup value copy the FooID to the DocumentsFooId</span>
+    <span style="color: #66d9ef">foreach</span> <span style="color: #f8f8f2">($item</span> <span style="color: #66d9ef">in</span> <span style="color: #f8f8f2">$list.Items)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">$lookup</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">$item[</span><span style="color: #e6db74">&quot;FooLookup&quot;</span><span style="color: #f8f8f2">];</span>
+        <span style="color: #f8f8f2">$fooId</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">$matcher.match($lookup).Groups[2].Value;</span>
+        <span style="color: #f8f8f2">$counters[$fooId]++;</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">($fooId)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">$item[</span><span style="color: #e6db74">&quot;DocumentsFooId&quot;</span><span style="color: #f8f8f2">]</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">[Double]</span><span style="color: #f8f8f2">::Parse($fooId);</span>
+            <span style="color: #75715e"># Update SharePoint (without changing the Modified or Modified By fields)</span>
+            <span style="color: #f8f8f2">$item.SystemUpdate($false);</span>
+        <span style="color: #f8f8f2">}</span>
+        <span style="color: #f8f8f2">$progress++;</span>
+        <span style="color: #f8f8f2">Write-Progress</span> <span style="color: #f8f8f2">-Activity</span> <span style="color: #e6db74">&quot;Copying Foo Ids&quot;</span> <span style="color: #f8f8f2">`</span>
+        <span style="color: #f8f8f2">-status</span> <span style="color: #e6db74">&quot;Processing doc(s) w/ Id $fooId</span><span style="color: #f8f8f2">$(</span><span style="color: #e6db74">&#39;.&#39;</span><span style="color: #f8f8f2">*$counters[$fooId])</span><span style="color: #e6db74">&quot;</span> <span style="color: #f8f8f2">`</span>
+        <span style="color: #f8f8f2">-percentComplete(($progress</span> <span style="color: #f8f8f2">/</span> <span style="color: #f8f8f2">$count)*100);</span>
+    <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">Write-Host</span> <span style="color: #e6db74">&quot;Finished setting up new column on $count documents!&quot;</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #f8f8f2">$success</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">$true;</span>
+<span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">finally</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(!$success)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">Write-Host</span> <span style="color: #e6db74">&quot;Column setup cancelled/failed after $progress documents!&quot;</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #75715e"># Re-enable event firing</span>
+    <span style="color: #f8f8f2">$prop.SetValue($null,</span> <span style="color: #f8f8f2">$false,</span> <span style="color: #f8f8f2">$null);</span>
+
+    <span style="color: #75715e"># Re-enable list threshold</span>
+    <span style="color: #f8f8f2">$list.EnableThrottling</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">$true;</span>
+<span style="color: #f8f8f2">}</span>
+</pre></div>
+
+
+<p>It grew some nice features as I repeatedly tested it. The PowerShell built-in
+progress thing is kinda neat, especially since this is a long running
+process. Since there were multiple documents with the same ID referenced I added
+a counter to make the status clearer. In Python I would have used
+<a href="https://docs.python.org/2/library/collections.html#collections.Counter">Collections.Counter</a>,
+but in PowerShell I got the same thing virtually for free:</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #75715e"># Setup a dictionary for counting found IDs</span>
+<span style="color: #f8f8f2">$counters</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">@{};</span>
+
+<span style="color: #75715e"># In mainloop tally each ID</span>
+<span style="color: #66d9ef">foreach</span> <span style="color: #f8f8f2">($item</span> <span style="color: #66d9ef">in</span> <span style="color: #f8f8f2">$list.Items)</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #f8f8f2">...</span>
+    <span style="color: #f8f8f2">$counters[$fooId]++;</span>
+    <span style="color: #f8f8f2">...</span>
+    <span style="color: #75715e"># Now each step has access to the current count seen so far</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #75715e"># And at the end you can see the total per ID</span>
+</pre></div>
+</p>
+
+<p>And it works - all the IDs are copied but the items are unmodified. I'm sure I
+could clean this up a little (e.g. getting the <code>item.SystemUpdate($false)</code> out
+of the mainloop should speed it up) but it solves my immediate problem and I
+now have one more tool for Windows hacking.</p>
+
+  </div>
+  <footer>
+    <div class="article-footer">
+      
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/powershell"><span></span>PowerShell</a>
+    </li>
+    
+    <li>
+      <a href="/tags/sharepoint"><span></span>SharePoint</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      
+      <div class="adsense">
+        <span class="sponsor-label">Sponsored link</span>
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="2442045076"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+      </div>
+      
+      
+<div id="share-buttons">
+  <ul>
+    
+    
+    
+    
+    <li>
+      <div class="g-plusone" data-size="medium"></div>
+    </li>
+    
+    
+  </ul>
+</div>
+
+
+      <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'SuperfComs';
+    var disqus_identifier = 'http:\/\/kitsu.github.io\/2017\/01\/23\/sharepoint-powershell-update-script\/';
+    var disqus_title = 'SharePoint PowerShell Update Script';
+    var disqus_url = 'http:\/\/kitsu.github.io\/2017\/01\/23\/sharepoint-powershell-update-script\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+      
+      <div id="pagenavigation-next-prev">
+        
+        <div id="pagenavigation-next">
+          <span class="pagenav-label">Previous</span>
+          <a href="http://kitsu.github.io/2017/01/21/playing-with-sharepoint-rest-api/">Playing with the SharePoint Rest APIs</a>
+        </div>
+        
+        
+      </div>
+      
+    </div>
+  </footer>
+</div>
+        </div>
+        <div class="sidebar">
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Author</span>
+    </div>
+    <div id="author">
+      <span>Ed Blake</span>
+      <div>
+        
+        
+        <a href="https://plus.google.com/118323029386640613972"><i class="fa fa-google-plus-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://github.com/kitsu"><i class="fa fa-github-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://www.linkedin.com/in/edward-blake-b3601411b"><i class="fa fa-linkedin-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://stackoverflow.com/users/770443"><i class="fa fa-stack-overflow fa-2x" aria-hidden="true"></i></a>
+        
+      </div>
+    </div>
+  </div>
+  
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Categories</span>
+    </div>
+    <div class="categories">
+      <ul>
+        
+        <li>
+          <a href="/categories/blog"><span></span>blog (3)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/development"><span></span>development (33)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/hacks"><span></span>hacks (4)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/personal"><span></span>personal (3)</a>
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>RSS</span>
+    </div>
+    <div id="rss">
+      <a href="/index.xml" type="application/rss+xml" target="_blank">
+        <i class="fa fa-rss-square fa-2x" aria-hidden="true"></i>
+      </a>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Sponsored link</span>
+    </div>
+    <div class="adsense">
+      <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:inline-block;width:300px;height:600px"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="9965311870"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+    </div>
+  </div>
+  
+</div>
+
+      </div>
+      <footer>
+        <div id="site-footer-wrap">
+          <div id="site-footer">
+            <span>Powered by <a href="https://gohugo.io/">Hugo</a>.</span>
+            <span>
+              
+              © 2015 Ed Blake
+              
+           </span>
+           <span id="copyleft">
+              <a rel="license"
+                 href="http://creativecommons.org/licenses/by-sa/4.0/">
+                <img alt="Creative Commons License" style="border-width:0"
+                     src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" />
+              </a>
+            </span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
+
