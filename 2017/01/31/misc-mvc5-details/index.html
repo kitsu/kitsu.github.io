@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="Hugo 0.15" />
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    
+    <link href="/index.xml" rel="alternate" type="application/rss+xml" title="Superfluous Comments" />
+    <link href="/index.xml" rel="feed" type="application/rss+xml" title="Superfluous Comments" />
+    
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+    
+    <script src="https://apis.google.com/js/platform.js" async defer>{lang: 'ja'}</script>
+    
+    <link rel="stylesheet" href="https://yandex.st/highlightjs/8.0/styles/default.min.css">
+    <script src="https://yandex.st/highlightjs/8.0/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <title>Miscellaneous MVC 5 Details | Superfluous Comments</title>
+    <meta name="Description" content="Some Asp.Net MVC details and other thoughts.
+">
+  </head>
+  <body>
+    <div id="wrap">
+      
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-77704589-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+      <header class="site-header">
+        <div class="site-header-left">
+          <a class="site-header-title" href="http://kitsu.github.io/">Superfluous Comments</a>
+        </div>
+      </header>
+      <div class="container">
+        <div id="main">
+
+<div class="article">
+  <header>
+    <div class="article-header">
+      <h1>Miscellaneous MVC 5 Details</h1>
+      <div class="article-meta">
+        <span class="posttime">2017/01/31</span>
+        
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/powershell"><span></span>PowerShell</a>
+    </li>
+    
+    <li>
+      <a href="/tags/sharepoint"><span></span>SharePoint</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      </div>
+    </div>
+  </header>
+      
+      <div class="adsense">
+        <span class="sponsor-label">Sponsored link</span>
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="2442045076"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+      </div>
+      
+  <div class="content">
+    
+
+<p>Some Asp.Net MVC details and other thoughts.</p>
+
+<p><hr/><br/>
+We are preparing to start a new project at work - the replacement of an old
+Lotus Notes &quot;app&quot; with a SQL DB and a web front end. I've exerted what little
+influence I have in the pre-design meeting to push us toward more modern tech
+(still in the MS ecosystem): MVC with Entity Framework and hopefully a thick
+client-side app pulling data via AJAX requests.</p>
+
+<p>Since the meeting I've spent some time researching what we picked and thinking
+about the application structure. The interesting parts fall in two categories:</p>
+
+<ul>
+<li><a href="#EntityFramework:5c96bf19bb72c20579970642705b23e7">EF Codebase Structure (architecture)</a></li>
+<li><a href="#WindowsAuth:5c96bf19bb72c20579970642705b23e7">Using Windows Auth in MVC</a></li>
+</ul>
+
+<p>I have used EF a couple of times now, and done some additional reading and
+training on it, but I don't think the rest of the dev team are that familiar
+with it. MVC will also be a new experience for some of them, especially pushing
+work from the server to the clients (no more <code>runat=server</code>). Since I would
+prefer to use these technologies, and to use them well, I am trying to be an
+advocate for them. I can see already how easy it would be for this team to get
+under a little pressure and decide to just chuck the whole thing for Webforms.</p>
+
+<h3 id="WindowsAuth:5c96bf19bb72c20579970642705b23e7">Using Windows Auth in MVC</h3>
+
+<p>One of the first problems I think they will run into is the MVC default template
+and its deep dependence on the newish
+<a href="https://www.asp.net/aspnet/overview/owin-and-katana">OWIN middleware</a>, and
+<a href="https://www.asp.net/identity/overview/getting-started/introduction-to-aspnet-identity">Identity Framework</a>
+for auth. There's nothing wrong with either of these if you need what they
+provide, but our new app is going to be strictly intranet with auth handled by
+the domain. So to simplify our application I created a dummy project and set to
+work cutting out all the unnecessary bits.</p>
+
+<p>I admit I got most of this information from
+<a href="http://stackoverflow.com/questions/23260283/windows-authentication-not-working-in-asp-net-mvc-5-web-app">a</a>
+<a href="http://stackoverflow.com/questions/12552950/windows-authentication-in-mvc">collection</a>
+<a href="http://stackoverflow.com/questions/12243699/mvc-website-forwards-to-account-login-with-only-windows-authentication-enabled?rq=1">of</a>
+<a href="http://stackoverflow.com/questions/28483745/http-error-404-15-not-found-because-the-query-string-is-too-long">StackOverflow</a>
+<a href="http://stackoverflow.com/questions/31665196/asp-net-mvc-5-without-owin">Answers</a>
+, and don't fully grasp the intent or necessity of all of them. Someone
+with more interest and time feel free to test all the possible combinations.</p>
+
+<h4 id="enable:5c96bf19bb72c20579970642705b23e7">Enable</h4>
+
+<p>Firstly I enabled Windows Auth. This required changes to the <em>web.config</em> file,
+changes to the <em>project</em> properties, and editing some code in <em>startup</em>. Here
+are the changes to web.config:</p>
+
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f92672">&lt;appSettings&gt;</span>
+    <span style="color: #75715e">&lt;!-- Add the following --&gt;</span>
+    <span style="color: #f92672">&lt;add</span> <span style="color: #a6e22e">key=</span><span style="color: #e6db74">&quot;autoFormsAuthentication&quot;</span> <span style="color: #a6e22e">value=</span><span style="color: #e6db74">&quot;false&quot;</span><span style="color: #f92672">/&gt;</span>
+    <span style="color: #f92672">&lt;add</span> <span style="color: #a6e22e">key=</span><span style="color: #e6db74">&quot;enableSimpleMembership&quot;</span> <span style="color: #a6e22e">value=</span><span style="color: #e6db74">&quot;false&quot;</span><span style="color: #f92672">/&gt;</span>
+<span style="color: #f92672">&lt;/appSettings&gt;</span>
+
+<span style="color: #f92672">&lt;system.web&gt;</span>
+    <span style="color: #75715e">&lt;!-- Add the following --&gt;</span>
+    <span style="color: #f92672">&lt;authentication</span> <span style="color: #a6e22e">mode=</span><span style="color: #e6db74">&quot;Windows&quot;</span> <span style="color: #f92672">/&gt;</span>
+    <span style="color: #f92672">&lt;authorization&gt;</span>
+      <span style="color: #f92672">&lt;deny</span> <span style="color: #a6e22e">users=</span><span style="color: #e6db74">&quot;?&quot;</span> <span style="color: #f92672">/&gt;</span>
+    <span style="color: #f92672">&lt;/authorization&gt;</span>
+<span style="color: #f92672">&lt;/system.web&gt;</span>
+
+
+<span style="color: #f92672">&lt;system.webServer&gt;</span>
+    <span style="color: #f92672">&lt;modules&gt;</span>
+        <span style="color: #75715e">&lt;!-- Add the following --&gt;</span>
+        <span style="color: #f92672">&lt;remove</span> <span style="color: #a6e22e">name=</span><span style="color: #e6db74">&quot;FormsAuthenticationModule&quot;</span> <span style="color: #f92672">/&gt;</span>
+    <span style="color: #f92672">&lt;/modules&gt;</span>
+<span style="color: #f92672">&lt;/system.webServer&gt;</span>
+</pre></div>
+
+
+<p>Next select your MVC project in the Solution Explorer and in properties ensure
+Windows Authentication is enabled and Anonymous Authentication is disabled.</p>
+
+<p>Finally edit Startup.Auth.cs (you can skip this step if you are going to remove
+the builtin auth system entirely):</p>
+
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #66d9ef">public</span> <span style="color: #66d9ef">partial</span> <span style="color: #66d9ef">class</span> <span style="color: #a6e22e">Startup</span>
+<span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">public</span> <span style="color: #66d9ef">void</span> <span style="color: #a6e22e">ConfigureAuth</span><span style="color: #f8f8f2">(IAppBuilder</span> <span style="color: #f8f8f2">app)</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">app.CreatePerOwinContext(ApplicationDbContext.Create);</span>
+        <span style="color: #f8f8f2">app.CreatePerOwinContext&lt;ApplicationUserManager&gt;(ApplicationUserManager.Create);</span>
+        <span style="color: #f8f8f2">app.CreatePerOwinContext&lt;ApplicationSignInManager&gt;(ApplicationSignInManager.Create);</span>
+
+        <span style="color: #75715e">// ----- Start deleting here -----</span>
+        <span style="color: #f8f8f2">app.UseCookieAuthentication(</span><span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">CookieAuthenticationOptions</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">AuthenticationType</span> <span style="color: #f8f8f2">=</span> <span style="color: #f8f8f2">DefaultAuthenticationTypes.ApplicationCookie,</span>
+            <span style="color: #f8f8f2">LoginPath</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">PathString(</span><span style="color: #e6db74">&quot;/Account/LogIn&quot;</span><span style="color: #f8f8f2">),</span>
+            <span style="color: #f8f8f2">Provider</span> <span style="color: #f8f8f2">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">CookieAuthenticationProvider</span>
+            <span style="color: #f8f8f2">{</span>
+                <span style="color: #75715e">// There might be different things in here...</span>
+            <span style="color: #f8f8f2">}</span>
+        <span style="color: #f8f8f2">});</span>            
+        <span style="color: #f8f8f2">app.UseExternalSignInCookie(DefaultAuthenticationTypes.ExternalCookie);</span>
+        <span style="color: #75715e">// ----- End deleting here -----</span>
+
+        <span style="color: #f8f8f2">app.UseTwoFactorSignInCookie(DefaultAuthenticationTypes.TwoFactorCookie,</span>
+        <span style="color: #f8f8f2">TimeSpan.FromMinutes(</span><span style="color: #ae81ff">5</span><span style="color: #f8f8f2">));</span>
+
+        <span style="color: #f8f8f2">etc.</span>
+    <span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">}</span>
+</pre></div>
+
+
+<p>Now when you run your app you should see your logon name on the Home.Index page.</p>
+
+<h4 id="remove:5c96bf19bb72c20579970642705b23e7">Remove</h4>
+
+<p>The next step for me was to remove everything that wasn't Windows Auth. I
+started by deleting <code>Startup.cs</code>, <code>App_startup/Startup.Auth.cs</code>, and
+<code>App_startup/IdentityConfig.cs</code> since they are only used by OWIN. I also deleted
+all <code>Account</code> and <code>Manage</code> views and controllers since they are for Identity
+management. In my case I also deleted the entire <code>Models</code> folder since my
+<a href="https://en.wikipedia.org/wiki/Data_access_layer">DAL</a> lives in another project
+in the solution and everything in <code>Models</code> is there to support Identity.</p>
+
+<p>Next comes package removal, which is made complex by the inter-package
+depednacies: You can only uninstall a package once all its dependents are
+uninstalled. I didn't really figure out the order, I just kept trying to
+uninstall each package in order until they were all gone. Here is the list of
+what was unnecessary (I also took the opportunity to remove appInsights):</p>
+
+<ul>
+<li>microsoft.aspnet.identity.owin</li>
+<li>microsoft.owin.host.systemweb</li>
+<li>microsoft.owin.security.cookies</li>
+<li>microsoft.owin.security.facebook</li>
+<li>microsoft.owin.security.google</li>
+<li>microsoft.owin.security.microsoftaccount</li>
+<li>microsoft.owin.security.twitter</li>
+<li>microsoft.aspnet.identity.entityframework</li>
+<li>(anything with application insights in the name)</li>
+</ul>
+
+<p>The only thing I left was <code>microsoft.aspnet.identity.core</code>, which gives you
+access to Windows Auth info (e.g. <code>Microsoft.AspNet.Identity</code> and
+<code>User.Identity.GetUserName</code> in <code>_loginPartial.cshtml</code>. Next I had to make more
+changes to web.config:</p>
+
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f92672">&lt;appSettings&gt;</span>
+    <span style="color: #75715e">&lt;!-- Add the following --&gt;</span>
+    <span style="color: #f92672">&lt;add</span> <span style="color: #a6e22e">key=</span><span style="color: #e6db74">&quot;owin:AutomaticAppStartup&quot;</span> <span style="color: #a6e22e">value=</span><span style="color: #e6db74">&quot;false&quot;</span> <span style="color: #f92672">/&gt;</span>
+<span style="color: #f92672">&lt;/appSettings&gt;</span>
+
+<span style="color: #f92672">&lt;runtime&gt;</span>
+    <span style="color: #f92672">&lt;AssemblyBinding&gt;</span>
+        <span style="color: #75715e">&lt;!-- Delete any of these that referece a removed package --&gt;</span>
+        <span style="color: #f92672">&lt;dependantAssembly&gt;</span>
+        <span style="color: #75715e">&lt;!-- Blah Blah OWIN Blah --&gt;</span>
+        <span style="color: #f92672">&lt;/dependantAssembly&gt;</span>
+    <span style="color: #f92672">&lt;/AssemblyBinding&gt;</span>
+<span style="color: #f92672">&lt;/runtime&gt;</span>
+</pre></div>
+</p>
+
+<p>Now when you run the app you should be recognized, and you should still be able
+to use auth annotations like <code>[Authorize(Roles = &quot;Client, Administrator&quot;)]</code> on
+controller methods (untested). With the project cleaned up it is much easier to
+focus on the application logic instead of the Microsoft baggage.</p>
+
+<h3 id="EntityFramework:5c96bf19bb72c20579970642705b23e7">EF Codebase Structure (architecture)</h3>
+
+<p>While I was playing with the above I was also having deep thoughts about Entity
+Framework and the structure of the DAL. By this point I've seen a lot of
+techniques and <em>best practices</em> for EF. I've found some things I like but I
+wanted a way to justify those preferences. I also wanted to limit the number of
+extraneous layers of abstraction I've seen recommended by the <em>enterprise minded</em>.</p>
+
+<p>In my test solution I've spun the DAL off into its own project, because that
+seems like a good idea. I am treating EF as the data persistence layer, i.e. I
+want to interact with it as little as possible in DAL code and not at all
+outside the DAL. The layer above that seems to be where all the controversy is:</p>
+
+<ul>
+<li>Do you create <em>Repositories</em> around your DBContexts, or are they already repos?</li>
+<li>Do you create <em>Generic</em> repos, or do you get specific?</li>
+<li>Does any <em>business logic</em> live in the POCOs used by EF, or do you create
+mirrors/wrappers for them, or something else?</li>
+<li>If something else then <em>were does</em> the business logic live?</li>
+</ul>
+
+<p>As I see it there are two clear ends of the spectrum here, on one you have a
+large complex infrastructure were everything is heavily decoupled, and on the
+other you have the minimum pretense to CRUD. I definitely feel the allure of
+architecting that large system, but in the end it feels like it is justifying
+its own existence by its complexity. I want to start with as few moving parts a
+necessary, and abstract from there as needed.</p>
+
+<p>The sketch I have in mind is POCOs are just data (pretend they are structs). A
+repo is created for each perspective/use-case. What little business logic there
+is in this app will live in the repo methods, or in helper classes (pure static
+methods). In other words the repos are closer to Business Objects, controlling
+the what and how of data access. As for justifying my choices I depend mainly on
+the SRP (Single Responsibility Principle) - That things should have only one reason to
+change:</p>
+
+<ul>
+<li><em>DBContexts</em> represent the DB in code, giving access to tables, views, etc.
+
+<ul>
+<li>Only changing when new collections need to be accessed.</li>
+</ul></li>
+<li><em>POCOs</em> are the object representation of entities (rows) in the DB.
+
+<ul>
+<li>Only changing to reflect the shape of data in their table.</li>
+</ul></li>
+<li><em>Repos</em> provide a higher level Command/Query interface over previous two.
+
+<ul>
+<li>Only changing in response to interaction requirements.</li>
+</ul></li>
+</ul>
+
+<p>I think that balances separation of concerns against complexity pretty well, at
+least for a start. With my repeated deep-dives into the legacy code at work I am
+continually re-motivated to simplify as much as possible. So many examples of
+architecture run amok, senseless designs, aimless decoupling, and general
+blind adherence to design rules letter rather than their intent.</p>
+
+<p>I'm sure I will run into problems with my design, but hopefully simple things
+will be easier to change.</p>
+
+  </div>
+  <footer>
+    <div class="article-footer">
+      
+<div class="tags">
+  <ul>
+    
+    <li>
+      <a href="/tags/powershell"><span></span>PowerShell</a>
+    </li>
+    
+    <li>
+      <a href="/tags/sharepoint"><span></span>SharePoint</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      
+      <div class="adsense">
+        <span class="sponsor-label">Sponsored link</span>
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="2442045076"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+      </div>
+      
+      
+<div id="share-buttons">
+  <ul>
+    
+    
+    
+    
+    <li>
+      <div class="g-plusone" data-size="medium"></div>
+    </li>
+    
+    
+  </ul>
+</div>
+
+
+      <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'SuperfComs';
+    var disqus_identifier = 'http:\/\/kitsu.github.io\/2017\/01\/31\/misc-mvc5-details\/';
+    var disqus_title = 'Miscellaneous MVC 5 Details';
+    var disqus_url = 'http:\/\/kitsu.github.io\/2017\/01\/31\/misc-mvc5-details\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+      
+      <div id="pagenavigation-next-prev">
+        
+        <div id="pagenavigation-next">
+          <span class="pagenav-label">Previous</span>
+          <a href="http://kitsu.github.io/2017/01/23/sharepoint-powershell-update-script/">SharePoint PowerShell Update Script</a>
+        </div>
+        
+        
+      </div>
+      
+    </div>
+  </footer>
+</div>
+        </div>
+        <div class="sidebar">
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Author</span>
+    </div>
+    <div id="author">
+      <span>Ed Blake</span>
+      <div>
+        
+        
+        <a href="https://plus.google.com/118323029386640613972"><i class="fa fa-google-plus-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://github.com/kitsu"><i class="fa fa-github-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://www.linkedin.com/in/edward-blake-b3601411b"><i class="fa fa-linkedin-square fa-2x" aria-hidden="true"></i></a>
+        
+        
+        <a href="https://stackoverflow.com/users/770443"><i class="fa fa-stack-overflow fa-2x" aria-hidden="true"></i></a>
+        
+      </div>
+    </div>
+  </div>
+  
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Categories</span>
+    </div>
+    <div class="categories">
+      <ul>
+        
+        <li>
+          <a href="/categories/blog"><span></span>blog (3)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/development"><span></span>development (34)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/hacks"><span></span>hacks (4)</a>
+        </li>
+        
+        <li>
+          <a href="/categories/personal"><span></span>personal (3)</a>
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>RSS</span>
+    </div>
+    <div id="rss">
+      <a href="/index.xml" type="application/rss+xml" target="_blank">
+        <i class="fa fa-rss-square fa-2x" aria-hidden="true"></i>
+      </a>
+    </div>
+  </div>
+  
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <span>Sponsored link</span>
+    </div>
+    <div class="adsense">
+      <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+<ins class="adsbygoogle"
+     style="display:inline-block;width:300px;height:600px"
+     data-ad-client="ca-pub-3013534986949508"
+     data-ad-slot="9965311870"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+    </div>
+  </div>
+  
+</div>
+
+      </div>
+      <footer>
+        <div id="site-footer-wrap">
+          <div id="site-footer">
+            <span>Powered by <a href="https://gohugo.io/">Hugo</a>.</span>
+            <span>
+              
+              © 2015 Ed Blake
+              
+           </span>
+           <span id="copyleft">
+              <a rel="license"
+                 href="http://creativecommons.org/licenses/by-sa/4.0/">
+                <img alt="Creative Commons License" style="border-width:0"
+                     src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" />
+              </a>
+            </span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
+

@@ -7,8 +7,18 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© 2015 Ed Blake</copyright>
-    <lastBuildDate>Mon, 23 Jan 2017 10:54:32 -0800</lastBuildDate>
+    <lastBuildDate>Tue, 31 Jan 2017 13:56:34 -0800</lastBuildDate>
     <atom:link href="http://kitsu.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Miscellaneous MVC 5 Details</title>
+      <link>http://kitsu.github.io/2017/01/31/misc-mvc5-details/</link>
+      <pubDate>Tue, 31 Jan 2017 13:56:34 -0800</pubDate>
+      
+      <guid>http://kitsu.github.io/2017/01/31/misc-mvc5-details/</guid>
+      <description>&lt;p&gt;Some Asp.Net MVC details and other thoughts.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>SharePoint PowerShell Update Script</title>
@@ -147,16 +157,6 @@
       
       <guid>http://kitsu.github.io/2016/06/21/unemployed-project-10/</guid>
       <description>&lt;p&gt;Learning the hard way not to trust automatic migrations.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Unemployed project - Knockout Templates</title>
-      <link>http://kitsu.github.io/2016/06/19/unemployed-project-09/</link>
-      <pubDate>Sun, 19 Jun 2016 11:58:12 -0700</pubDate>
-      
-      <guid>http://kitsu.github.io/2016/06/19/unemployed-project-09/</guid>
-      <description>&lt;p&gt;Building modular chunks of HTML and reusing them with Knockout.&lt;/p&gt;
 </description>
     </item>
     
