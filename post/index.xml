@@ -7,8 +7,18 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© 2015 Ed Blake</copyright>
-    <lastBuildDate>Tue, 31 Jan 2017 13:56:34 -0800</lastBuildDate>
+    <lastBuildDate>Thu, 02 Feb 2017 10:20:43 -0800</lastBuildDate>
     <atom:link href="http://kitsu.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Minecraft Shader Day Length Fix</title>
+      <link>http://kitsu.github.io/2017/02/02/minecraft-shader-time-fix/</link>
+      <pubDate>Thu, 02 Feb 2017 10:20:43 -0800</pubDate>
+      
+      <guid>http://kitsu.github.io/2017/02/02/minecraft-shader-time-fix/</guid>
+      <description>&lt;p&gt;And now for something completely different - hacking some GLSL.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Miscellaneous MVC 5 Details</title>
@@ -147,16 +157,6 @@
       
       <guid>http://kitsu.github.io/2016/06/22/unemployed-project-11/</guid>
       <description>&lt;p&gt;Setting up Typescript unit testing in Visual Studio with Chutzpah.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Unemployed project - Migration</title>
-      <link>http://kitsu.github.io/2016/06/21/unemployed-project-10/</link>
-      <pubDate>Tue, 21 Jun 2016 11:19:00 -0700</pubDate>
-      
-      <guid>http://kitsu.github.io/2016/06/21/unemployed-project-10/</guid>
-      <description>&lt;p&gt;Learning the hard way not to trust automatic migrations.&lt;/p&gt;
 </description>
     </item>
     

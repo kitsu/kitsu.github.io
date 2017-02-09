@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Minecraft on Superfluous Comments</title>
+    <link>http://kitsu.github.io/tags/minecraft/</link>
+    <description>Recent content in Minecraft on Superfluous Comments</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>© 2015 Ed Blake</copyright>
+    <lastBuildDate>Thu, 02 Feb 2017 10:20:43 -0800</lastBuildDate>
+    <atom:link href="http://kitsu.github.io/tags/minecraft/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Minecraft Shader Day Length Fix</title>
+      <link>http://kitsu.github.io/2017/02/02/minecraft-shader-time-fix/</link>
+      <pubDate>Thu, 02 Feb 2017 10:20:43 -0800</pubDate>
+      
+      <guid>http://kitsu.github.io/2017/02/02/minecraft-shader-time-fix/</guid>
+      <description>&lt;p&gt;And now for something completely different - hacking some GLSL.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
